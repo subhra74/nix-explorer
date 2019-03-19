@@ -1,2 +1,0 @@
-mvn install:install-file -Dfile=/home/subhro/eclipse-workspace/jediterm/target/jediterm-0.0.1-SNAPSHOT.jar -DgroupId=jediterm \
-    -DartifactId=jediterm -Dversion=0.0.1-SNAPSHOT -Dpackaging=jar
