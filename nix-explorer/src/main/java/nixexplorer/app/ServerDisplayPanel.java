@@ -39,6 +39,7 @@ import nixexplorer.app.settings.ui.ConfigDialog;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.widgets.Widget;
 import nixexplorer.widgets.console.TabbedConsoleWidget;
+import nixexplorer.widgets.du.DiskUsageViewerWidget;
 import nixexplorer.widgets.editor.FormattedEditorWidget;
 //import nixexplorer.widgets.folderview.foreign.ForeignFolderViewWidget;
 import nixexplorer.widgets.folderview.local.LocalFolderViewWidget;
@@ -282,6 +283,7 @@ public class ServerDisplayPanel extends JPanel {
 			}
 		}, TextHolder.getString("app.control.curl"),
 				UIManager.getIcon("ServerTools.curlIcon"));
+
 		toolbar.addButton("app.control.search", new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -296,6 +298,21 @@ public class ServerDisplayPanel extends JPanel {
 			}
 		}, TextHolder.getString("app.control.search"),
 				UIManager.getIcon("ServerTools.findFilesIcon"));
+
+		toolbar.addButton("diskUsageViewer.title", new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					DiskUsageViewerWidget w = new DiskUsageViewerWidget(info,
+							new String[] {}, appSession, window);
+					appSession.addToSession(w);
+					addTab(w);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+		}, TextHolder.getString("diskUsageViewer.title"),
+				UIManager.getIcon("ServerTools.taskmgrIcon"));
 
 		// at the end
 		toolbar.createSettingsButton("app.control.settings",

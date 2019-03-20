@@ -596,6 +596,15 @@ public final class App {
 		TextHolder.addString("terminal.reconnect", "Reconnect");
 		TextHolder.addString("terminal.reconnectText",
 				"Connection interrupted");
+
+		TextHolder.addString("diskUsageViewer.title", "Disk Usage");
+		TextHolder.addString("diskUsageViewer.fileName", "Directory name");
+		TextHolder.addString("diskUsageViewer.fileSize", "Size");
+		TextHolder.addString("diskUsageViewer.filePath", "Path");
+		TextHolder.addString("diskUsageViewer.usage", "Usage");
+
+		TextHolder.addString("diskUsageViewer.targetLabel", "Directory");
+		TextHolder.addString("diskUsageViewer.go", "Analyze");
 	}
 
 	private static void registerPlugins() {
