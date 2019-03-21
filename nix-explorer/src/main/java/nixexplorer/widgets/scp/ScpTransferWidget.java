@@ -143,7 +143,7 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 		lblError.setForeground(Color.RED);
 		connectionPanel.add(lblError, BorderLayout.SOUTH);
 
-		connectionTableModel = new ScpTableModel(appSession);
+		connectionTableModel = new ScpTableModel(appSession, info);
 
 		connectionTable = new JTable(connectionTableModel);
 		connectionTable.getSelectionModel().addListSelectionListener(e -> {

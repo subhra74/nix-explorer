@@ -444,7 +444,11 @@ public class FileSearchWidget extends Widget {
 		bActions.add(Box.createHorizontalStrut(Utility.toPixel(10)));
 		bActions.add(btnDownload);
 
-		add(b1, BorderLayout.WEST);
+		JScrollPane jspB1 = new JScrollPane(b1,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+		add(jspB1, BorderLayout.WEST);
 
 		JPanel p = new JPanel(
 				new BorderLayout(Utility.toPixel(1), Utility.toPixel(1)));
@@ -773,7 +777,7 @@ public class FileSearchWidget extends Widget {
 	 */
 	@Override
 	public Icon getIcon() {
-		return UIManager.getIcon("ServerTools.findFilesIcon");
+		return UIManager.getIcon("ServerTools.findFilesIcon16");
 	}
 
 	/*

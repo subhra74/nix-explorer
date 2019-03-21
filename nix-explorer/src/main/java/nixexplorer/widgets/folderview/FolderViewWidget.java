@@ -81,6 +81,7 @@ import nixexplorer.widgets.dnd.FolderViewBaseTransferHandler;
 import nixexplorer.widgets.dnd.TransferFileInfo;
 import nixexplorer.widgets.dnd.TransferFileInfo.Action;
 import nixexplorer.widgets.dnd.TreeBaseTransferHandler;
+import nixexplorer.widgets.folderview.ViewTogglePanel.ViewMode;
 import nixexplorer.widgets.folderview.common.FolderViewSelectionHelper;
 import nixexplorer.widgets.folderview.remote.AskForPriviledgeDlg;
 import nixexplorer.widgets.folderview.remote.RemoteFolderViewWidget;
@@ -139,6 +140,10 @@ public class FolderViewWidget extends JPanel
 	private boolean showingHiddenFiles = false;
 	private FolderViewSelectionHelper selectionHelper;
 	private TableRowSorter<FolderViewTableModel> sorter;
+	private TableListModel fileListModel;
+	private JList<FileInfo> fileListView;
+	private JScrollPane scrollListView;
+	private ViewTogglePanel toggleView;
 	// private NavigationListModel modelNav;
 
 	public FolderViewWidget(String file, TabCallback tabCallback,
@@ -319,6 +324,8 @@ public class FolderViewWidget extends JPanel
 		add(b1, BorderLayout.SOUTH);
 
 		Box addressBox = Box.createHorizontalBox();
+		addressBox.setBorder(new EmptyBorder(Utility.toPixel(3),
+				Utility.toPixel(3), Utility.toPixel(3), Utility.toPixel(3)));
 
 		// Dimension d2 = new Dimension(Utility.toPixel(30),
 		// Utility.toPixel(30));
@@ -413,189 +420,7 @@ public class FolderViewWidget extends JPanel
 			}
 		});
 
-		folderViewModel = new FolderViewTableModel();
-
-		folderTable = new JTable(folderViewModel);
-		// folderTable.setBackground(UIManager.getColor("Panel.secondary"));
-		folderTable.setIntercellSpacing(new Dimension(0, 0));
-		folderTable.setBorder(null);
-		if (!embedded) {
-			folderTable.setDragEnabled(true);
-		}
-		folderTable.setDropMode(DropMode.USE_SELECTION);
-		folderTable.setShowGrid(false);
-		folderTable.setRowHeight(24);
-		folderTable.setFillsViewportHeight(true);
-//		if (!embedded) {
-//			folderTable.setTransferHandler(new FolderViewTransferHandler(this));
-//		}
-
-		if (transferHandler != null) {
-			transferHandler.setWidget(this);
-			folderTable.setTransferHandler(transferHandler);
-		}
-
-		folderTable.setSelectionMode(
-				ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		label.setOpaque(true);
-		FolderViewRenderer r = new FolderViewRenderer();
-		folderTable.setDefaultRenderer(Object.class, r);
-		folderTable.setDefaultRenderer(Long.class, r);
-		folderTable.setDefaultRenderer(Date.class, r);
-
-		// folderTable.setAutoCreateRowSorter(true);
-		sorter = new TableRowSorter<FolderViewTableModel>(folderViewModel);
-		sorter.setComparator(0, new Comparator<Object>() {
-			@Override
-			public int compare(Object s1, Object s2) {
-				FileInfo info1 = (FileInfo) s1;
-				FileInfo info2 = (FileInfo) s2;
-				if (info1.getType() == FileType.Directory
-						|| info1.getType() == FileType.DirLink) {
-					if (info2.getType() == FileType.Directory
-							|| info2.getType() == FileType.DirLink) {
-						return info1.getName()
-								.compareToIgnoreCase(info2.getName());
-					} else {
-						return 1;
-					}
-				} else {
-					if (info2.getType() == FileType.Directory
-							|| info2.getType() == FileType.DirLink) {
-						return -1;
-					} else {
-						return info1.getName()
-								.compareToIgnoreCase(info2.getName());
-					}
-				}
-			}
-		});
-		sorter.setComparator(1, new Comparator<Long>() {
-			@Override
-			public int compare(Long s1, Long s2) {
-				return s1.compareTo(s2);
-			}
-		});
-//		sorter.setComparator(2, new Comparator<String>() {
-//			@Override
-//			public int compare(String s1, String s2) {
-//				return s1.compareTo(s2);
-//			}
-//		});
-		sorter.setComparator(3, new Comparator<FileInfo>() {
-
-			@Override
-			public int compare(FileInfo info1, FileInfo info2) {
-				if (info1.getType() == FileType.Directory
-						|| info1.getType() == FileType.DirLink) {
-					if (info2.getType() == FileType.Directory
-							|| info2.getType() == FileType.DirLink) {
-						return info1.getLastModified()
-								.compareTo(info2.getLastModified());
-					} else {
-						return 1;
-					}
-				} else {
-					if (info2.getType() == FileType.Directory
-							|| info2.getType() == FileType.DirLink) {
-						return -1;
-					} else {
-						return info1.getLastModified()
-								.compareTo(info2.getLastModified());
-					}
-				}
-			}
-
-		});
-
-		folderTable.setRowSorter(sorter);
-
-		ArrayList<RowSorter.SortKey> list = new ArrayList<>();
-		list.add(new RowSorter.SortKey(3, SortOrder.DESCENDING));
-		sorter.setSortKeys(list);
-
-		sorter.sort();
-
-		folderTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-				.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "Enter");
-		folderTable.getActionMap().put("Enter", new AbstractAction() {
-			@Override
-			public void actionPerformed(ActionEvent ae) {
-				FileInfo[] files = getSelectedFiles();
-				if (files.length > 0) {
-					if (files[0].getType() == FileType.Directory
-							|| files[0].getType() == FileType.DirLink) {
-						String str = files[0].getPath();
-						render(str);
-					}
-				}
-			}
-		});
-
-		folderTable.addKeyListener(
-				new FolderViewKeyHandler(folderTable, folderViewModel));
-
-		folderTable.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				System.out.println("Mouse click on table");
-				if (folderTable.getSelectionModel().getValueIsAdjusting()) {
-					System.out.println("Value adjusting");
-					selectRow(e);
-					return;
-				}
-				if (e.getClickCount() == 2) {
-					Point p = e.getPoint();
-					int r = folderTable.rowAtPoint(p);
-					int x = folderTable.getSelectedRow();
-					if (x == -1) {
-						return;
-					}
-					if (r == folderTable.getSelectedRow()) {
-						FileInfo fileInfo = folderViewModel
-								.getItemAt(getRow(r));
-						if (fileInfo.getType() == FileType.Directory
-								|| fileInfo.getType() == FileType.DirLink) {
-							System.out.println("Current file: "
-									+ FolderViewWidget.this.file);
-							history.addBack(FolderViewWidget.this.file);
-							render(fileInfo.getPath());
-							updateNavButtons();
-						}
-					}
-				} else if (e.isPopupTrigger()
-						|| e.getButton() == MouseEvent.BUTTON3) {
-					selectRow(e);
-					if (embedded)
-						return;
-					System.out.println("called");
-					menuHandler.createMenu(popup, getSelectedFiles());
-					popup.pack();
-					popup.show(folderTable, e.getX(), e.getY());
-				}
-//				else {
-//					int r = folderTable.getSelectedRow();
-//					if (r != -1) {
-//						FileInfo fileInfo = folderViewModel
-//								.getItemAt(getRow(r));
-//						if (selectionCallback != null) {
-//							selectionCallback
-//									.onPathSelection(fileInfo.getPath());
-//						}
-//					}
-//				}
-			}
-		});
-
-		folderTable.getSelectionModel().addListSelectionListener(e -> {
-			ListSelectionModel model = folderTable.getSelectionModel();
-			if (e.getValueIsAdjusting() || embedded) {
-				return;
-			}
-			if (model.isSelectionEmpty()) {
-				return;
-			}
-		});
+		createFolderTable(transferHandler);
 
 		AbstractAction upAction = new AbstractAction() {
 			@Override
@@ -670,6 +495,23 @@ public class FolderViewWidget extends JPanel
 				}
 			}
 		});
+
+		fileListModel = new TableListModel(folderTable);
+		fileListView = new JList<>(fileListModel);
+		fileListView.setCellRenderer(new ListViewRenderer());
+		fileListView.setFixedCellWidth(Utility.toPixel(96));
+		fileListView.setFixedCellHeight(Utility.toPixel(96));
+		fileListView.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+		fileListView.setVisibleRowCount(-1);
+		scrollListView = new JScrollPane(fileListView);
+
+		toggleView = new ViewTogglePanel(ViewMode.List);
+		toggleView.setViewListener(e -> {
+			updateContentView();
+			revalidate();
+			repaint();
+		});
+
 		JLabel lblCorner = new JLabel();
 		lblCorner.setBorder(UIManager.getBorder("TableHeader.cellBorder"));
 		scrollTable.setCorner(JScrollPane.UPPER_RIGHT_CORNER, lblCorner);
@@ -681,13 +523,14 @@ public class FolderViewWidget extends JPanel
 		addressBox.add(btnUp);
 		addressBox.add(txtAddressBar);
 		addressBox.add(btnReload);
+		addressBox.add(toggleView.getComponent());
 		// addressBox.add(btnSearch);
 		addressBox.add(btnMoreMenu);
 
 		contentHolder = new JPanel(new BorderLayout());
 
 		add(addressBox, BorderLayout.NORTH);
-		contentHolder.add(scrollTable);
+		// contentHolder.add(scrollTable);
 
 		splitPane.setLeftComponent(navigationPanel);
 		splitPane.setRightComponent(contentHolder);
@@ -705,6 +548,8 @@ public class FolderViewWidget extends JPanel
 				getConfig().getFileBrowser().getSidePanelViewMode());
 
 		resizeColumnWidth(folderTable);
+
+		updateContentView();
 
 		addAncestorListener(new AncestorListener() {
 
@@ -730,7 +575,6 @@ public class FolderViewWidget extends JPanel
 		});
 
 		reconnect();
-
 	}
 
 	public final void resizeColumnWidth(JTable table) {
@@ -834,14 +678,17 @@ public class FolderViewWidget extends JPanel
 						public void run() {
 							txtAddressBar.setText(FolderViewWidget.this.file);
 							folderViewModel.clear();
+							// fileListModel.clear();
 
 							for (FileInfo finfo : flist) {
 								if (finfo.getName().startsWith(".")) {
 									if (showingHiddenFiles) {
 										folderViewModel.add(finfo);
+										// fileListModel.addElement(finfo);
 									}
 								} else {
 									folderViewModel.add(finfo);
+									// fileListModel.addElement(finfo);
 								}
 							}
 
@@ -854,6 +701,8 @@ public class FolderViewWidget extends JPanel
 
 							tabCallback.updateTitle(title,
 									FolderViewWidget.this);
+							
+							fileListModel.refresh();
 
 							renderTree();
 
@@ -944,12 +793,22 @@ public class FolderViewWidget extends JPanel
 //	}
 
 	public FileInfo[] getSelectedFiles() {
-		FileInfo fs[] = new FileInfo[folderTable.getSelectedRows().length];
-		int rows[] = folderTable.getSelectedRows();
-		for (int i = 0; i < rows.length; i++) {
-			fs[i] = folderViewModel.getItemAt(getRow(rows[i]));
+		if (toggleView.getViewMode() == ViewMode.Details) {
+			FileInfo fs[] = new FileInfo[folderTable.getSelectedRows().length];
+			int rows[] = folderTable.getSelectedRows();
+			for (int i = 0; i < rows.length; i++) {
+				fs[i] = folderViewModel.getItemAt(getRow(rows[i]));
+			}
+			return fs;
+		} else {
+			FileInfo fs[] = new FileInfo[fileListView
+					.getSelectedIndices().length];
+			int rows[] = fileListView.getSelectedIndices();
+			for (int i = 0; i < rows.length; i++) {
+				fs[i] = fileListModel.getElementAt(rows[i]);// folderViewModel.getItemAt(getRow(rows[i]));
+			}
+			return fs;
 		}
-		return fs;
 	}
 
 	private boolean shouldRender(String name) {
@@ -2302,5 +2161,184 @@ public class FolderViewWidget extends JPanel
 
 	private void focus() {
 		folderTable.requestFocusInWindow();
+	}
+
+	private void createFolderTable(
+			FolderViewBaseTransferHandler transferHandler) {
+		folderViewModel = new FolderViewTableModel();
+
+		FolderViewRenderer r = new FolderViewRenderer();
+
+		folderTable = new JTable(folderViewModel);
+		folderTable.setIntercellSpacing(new Dimension(0, 0));
+		folderTable.setBorder(null);
+		if (!embedded) {
+			folderTable.setDragEnabled(true);
+		}
+		folderTable.setDropMode(DropMode.USE_SELECTION);
+		folderTable.setShowGrid(false);
+		folderTable.setRowHeight(r.getPreferredHeight() + Utility.toPixel(5));
+		folderTable.setFillsViewportHeight(true);
+
+		if (transferHandler != null) {
+			transferHandler.setWidget(this);
+			folderTable.setTransferHandler(transferHandler);
+		}
+
+		folderTable.setSelectionMode(
+				ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		label.setOpaque(true);
+		folderTable.setDefaultRenderer(Object.class, r);
+		folderTable.setDefaultRenderer(Long.class, r);
+		folderTable.setDefaultRenderer(Date.class, r);
+
+		sorter = new TableRowSorter<FolderViewTableModel>(folderViewModel);
+		sorter.setComparator(0, new Comparator<Object>() {
+			@Override
+			public int compare(Object s1, Object s2) {
+				FileInfo info1 = (FileInfo) s1;
+				FileInfo info2 = (FileInfo) s2;
+				if (info1.getType() == FileType.Directory
+						|| info1.getType() == FileType.DirLink) {
+					if (info2.getType() == FileType.Directory
+							|| info2.getType() == FileType.DirLink) {
+						return info1.getName()
+								.compareToIgnoreCase(info2.getName());
+					} else {
+						return 1;
+					}
+				} else {
+					if (info2.getType() == FileType.Directory
+							|| info2.getType() == FileType.DirLink) {
+						return -1;
+					} else {
+						return info1.getName()
+								.compareToIgnoreCase(info2.getName());
+					}
+				}
+			}
+		});
+
+		sorter.setComparator(1, new Comparator<Long>() {
+			@Override
+			public int compare(Long s1, Long s2) {
+				return s1.compareTo(s2);
+			}
+		});
+
+		sorter.setComparator(3, new Comparator<FileInfo>() {
+
+			@Override
+			public int compare(FileInfo info1, FileInfo info2) {
+				if (info1.getType() == FileType.Directory
+						|| info1.getType() == FileType.DirLink) {
+					if (info2.getType() == FileType.Directory
+							|| info2.getType() == FileType.DirLink) {
+						return info1.getLastModified()
+								.compareTo(info2.getLastModified());
+					} else {
+						return 1;
+					}
+				} else {
+					if (info2.getType() == FileType.Directory
+							|| info2.getType() == FileType.DirLink) {
+						return -1;
+					} else {
+						return info1.getLastModified()
+								.compareTo(info2.getLastModified());
+					}
+				}
+			}
+
+		});
+
+		folderTable.setRowSorter(sorter);
+
+		ArrayList<RowSorter.SortKey> list = new ArrayList<>();
+		list.add(new RowSorter.SortKey(3, SortOrder.DESCENDING));
+		sorter.setSortKeys(list);
+
+		sorter.sort();
+
+		folderTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+				.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "Enter");
+		folderTable.getActionMap().put("Enter", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				FileInfo[] files = getSelectedFiles();
+				if (files.length > 0) {
+					if (files[0].getType() == FileType.Directory
+							|| files[0].getType() == FileType.DirLink) {
+						String str = files[0].getPath();
+						render(str);
+					}
+				}
+			}
+		});
+
+		folderTable.addKeyListener(
+				new FolderViewKeyHandler(folderTable, folderViewModel));
+
+		folderTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				System.out.println("Mouse click on table");
+				if (folderTable.getSelectionModel().getValueIsAdjusting()) {
+					System.out.println("Value adjusting");
+					selectRow(e);
+					return;
+				}
+				if (e.getClickCount() == 2) {
+					Point p = e.getPoint();
+					int r = folderTable.rowAtPoint(p);
+					int x = folderTable.getSelectedRow();
+					if (x == -1) {
+						return;
+					}
+					if (r == folderTable.getSelectedRow()) {
+						FileInfo fileInfo = folderViewModel
+								.getItemAt(getRow(r));
+						if (fileInfo.getType() == FileType.Directory
+								|| fileInfo.getType() == FileType.DirLink) {
+							System.out.println("Current file: "
+									+ FolderViewWidget.this.file);
+							history.addBack(FolderViewWidget.this.file);
+							render(fileInfo.getPath());
+							updateNavButtons();
+						}
+					}
+				} else if (e.isPopupTrigger()
+						|| e.getButton() == MouseEvent.BUTTON3) {
+					selectRow(e);
+					if (embedded)
+						return;
+					System.out.println("called");
+					menuHandler.createMenu(popup, getSelectedFiles());
+					popup.pack();
+					popup.show(folderTable, e.getX(), e.getY());
+				}
+			}
+		});
+
+		folderTable.getSelectionModel().addListSelectionListener(e -> {
+			ListSelectionModel model = folderTable.getSelectionModel();
+			if (e.getValueIsAdjusting() || embedded) {
+				return;
+			}
+			if (model.isSelectionEmpty()) {
+				return;
+			}
+		});
+	}
+
+	private void updateContentView() {
+		ViewMode viewMode = toggleView.getViewMode();
+		if (viewMode == ViewMode.List) {
+			contentHolder.remove(scrollTable);
+			contentHolder.add(scrollListView);
+		} else {
+			contentHolder.remove(scrollListView);
+			contentHolder.add(scrollTable);
+		}
 	}
 }

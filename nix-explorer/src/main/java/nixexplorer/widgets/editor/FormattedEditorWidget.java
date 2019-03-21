@@ -849,7 +849,7 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 	 */
 	@Override
 	public Icon getIcon() {
-		return UIManager.getIcon("ServerTools.editorIcon");
+		return UIManager.getIcon("ServerTools.editorIcon16");
 	}
 
 	/*

@@ -554,8 +554,8 @@ public class HttpClient extends Widget {
 
 		txtRawBody = new JTextArea();
 
-		//DefaultListModel<String> fileModel = new DefaultListModel<String>();
-		//JList<String> fileList = new JList<String>(fileModel);
+		// DefaultListModel<String> fileModel = new DefaultListModel<String>();
+		// JList<String> fileList = new JList<String>(fileModel);
 		CardLayout c = new CardLayout();
 
 		JPanel pan = new JPanel(c);
@@ -822,7 +822,7 @@ public class HttpClient extends Widget {
 	 */
 	@Override
 	public Icon getIcon() {
-		return UIManager.getIcon("ServerTools.curlIcon");
+		return UIManager.getIcon("ServerTools.curlIcon16");
 	}
 
 	/*

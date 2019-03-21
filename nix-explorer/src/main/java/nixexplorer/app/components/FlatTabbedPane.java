@@ -37,13 +37,12 @@ public class FlatTabbedPane extends JPanel {
 		super(new BorderLayout());
 		this.largeTabs = largeTabs;
 		setBackground(UIManager.getColor("Panel.secondary"));
-		topPanel = new JPanel(new TaskbarLayout(TaskbarOrientation.Top,
-				this.largeTabs ? Utility.toPixel(32) : Utility.toPixel(25)));
+		topPanel = new JPanel(new TaskbarLayout());
 		topPanel.setBackground(UIManager.getColor("Panel.secondary"));// "DefaultBorder.color"));
 		JPanel topContainer = new JPanel(new BorderLayout());
 		topContainer.add(topPanel);
 		topContainer.setBackground(UIManager.getColor("Panel.secondary"));
-		
+
 //		if (closeAllCapable) {
 //			closeAllBtn = new JButton(
 //					UIManager.getIcon("FlatTabbedPanel.closeAllIcon"));
@@ -88,7 +87,7 @@ public class FlatTabbedPane extends JPanel {
 		}
 		lblTab.setBackground(UIManager.getColor("FlatTabbedPane.background"));
 		pan.setBorder(new EmptyBorder(Utility.toPixel(8), Utility.toPixel(8),
-				Utility.toPixel(8), Utility.toPixel(5)));
+				Utility.toPixel(8), Utility.toPixel(8)));
 		pan.putClientProperty("tab.component", c);
 		lblTab.addMouseListener(new MouseAdapter() {
 			@Override

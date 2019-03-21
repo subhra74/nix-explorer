@@ -66,4 +66,9 @@ public class FolderViewRenderer implements TableCellRenderer {
 		return label;
 	}
 
+	public int getPreferredHeight() {
+		label.setText("The quick brown fox jumps over the lazy dog");
+		return label.getPreferredSize().height;
+	}
+
 }

@@ -897,7 +897,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	 */
 	@Override
 	public Icon getIcon() {
-		return UIManager.getIcon("ServerTools.taskmgrIcon");
+		return UIManager.getIcon("ServerTools.taskmgrIcon16");
 	}
 
 	/*

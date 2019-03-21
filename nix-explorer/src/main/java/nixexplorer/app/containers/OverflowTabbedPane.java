@@ -28,8 +28,7 @@ public class OverflowTabbedPane extends JPanel {
 
 	public OverflowTabbedPane() {
 		super(new BorderLayout());
-		topPanel = new JPanel(
-				new TaskbarLayout(TaskbarOrientation.Top, Utility.toPixel(30)));
+		topPanel = new JPanel(new TaskbarLayout());
 		topPanel.setOpaque(false);
 		add(topPanel, BorderLayout.NORTH);
 		content = new JPanel(new BorderLayout());

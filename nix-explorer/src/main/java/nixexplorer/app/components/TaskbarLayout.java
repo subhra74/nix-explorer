@@ -10,17 +10,8 @@ import nixexplorer.widgets.util.Utility;
 
 public class TaskbarLayout implements LayoutManager {
 
-	// List<Component> list = new ArrayList<>();
-//	FlowLayout fl;
-//	int width, height;
-	private TaskbarOrientation orientation;
-
-	private int thikness;
-
-	public TaskbarLayout(TaskbarOrientation orientation, int thikness) {
+	public TaskbarLayout() {
 		super();
-		this.orientation = orientation;
-		this.thikness = thikness;
 	}
 
 	@Override
@@ -40,22 +31,13 @@ public class TaskbarLayout implements LayoutManager {
 	public Dimension preferredLayoutSize(Container c) {
 		int w = 0;
 		int h = 0;
-		if (orientation == TaskbarOrientation.Bottom
-				|| orientation == TaskbarOrientation.Top) {
-			h = thikness;
-		} else {
-			w = thikness;
-		}
 		for (int i = 0; i < c.getComponentCount(); i++) {
 			Component comp = c.getComponent(i);
 			Dimension pref = comp.getPreferredSize();
 
-			if (orientation == TaskbarOrientation.Bottom
-					|| orientation == TaskbarOrientation.Top) {
-				w += pref.getWidth();
-			} else {
-				h += pref.getHeight();
-			}
+			w += pref.width;
+
+			h = Math.max(h, pref.height);
 		}
 		// System.out.println("preferredLayoutSize");
 		Insets border = c.getInsets();
@@ -76,108 +58,36 @@ public class TaskbarLayout implements LayoutManager {
 			Component comp = c.getComponent(i);
 			Dimension pref = comp.getPreferredSize();
 
-			if (orientation == TaskbarOrientation.Bottom
-					|| orientation == TaskbarOrientation.Top) {
-				total += pref.getWidth();
-			} else {
-				total += pref.getHeight();
-			}
+			total += pref.getWidth();
 		}
 		return total;
 	}
 
 	@Override
 	public void layoutContainer(Container c) {
-		// System.out.println("layoutContainer");
-
 		Insets border = c.getInsets();
 
 		int w = c.getWidth() - border.left - border.right;
 		int h = c.getHeight() - border.top - border.bottom;
 
-		// System.out.println("Actuals - w:" + w + "h:" + h);
-
 		int len = getTotalLength(c);
 
-		// System.out.println("len - " + len);
-
-		if (orientation == TaskbarOrientation.Bottom
-				|| orientation == TaskbarOrientation.Top) {
-			if (len > w) {
-				int slice = w / c.getComponentCount();
-				int x = 0;
-				for (int i = 0; i < c.getComponentCount(); i++) {
-					Component comp = c.getComponent(i);
-					comp.setBounds(x, 0, slice, h);
-					x += slice;
-				}
-			} else {
-				int x = 0;
-				for (int i = 0; i < c.getComponentCount(); i++) {
-					Component comp = c.getComponent(i);
-					comp.setBounds(x, 0, comp.getPreferredSize().width, h);
-					x += comp.getPreferredSize().width;
-				}
+		if (len > w) {
+			int slice = w / c.getComponentCount();
+			int x = 0;
+			for (int i = 0; i < c.getComponentCount(); i++) {
+				Component comp = c.getComponent(i);
+				comp.setBounds(x, 0, slice, h);
+				x += slice;
 			}
 		} else {
-			if (len > h) {
-				int slice = h / c.getComponentCount();
-				int y = 0;
-				for (int i = 0; i < c.getComponentCount(); i++) {
-					Component comp = c.getComponent(i);
-					comp.setBounds(0, y, w, slice);
-					y += slice + Utility.toPixel(1);
-				}
-			} else {
-				int y = 0;
-				for (int i = 0; i < c.getComponentCount(); i++) {
-					Component comp = c.getComponent(i);
-					comp.setBounds(0, y, w, comp.getPreferredSize().height);
-					y += comp.getPreferredSize().height + Utility.toPixel(1);
-				}
+			int x = 0;
+			for (int i = 0; i < c.getComponentCount(); i++) {
+				Component comp = c.getComponent(i);
+				comp.setBounds(x, 0, comp.getPreferredSize().width, h);
+				x += comp.getPreferredSize().width;
 			}
 		}
-
-//		for (int i = 0; i < c.getComponentCount(); i++) {
-//			Component comp = c.getComponent(i);
-//			Dimension pref = comp.getPreferredSize();
-//
-//			if (orientation == TaskbarOrientation.Bottom) {
-//				if (h > pref.getHeight()) {
-//					h = (int) pref.getHeight();
-//				}
-//				w += pref.getWidth();
-//			}
-//
-//			comp.setBounds(x, 0, (int) pref.getWidth(), (int) pref.getHeight());
-//			width += pref.getWidth();
-//			x += pref.getWidth();
-//			height = (int) pref.getHeight();
-//		}
-//		if (width > c.getBounds().getWidth()) {
-//			System.out.println("width exceeded");
-//		}
-//		System.out.println(c.getPreferredSize() + " - "
-//				+ new Dimension(width, height) + " " + c.getBounds());
-//
-//		// parent.setPreferredSize(new Dimension(width, height));
-//		// parent.setSize(width, height);
-	}
-
-	public TaskbarOrientation getOrientation() {
-		return orientation;
-	}
-
-	public void setOrientation(TaskbarOrientation orientation) {
-		this.orientation = orientation;
-	}
-
-	public int getThikness() {
-		return thikness;
-	}
-
-	public void setThikness(int thikness) {
-		this.thikness = thikness;
 	}
 
 }

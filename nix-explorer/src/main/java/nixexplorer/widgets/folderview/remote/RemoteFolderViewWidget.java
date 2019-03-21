@@ -65,7 +65,7 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 //			e.printStackTrace();
 //		}
 		// tabbedFolders.a
-		this.icon = UIManager.getIcon("ServerTools.filesIcon");
+		this.icon = UIManager.getIcon("ServerTools.filesIcon16");
 //		add(tabbedFolders);
 
 		new Thread(this).start();

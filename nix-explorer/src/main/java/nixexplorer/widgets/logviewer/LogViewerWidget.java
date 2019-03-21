@@ -804,7 +804,7 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 	 */
 	@Override
 	public Icon getIcon() {
-		return UIManager.getIcon("ServerTools.logViewIcon");
+		return UIManager.getIcon("ServerTools.logViewIcon16");
 	}
 
 	/*

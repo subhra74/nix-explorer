@@ -140,7 +140,7 @@ public final class TabbedConsoleWidget extends Widget
 			add(hb, BorderLayout.NORTH);
 		}
 
-		icon = UIManager.getIcon("ServerTools.terminalIcon");
+		icon = UIManager.getIcon("ServerTools.terminalIcon16");
 
 		AppConfig config = appSession.getApplicationContext().getConfig();
 

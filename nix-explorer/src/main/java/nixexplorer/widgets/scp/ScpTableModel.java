@@ -15,7 +15,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import nixexplorer.App;
 import nixexplorer.app.session.AppSession;
+import nixexplorer.app.session.SessionInfo;
+import nixexplorer.app.settings.AppConfig;
 
 /**
  * @author subhro
@@ -31,14 +34,17 @@ public class ScpTableModel extends AbstractTableModel {
 	private AppSession appSession;
 
 	private ObjectMapper objectMapper;
+	private SessionInfo info;
 
 	/**
 	 * 
 	 */
-	public ScpTableModel(AppSession appSession) {
+	public ScpTableModel(AppSession appSession, SessionInfo info) {
 		this.appSession = appSession;
-		objectMapper=new ObjectMapper();
+		this.info = info;
+		objectMapper = new ObjectMapper();
 		loadItems();
+		fireTableDataChanged();
 	}
 
 	public ScpServerInfo getItemAt(int index) {
@@ -46,7 +52,8 @@ public class ScpTableModel extends AbstractTableModel {
 	}
 
 	private void loadItems() {
-		File f = new File(appSession.getDirectory(), "scp-sessions.json");
+		File f = new File(App.getConfig("app.dir"),
+				this.info.getId() + ".scp-sessions.json");
 		if (f.exists()) {
 			List<ScpServerInfo> items = null;
 			try {
@@ -66,6 +73,8 @@ public class ScpTableModel extends AbstractTableModel {
 			if (items != null) {
 				list.addAll(items);
 			}
+		} else {
+			System.out.println("No files exists: " + f.getAbsolutePath());
 		}
 	}
 
@@ -76,7 +85,8 @@ public class ScpTableModel extends AbstractTableModel {
 	}
 
 	public void saveItems() {
-		File f = new File(appSession.getDirectory(), "scp-sessions.json");
+		File f = new File(App.getConfig("app.dir"),
+				this.info.getId() + ".scp-sessions.json");
 		try {
 			objectMapper.writeValue(f, list);
 		} catch (IOException e) {

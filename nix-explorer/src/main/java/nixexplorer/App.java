@@ -605,6 +605,9 @@ public final class App {
 
 		TextHolder.addString("diskUsageViewer.targetLabel", "Directory");
 		TextHolder.addString("diskUsageViewer.go", "Analyze");
+
+		TextHolder.addString("viewMode.listViewText", "List view");
+		TextHolder.addString("viewMode.detailsViewText", "Details view");
 	}
 
 	private static void registerPlugins() {
@@ -1359,17 +1362,17 @@ public final class App {
 					new ScaledIcon(
 							App.class.getResource(
 									"/images/" + black + "_reload.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+							Utility.toPixel(20), Utility.toPixel(20)));
 			UIManager.put("AddressBar.moreMenu",
 					new ScaledIcon(
 							App.class.getResource(
 									"/images/" + black + "_more_menu.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+							Utility.toPixel(20), Utility.toPixel(20)));
 			UIManager.put("AddressBar.search",
 					new ScaledIcon(
 							App.class.getResource(
 									"/images/" + black + "_search.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+							Utility.toPixel(20), Utility.toPixel(20)));
 			UIManager.put("AddressBar.edit",
 					new ScaledIcon(
 							App.class.getResource(
@@ -1630,6 +1633,60 @@ public final class App {
 					new ScaledIcon(
 							App.class.getResource(
 									"/images/" + black + "_show_sidebar.png"),
+							Utility.toPixel(20), Utility.toPixel(20)));
+
+			UIManager.put("ServerTools.terminalIcon16",
+					new ScaledIcon(
+							App.class.getResource(
+									"/images/" + black + "_terminal.png"),
+							Utility.toPixel(16), Utility.toPixel(16)));
+
+			UIManager.put("ServerTools.editorIcon16",
+					new ScaledIcon(
+							App.class.getResource(
+									"/images/" + black + "_text_editor.png"),
+							Utility.toPixel(16), Utility.toPixel(16)));
+
+			UIManager.put("ServerTools.filesIcon16",
+					new ScaledIcon(
+							App.class.getResource(
+									"/images/" + black + "_files.png"),
+							Utility.toPixel(16), Utility.toPixel(16)));
+
+			UIManager.put("ServerTools.curlIcon16",
+					new ScaledIcon(
+							App.class.getResource(
+									"/images/" + black + "_curl.png"),
+							Utility.toPixel(16), Utility.toPixel(16)));
+
+			UIManager.put("ServerTools.logViewIcon16",
+					new ScaledIcon(
+							App.class.getResource(
+									"/images/" + black + "_logview.png"),
+							Utility.toPixel(16), Utility.toPixel(16)));
+
+			UIManager.put("ServerTools.findFilesIcon16",
+					new ScaledIcon(
+							App.class.getResource(
+									"/images/" + black + "_search_icon.png"),
+							Utility.toPixel(16), Utility.toPixel(16)));
+
+			UIManager.put("ServerTools.taskmgrIcon16",
+					new ScaledIcon(
+							App.class.getResource(
+									"/images/" + black + "_taskmgr.png"),
+							Utility.toPixel(16), Utility.toPixel(16)));
+
+			UIManager.put("ViewMode.listIcon",
+					new ScaledIcon(
+							App.class.getResource(
+									"/images/" + black + "_list_view.png"),
+							Utility.toPixel(20), Utility.toPixel(20)));
+
+			UIManager.put("ViewMode.detailsIcon",
+					new ScaledIcon(
+							App.class.getResource(
+									"/images/" + black + "_details_view.png"),
 							Utility.toPixel(20), Utility.toPixel(20)));
 
 //			UIManager.put("TextEditor.reloadIcon",
