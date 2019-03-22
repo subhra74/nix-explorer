@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -43,8 +44,10 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
+import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
@@ -420,7 +423,7 @@ public class FolderViewWidget extends JPanel
 			}
 		});
 
-		createFolderTable(transferHandler);
+		createFolderTable();
 
 		AbstractAction upAction = new AbstractAction() {
 			@Override
@@ -496,13 +499,8 @@ public class FolderViewWidget extends JPanel
 			}
 		});
 
-		fileListModel = new TableListModel(folderTable);
-		fileListView = new JList<>(fileListModel);
-		fileListView.setCellRenderer(new ListViewRenderer());
-		fileListView.setFixedCellWidth(Utility.toPixel(96));
-		fileListView.setFixedCellHeight(Utility.toPixel(96));
-		fileListView.setLayoutOrientation(JList.HORIZONTAL_WRAP);
-		fileListView.setVisibleRowCount(-1);
+		createListView(transferHandler);
+
 		scrollListView = new JScrollPane(fileListView);
 
 		toggleView = new ViewTogglePanel(ViewMode.List);
@@ -559,7 +557,7 @@ public class FolderViewWidget extends JPanel
 
 			@Override
 			public void ancestorMoved(AncestorEvent event) {
-				System.out.println("Requesting focus on table");
+				// System.out.println("Requesting focus on table");
 				if (isShowing()) {
 					focus();
 				}
@@ -567,12 +565,22 @@ public class FolderViewWidget extends JPanel
 
 			@Override
 			public void ancestorAdded(AncestorEvent event) {
-				System.out.println("Requesting focus on table");
+				// System.out.println("Requesting focus on table");
 				if (isShowing()) {
 					focus();
 				}
 			}
 		});
+
+		sortView(3, false);
+
+		addListViewMouseHandler();
+
+		if (transferHandler != null) {
+			transferHandler.setWidget(this);
+			folderTable.setTransferHandler(transferHandler);
+			fileListView.setTransferHandler(transferHandler);
+		}
 
 		reconnect();
 	}
@@ -701,7 +709,7 @@ public class FolderViewWidget extends JPanel
 
 							tabCallback.updateTitle(title,
 									FolderViewWidget.this);
-							
+
 							fileListModel.refresh();
 
 							renderTree();
@@ -798,6 +806,7 @@ public class FolderViewWidget extends JPanel
 			int rows[] = folderTable.getSelectedRows();
 			for (int i = 0; i < rows.length; i++) {
 				fs[i] = folderViewModel.getItemAt(getRow(rows[i]));
+				System.out.println("Selected item: " + fs[i]);
 			}
 			return fs;
 		} else {
@@ -806,6 +815,7 @@ public class FolderViewWidget extends JPanel
 			int rows[] = fileListView.getSelectedIndices();
 			for (int i = 0; i < rows.length; i++) {
 				fs[i] = fileListModel.getElementAt(rows[i]);// folderViewModel.getItemAt(getRow(rows[i]));
+				System.out.println("Selected item: " + fs[i]);
 			}
 			return fs;
 		}
@@ -1882,6 +1892,39 @@ public class FolderViewWidget extends JPanel
 		}
 	}
 
+	private void selectListRow(MouseEvent e) {
+//		if (fileListView.getSelectionModel().getValueIsAdjusting()) {
+//			return;
+//		}
+		if (e.isAltDown() || e.isControlDown() || e.isShiftDown()) {
+			return;
+		}
+		System.out.println("Selecting row");
+		int r = fileListView.locationToIndex(e.getPoint());// folderTable.rowAtPoint(e.getPoint());
+		System.out.println("List Row at point: " + r);
+		if (r == -1) {
+			fileListView.clearSelection();// folderTable.clearSelection();
+			return;
+		}
+
+		Rectangle rect = fileListView.getCellBounds(r, r);
+		System.out.println("Rect: " + rect);
+		if (rect != null && !rect.contains(e.getPoint())) {
+			fileListView.clearSelection();
+			return;
+		}
+
+		if (fileListView.getSelectedIndices().length > 0) {
+			int[] rows = fileListView.getSelectedIndices();
+			for (int row : rows) {
+				if (r == row) {
+					return;
+				}
+			}
+		}
+		fileListView.setSelectedIndex(r);
+	}
+
 	private void loadFavourites() {
 		List<String> favourites = isLocal()
 				? SessionStore.getSharedInstance().getLocalFolders()
@@ -2163,8 +2206,7 @@ public class FolderViewWidget extends JPanel
 		folderTable.requestFocusInWindow();
 	}
 
-	private void createFolderTable(
-			FolderViewBaseTransferHandler transferHandler) {
+	private void createFolderTable() {
 		folderViewModel = new FolderViewTableModel();
 
 		FolderViewRenderer r = new FolderViewRenderer();
@@ -2179,11 +2221,6 @@ public class FolderViewWidget extends JPanel
 		folderTable.setShowGrid(false);
 		folderTable.setRowHeight(r.getPreferredHeight() + Utility.toPixel(5));
 		folderTable.setFillsViewportHeight(true);
-
-		if (transferHandler != null) {
-			transferHandler.setWidget(this);
-			folderTable.setTransferHandler(transferHandler);
-		}
 
 		folderTable.setSelectionMode(
 				ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -2254,11 +2291,11 @@ public class FolderViewWidget extends JPanel
 
 		folderTable.setRowSorter(sorter);
 
-		ArrayList<RowSorter.SortKey> list = new ArrayList<>();
-		list.add(new RowSorter.SortKey(3, SortOrder.DESCENDING));
-		sorter.setSortKeys(list);
-
-		sorter.sort();
+//		ArrayList<RowSorter.SortKey> list = new ArrayList<>();
+//		list.add(new RowSorter.SortKey(3, SortOrder.DESCENDING));
+//		sorter.setSortKeys(list);
+//
+//		sorter.sort();
 
 		folderTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
 				.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "Enter");
@@ -2320,15 +2357,15 @@ public class FolderViewWidget extends JPanel
 			}
 		});
 
-		folderTable.getSelectionModel().addListSelectionListener(e -> {
-			ListSelectionModel model = folderTable.getSelectionModel();
-			if (e.getValueIsAdjusting() || embedded) {
-				return;
-			}
-			if (model.isSelectionEmpty()) {
-				return;
-			}
-		});
+//		folderTable.getSelectionModel().addListSelectionListener(e -> {
+//			ListSelectionModel model = folderTable.getSelectionModel();
+//			if (e.getValueIsAdjusting() || embedded) {
+//				return;
+//			}
+//			if (model.isSelectionEmpty()) {
+//				return;
+//			}
+//		});
 	}
 
 	private void updateContentView() {
@@ -2340,5 +2377,125 @@ public class FolderViewWidget extends JPanel
 			contentHolder.remove(scrollListView);
 			contentHolder.add(scrollTable);
 		}
+	}
+
+	public void sortView(int index, boolean asc) {
+		ArrayList<RowSorter.SortKey> list = new ArrayList<>();
+		list.add(new RowSorter.SortKey(index,
+				asc ? SortOrder.ASCENDING : SortOrder.DESCENDING));
+		sorter.setSortKeys(list);
+		sorter.sort();
+		fileListModel.refresh();
+		menuHandler2.updateMenu();
+	}
+
+	public synchronized int getSortField() {
+		List<? extends SortKey> list = sorter.getSortKeys();
+		if (list.isEmpty()) {
+			return -1;
+		} else {
+			return list.get(0).getColumn();
+		}
+	}
+
+	public synchronized boolean isSortingAscending() {
+		List<? extends SortKey> list = sorter.getSortKeys();
+		if (list.isEmpty()) {
+			return false;
+		} else {
+			return list.get(0).getSortOrder() == SortOrder.ASCENDING;
+		}
+	}
+
+	private void addListViewMouseHandler() {
+		fileListView.addMouseListener(new MouseAdapter() {
+
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see java.awt.event.MouseAdapter#mousePressed(java.awt.event.
+			 * MouseEvent)
+			 */
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if(fileListView.getSelectionModel().getValueIsAdjusting()) {
+					return;
+				}
+//				if (e.isAltDown() || e.isControlDown() || e.isShiftDown()) {
+//					return;
+//				}
+				selectListRow(e);
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				System.out.println("Mouse click on list");
+				if (fileListView.getSelectionModel().getValueIsAdjusting()) {
+					System.out.println("List Value adjusting");
+					return;
+				}
+				selectListRow(e);
+				if (e.getClickCount() == 2) {
+					System.out.println("Double click");
+					Point p = e.getPoint();
+					int r = fileListView.locationToIndex(p);// folderTable.rowAtPoint(p);
+					int x = fileListView.getSelectedIndex();// folderTable.getSelectedRow();
+					if (x == -1) {
+						System.out.println("List no row selected");
+						return;
+					}
+					if (r == fileListView.getSelectedIndex()) {
+						FileInfo fileInfo = fileListModel.getElementAt(r);
+						// .getItemAt(getRow(r));
+						if (fileInfo.getType() == FileType.Directory
+								|| fileInfo.getType() == FileType.DirLink) {
+							System.out.println("Current file: "
+									+ FolderViewWidget.this.file);
+							history.addBack(FolderViewWidget.this.file);
+							render(fileInfo.getPath());
+							updateNavButtons();
+						}
+					}
+				} else if (e.isPopupTrigger()
+						|| e.getButton() == MouseEvent.BUTTON3) {
+					selectListRow(e);
+					menuHandler.createMenu(popup, getSelectedFiles());
+					popup.pack();
+					popup.show(fileListView, e.getX(), e.getY());
+				}
+			}
+		});
+
+	}
+
+	/**
+	 * 
+	 */
+	private void createListView(TransferHandler transferHandler) {
+		fileListModel = new TableListModel(folderTable);
+		fileListView = new JList<>(fileListModel);
+		fileListView.setCellRenderer(new ListViewRenderer());
+		fileListView.setFixedCellWidth(Utility.toPixel(96));
+		fileListView.setFixedCellHeight(Utility.toPixel(96));
+		fileListView.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+		fileListView.setVisibleRowCount(-1);
+		fileListView.setDragEnabled(true);
+
+		fileListView.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+				.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "Enter");
+		fileListView.getActionMap().put("Enter", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				FileInfo[] files = getSelectedFiles();
+				if (files.length > 0) {
+					if (files[0].getType() == FileType.Directory
+							|| files[0].getType() == FileType.DirLink) {
+						String str = files[0].getPath();
+						System.out.println("Rendering: " + str);
+						render(str);
+					}
+				}
+			}
+		});
 	}
 }

@@ -32,8 +32,9 @@ public class FolderViewKeyHandler extends KeyAdapter {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		System.out.println("Table key press");
 		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-
+			return;
 		}
 		if (isNavigationKey(e)) {
 			prefix = "";

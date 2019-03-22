@@ -116,31 +116,59 @@ public class SshFileSystemProvider implements FileSystemProvider {
 								childs.add(e);
 							} else {
 								try {
-									String str = sftp.readlink(
-											PathUtils.combineUnix(path,
-													ent.getFilename()));
-									attrs = sftp.stat(str);
+									String pathToResolve = PathUtils
+											.combineUnix(path,
+													ent.getFilename());
+									System.out.println("Following symlink: "
+											+ pathToResolve);
 
-									if (onlyDir && (!attrs.isDir())) {
-										continue;
+									String str = sftp.readlink(pathToResolve);
+
+									str = str.startsWith("/") ? str
+											: PathUtils.combineUnix(path, str);
+									System.out.println(
+											"Getting link attrs: " + str);
+
+									try {
+										attrs = sftp.stat(str);
+										System.out.println(
+												"Adding link resolved: "
+														+ ent.getFilename());
+
+										FileInfo e = new FileInfo(
+												ent.getFilename(), str,
+												(attrs.isDir() ? -1
+														: attrs.getSize()),
+												attrs.isDir() ? FileType.DirLink
+														: FileType.FileLink,
+												(long) attrs.getMTime() * 1000,
+												ent.getAttrs().getPermissions(),
+												PROTO_SFTP,
+												ent.getAttrs()
+														.getPermissionsString(),
+												attrs.getATime(),
+												ent.getLongname());
+										childs.add(e);
+									} catch (SftpException e) {
+										if (!sftp.isConnected()) {
+											throw e;
+										}
+										childs.add(new FileInfo(
+												ent.getFilename(),
+												PathUtils.combineUnix(path,
+														ent.getFilename()),
+												0,
+												FileType.FileLink,
+												(long) attrs.getMTime() * 1000,
+												ent.getAttrs().getPermissions(),
+												PROTO_SFTP,
+												ent.getAttrs()
+														.getPermissionsString(),
+												attrs.getATime(),
+												ent.getLongname()));
 									}
-
-									FileInfo e = new FileInfo(ent.getFilename(),
-											str,
-											(attrs.isDir() ? -1
-													: attrs.getSize()),
-											attrs.isDir() ? FileType.DirLink
-													: FileType.FileLink,
-											(long) attrs.getMTime() * 1000,
-											ent.getAttrs().getPermissions(),
-											PROTO_SFTP,
-											ent.getAttrs()
-													.getPermissionsString(),
-											attrs.getATime(),
-											ent.getLongname());
-									childs.add(e);
-
 								} catch (Exception e) {
+									e.printStackTrace();
 									if (!sftp.isConnected()) {
 										throw e;
 									}

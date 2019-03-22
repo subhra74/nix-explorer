@@ -260,6 +260,14 @@ public final class App {
 		TextHolder.addString("folderview.newFile", "New file");
 		TextHolder.addString("folderview.newFolder", "New folder");
 		TextHolder.addString("folderview.renameTitle", "Rename file to");
+		TextHolder.addString("folderview.sortByName", "Name");
+		TextHolder.addString("folderview.sortBySize", "Size");
+		TextHolder.addString("folderview.sortByType", "Type");
+		TextHolder.addString("folderview.sortByModified", "Modified");
+		TextHolder.addString("folderview.sortByPerm", "Permission");
+		TextHolder.addString("folderview.sortAsc", "Ascending");
+		TextHolder.addString("folderview.sortDesc", "Descending");
+		TextHolder.addString("folderview.sortBy", "Sort by");
 		TextHolder.addString("folderview.renameFailed",
 				"Failed to rename file/folder");
 		TextHolder.addString("folderview.copy", "Copy");

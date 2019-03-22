@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTree;
@@ -14,11 +15,22 @@ import javax.swing.tree.TreePath;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
 import nixexplorer.core.FileInfo;
+import nixexplorer.core.FileType;
+import nixexplorer.app.components.FileIcon;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.widgets.DuplicatePromptDialog;
 import nixexplorer.widgets.Widget;
 
 public class FolderViewUtility {
+	public static final Icon getIconForFile(FileInfo value, FileIcon folderIcon,
+			FileIcon fileIcon) {
+		FileIcon icon = value.getType() == FileType.Directory
+				|| value.getType() == FileType.DirLink ? folderIcon : fileIcon;
+		icon.setShowingLinkArrow(value.getType() == FileType.DirLink
+				|| value.getType() == FileType.FileLink);
+		return icon;
+	}
+
 	public static String getFilePath(JTree tree, TreePath path,
 			boolean isLocal) {
 		if (path == null) {

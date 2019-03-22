@@ -117,6 +117,7 @@ public class RemoteContextMenuActionHandler
 		aOpen = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				System.out.println("Open called");
 				openDefaultAction();
 			}
 		};
@@ -1082,6 +1083,14 @@ public class RemoteContextMenuActionHandler
 	 * 
 	 */
 	protected void openDefaultAction() {
+		FileInfo[] selectedFiles = folderView.getSelectedFiles();
+		if (selectedFiles != null && selectedFiles.length == 1) {
+			FileInfo info = selectedFiles[0];
+			if (info.getType() == FileType.Directory
+					|| info.getType() == FileType.DirLink) {
+
+			}
+		}
 		int action = remoteFolderView.getAppSession().getApplicationContext()
 				.getConfig().getFileBrowser().getDblClickAction();
 		switch (action) {

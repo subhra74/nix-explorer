@@ -6,12 +6,19 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
+import nixexplorer.TextHolder;
 import nixexplorer.core.FileInfo;
 
 public class FolderViewTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = 7212506492710233442L;
 	private List<FileInfo> files = new ArrayList<>();
+
+	private String[] columns = { TextHolder.getString("folderview.sortByName"),
+			TextHolder.getString("folderview.sortBySize"),
+			TextHolder.getString("folderview.sortByType"),
+			TextHolder.getString("folderview.sortByModified"),
+			TextHolder.getString("folderview.sortByPerm") };
 
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
@@ -56,19 +63,20 @@ public class FolderViewTableModel extends AbstractTableModel {
 
 	@Override
 	public String getColumnName(int column) {
-		switch (column) {
-		case 0:
-			return "Name";
-		case 1:
-			return "Size";
-		case 2:
-			return "Type";
-		case 3:
-			return "Modified";
-		case 4:
-			return "Permission";
-		}
-		return "";
+		return columns[column];
+//		switch (column) {
+//		case 0:
+//			return "Name";
+//		case 1:
+//			return "Size";
+//		case 2:
+//			return "Type";
+//		case 3:
+//			return "Modified";
+//		case 4:
+//			return "Permission";
+//		}
+//		return "";
 	}
 
 	public int getRowCount() {

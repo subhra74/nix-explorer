@@ -15,4 +15,6 @@ public interface OverflowMenuActionHandler {
 	public void createMenu(JPopupMenu popup);
 
 	public void install(FolderViewWidget c);
+
+	public void updateMenu();
 }

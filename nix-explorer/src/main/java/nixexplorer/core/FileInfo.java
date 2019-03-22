@@ -73,8 +73,10 @@ public class FileInfo {
 
 	@Override
 	public String toString() {
-		return "FileInfo [name=" + name + ", path=" + path + ", size=" + size
-				+ ", type=" + type + ", lastModified=" + lastModified + "]";
+		return name;
+		
+//		"FileInfo [name=" + name + ", path=" + path + ", size=" + size
+//				+ ", type=" + type + ", lastModified=" + lastModified + "]";
 	}
 
 	public int getPermission() {

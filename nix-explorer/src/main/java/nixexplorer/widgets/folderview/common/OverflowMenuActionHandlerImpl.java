@@ -7,14 +7,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
+import javax.swing.ButtonGroup;
 import javax.swing.InputMap;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
 import nixexplorer.TextHolder;
@@ -37,6 +41,11 @@ public class OverflowMenuActionHandlerImpl
 			mUnselectFiles;
 	private JCheckBoxMenuItem mShowHiddenFiles;
 	private KeyStroke ksHideShow, ksInvSel, ksFilter;
+
+	private JRadioButtonMenuItem mSortName, mSortSize, mSortType, mSortModified,
+			mSortPermission, mSortAsc, mSortDesc;
+
+	private AtomicBoolean sortingChanging = new AtomicBoolean(false);
 
 	/**
 	 * 
@@ -105,6 +114,51 @@ public class OverflowMenuActionHandlerImpl
 			appyFiterAction();
 		});
 		mFilter.setAccelerator(ksFilter);
+
+		ButtonGroup bg1 = new ButtonGroup();
+
+		mSortName = createSortMenuItem(
+				TextHolder.getString("folderview.sortByName"), 0, bg1);
+
+		mSortSize = createSortMenuItem(
+				TextHolder.getString("folderview.sortBySize"), 1, bg1);
+
+		mSortType = createSortMenuItem(
+				TextHolder.getString("folderview.sortByType"), 2, bg1);
+
+		mSortModified = createSortMenuItem(
+				TextHolder.getString("folderview.sortByModified"), 3, bg1);
+
+		mSortPermission = createSortMenuItem(
+				TextHolder.getString("folderview.sortByPerm"), 4, bg1);
+
+		ButtonGroup bg2 = new ButtonGroup();
+
+		mSortAsc = createSortMenuItem(
+				TextHolder.getString("folderview.sortAsc"), 0, bg2);
+
+		mSortDesc = createSortMenuItem(
+				TextHolder.getString("folderview.sortDesc"), 1, bg2);
+	}
+
+	private JRadioButtonMenuItem createSortMenuItem(String text, Integer index,
+			ButtonGroup bg) {
+		JRadioButtonMenuItem mSortItem = new JRadioButtonMenuItem(text);
+		mSortItem.putClientProperty("sort.index", index);
+		mSortItem.addActionListener(e -> {
+			sortMenuClicked(mSortItem);
+		});
+		bg.add(mSortItem);
+		return mSortItem;
+	}
+
+	private void sortMenuClicked(JRadioButtonMenuItem mSortItem) {
+		if (sortingChanging.get()) {
+			return;
+		}
+		int index = (int) mSortItem.getClientProperty("sort.index");
+		boolean asc = mSortAsc.isSelected();
+		folderView.sortView(index, asc);
 	}
 
 	/**
@@ -194,6 +248,19 @@ public class OverflowMenuActionHandlerImpl
 		popup.add(mSelectSimilar);
 		popup.add(mUnSelectSimilar);
 		popup.add(mFilter);
+
+		JMenu mSortMenu = new JMenu(TextHolder.getString("folderview.sortBy"));
+		popup.add(mSortMenu);
+
+		mSortMenu.add(mSortName);
+		mSortMenu.add(mSortSize);
+		mSortMenu.add(mSortType);
+		mSortMenu.add(mSortModified);
+		mSortMenu.add(mSortPermission);
+		mSortMenu.addSeparator();
+		mSortMenu.add(mSortAsc);
+		mSortMenu.add(mSortDesc);
+
 		popup.add(mShowHiddenFiles);
 	}
 
@@ -233,6 +300,25 @@ public class OverflowMenuActionHandlerImpl
 				invertSelectionAction();
 			}
 		});
+	}
+
+	@Override
+	public void updateMenu() {
+		sortingChanging.set(true);
+		int index = folderView.getSortField();
+		for (JRadioButtonMenuItem item : new JRadioButtonMenuItem[] { mSortName,
+				mSortSize, mSortType, mSortModified, mSortPermission }) {
+			if (index == (int) item.getClientProperty("sort.index")) {
+				item.setSelected(true);
+				break;
+			}
+		}
+		if (folderView.isSortingAscending()) {
+			mSortAsc.setSelected(true);
+		} else {
+			mSortDesc.setSelected(true);
+		}
+		sortingChanging.set(false);
 	}
 
 }
