@@ -2475,8 +2475,8 @@ public class FolderViewWidget extends JPanel
 		fileListModel = new TableListModel(folderTable);
 		fileListView = new JList<>(fileListModel);
 		fileListView.setCellRenderer(new ListViewRenderer());
-		fileListView.setFixedCellWidth(Utility.toPixel(96));
-		fileListView.setFixedCellHeight(Utility.toPixel(96));
+		fileListView.setFixedCellWidth(Utility.toPixel(100));
+		fileListView.setFixedCellHeight(Utility.toPixel(100));
 		fileListView.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		fileListView.setVisibleRowCount(-1);
 		fileListView.setDragEnabled(true);

@@ -31,7 +31,8 @@ public class TerminalDialog extends JDialog implements DisposableView {
 			AppSession appSession, Window window, String title) {
 		super(window);
 		setTitle(title);
-		this.terminal = new TabbedConsoleWidget(info, args, appSession, window);
+		this.terminal = new TabbedConsoleWidget(info, args, appSession, window,
+				true);
 		this.add(terminal);
 		this.setSize(Utility.toPixel(640), Utility.toPixel(480));
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);

@@ -28,7 +28,11 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import com.jcraft.jsch.ChannelExec;
+
 import nixexplorer.app.MainAppFrame;
+import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.drawables.icons.EmptyIcon;
 import nixexplorer.drawables.icons.ScaledIcon;
 import nixexplorer.registry.PluginEntry;
@@ -73,6 +77,22 @@ public final class App {
 
 	public static void main(String[] args)
 			throws Exception, URISyntaxException {
+
+//		SessionInfo info = new SessionInfo();
+//		info.setUser("subhro");
+//		info.setPassword("Starscream@64");
+//		info.setHost("192.168.56.101");
+//		SshWrapper wr = new SshWrapper(info);
+//		wr.connect();
+//		ChannelExec exec = wr.getExecChannel();
+//		exec.setPty(true);
+//		exec.setInputStream(System.in);
+//		exec.setOutputStream(System.out);
+//		exec.setCommand("echo $PATH");
+//		exec.connect();
+//		while(!exec.isClosed()) {
+//			Thread.sleep(1000);
+//		}
 //		System.out.println(KeyStroke.getKeyStroke(KeyEvent.VK_C,
 //				InputEvent.CTRL_DOWN_MASK));
 
@@ -2035,7 +2055,7 @@ public final class App {
 //					Utility.toPixel(20), Utility.toPixel(20));
 
 			Icon smallFolder = new ScaledIcon(
-					App.class.getResource("/images/local.png"),
+					App.class.getResource("/images/folder.png"),
 					Utility.toPixel(20), Utility.toPixel(20));
 
 			Icon smallFile = new ScaledIcon(

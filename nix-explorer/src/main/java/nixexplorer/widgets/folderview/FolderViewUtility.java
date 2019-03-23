@@ -2,7 +2,9 @@ package nixexplorer.widgets.folderview;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.swing.Icon;
@@ -12,6 +14,9 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import org.apache.commons.io.FilenameUtils;
+
+import nixexplorer.IconCache;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
 import nixexplorer.core.FileInfo;
@@ -22,10 +27,76 @@ import nixexplorer.widgets.DuplicatePromptDialog;
 import nixexplorer.widgets.Widget;
 
 public class FolderViewUtility {
-	public static final Icon getIconForFile(FileInfo value, FileIcon folderIcon,
-			FileIcon fileIcon) {
-		FileIcon icon = value.getType() == FileType.Directory
-				|| value.getType() == FileType.DirLink ? folderIcon : fileIcon;
+	private static final List<String> knownArchives = Arrays.asList("ZIP",
+			"TAR", "GZ", "XZ", "BZ2", "TGZ", "TBZ2", "TXZ");
+
+	private static final List<String> knownImages = Arrays.asList("BMP", "JPEG",
+			"JPG", "GIF", "PNG", "SVG", "ICO", "TIFF", "TIF", "TGA", "WEBP",
+			"XPM", "ICNS");
+
+	private static final List<String> knownVideos = Arrays.asList("MP4", "MKV",
+			"WEBM", "MP3", "AAC", "M4A", "M4V");
+
+	private static final List<String> knownSpreadSheets = Arrays.asList("XLS",
+			"XLSX", "ODS", "XLR", "CSV");
+
+	private static final List<String> knownDocuments = Arrays.asList("RTF",
+			"DOC", "DOCX", "ODT", "RTF", "TEX", "ODP", "PPT", "PPTX", "PPS",
+			"TXT");
+
+	public static boolean isExecutable(int perm) {
+		return ((perm & PermissionsDialog.S_IXUSR) == PermissionsDialog.S_IXUSR)
+				|| ((perm
+						& PermissionsDialog.S_IXGRP) == PermissionsDialog.S_IXGRP)
+				|| ((perm
+						& PermissionsDialog.S_IXOTH) == PermissionsDialog.S_IXOTH);
+	}
+
+	private static boolean isTypeOf(String name, List<String> list) {
+		String ext = FilenameUtils.getExtension(name);
+		if (ext == null || ext.length() < 1) {
+			return false;
+		}
+		return (list.contains(ext.toUpperCase(Locale.ENGLISH)));
+	}
+
+	private static FileIcon getIconForExt(String name, boolean isLarge) {
+		String ext = FilenameUtils.getExtension(name);
+		if (ext == null || ext.length() < 1) {
+			return null;
+		}
+		return IconCache.getIconExt(ext.toUpperCase(Locale.ENGLISH), isLarge);
+	}
+
+	public static final Icon getIconForFile(FileInfo value, boolean largeIcon) {
+		FileIcon icon = null;
+		if (value.getType() == FileType.Directory
+				|| value.getType() == FileType.DirLink) {
+			icon = IconCache.getIconExt("folder", largeIcon);
+		} else {
+			if (isTypeOf(value.getName(), knownArchives)) {
+				icon = IconCache.getIconExt("archive", largeIcon);
+			} else if (isTypeOf(value.getName(), knownImages)) {
+				icon = IconCache.getIconExt("picture", largeIcon);
+			} else if (isTypeOf(value.getName(), knownVideos)) {
+				icon = IconCache.getIconExt("video", largeIcon);
+			} else if (isTypeOf(value.getName(), knownSpreadSheets)) {
+				icon = IconCache.getIconExt("spreadsheet", largeIcon);
+			} else if (isTypeOf(value.getName(), knownDocuments)) {
+				icon = IconCache.getIconExt("document", largeIcon);
+			} else {
+				icon = getIconForExt(value.getName(), largeIcon);
+				if (icon == null) {
+					if (isExecutable(value.getPermission())) {
+						icon = IconCache.getIconExt("executable", largeIcon);
+					} else {
+						icon = IconCache.getIconExt("fileicon", largeIcon);
+					}
+				}
+			}
+		}
+//		FileIcon icon = value.getType() == FileType.Directory
+//				|| value.getType() == FileType.DirLink ? folderIcon : fileIcon;
 		icon.setShowingLinkArrow(value.getType() == FileType.DirLink
 				|| value.getType() == FileType.FileLink);
 		return icon;

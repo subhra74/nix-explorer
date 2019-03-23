@@ -3,26 +3,20 @@ package nixexplorer.widgets.console;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
@@ -30,24 +24,22 @@ import javax.swing.border.EmptyBorder;
 import com.jediterm.terminal.RequestOrigin;
 import com.jediterm.terminal.TerminalColor;
 import com.jediterm.terminal.TextStyle;
+import com.jediterm.terminal.TtyConnector;
 import com.jediterm.terminal.emulator.ColorPalette;
 import com.jediterm.terminal.ui.JediTermWidget;
 import com.jediterm.terminal.ui.TerminalAction;
-import com.jediterm.terminal.ui.TerminalActionProvider;
 import com.jediterm.terminal.ui.TerminalActionProviderBase;
 import com.jediterm.terminal.ui.TerminalPanel;
-import com.jediterm.terminal.ui.TerminalWidget;
-import com.jediterm.terminal.ui.TerminalWidgetListener;
 import com.jediterm.terminal.ui.settings.DefaultSettingsProvider;
 
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionEventAware;
+import nixexplorer.app.session.SessionInfo;
 import nixexplorer.app.settings.AppConfig;
 import nixexplorer.app.settings.snippet.SnippetItem;
 import nixexplorer.app.settings.ui.ConfigDialog;
-import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.ssh.SshTtyConnector;
 import nixexplorer.widgets.Widget;
 import nixexplorer.widgets.util.Utility;
@@ -62,15 +54,19 @@ public final class TabbedConsoleWidget extends Widget
 	private JComboBox<SnippetItem> cmbSnippets;
 	private SnippetActionProvider snippetProvider;
 	private AtomicBoolean stopFlag = new AtomicBoolean(false);
-	private SshTtyConnector tty;
+	private TtyConnector tty;
 
 	public TabbedConsoleWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window) {
+		this(info, args, appSession, window, true);
+	}
+
+	public TabbedConsoleWidget(SessionInfo info, String[] args,
+			AppSession appSession, Window window, boolean shell) {
 
 		super(info, args, appSession, window);
 
 		setFocusable(true);
-		// setTitle((info == null ? "" : info.getName() + " - ") + "Terminal");
 		this.setLayout(new BorderLayout());
 
 		model = new DefaultComboBoxModel<>();
@@ -94,7 +90,6 @@ public final class TabbedConsoleWidget extends Widget
 		});
 
 		addFocusListener(new FocusListener() {
-
 			@Override
 			public void focusLost(FocusEvent e) {
 				System.out.println("Focus lost");
@@ -320,42 +315,48 @@ public final class TabbedConsoleWidget extends Widget
 				cmd = args[1];
 			}
 		}
+
+		String command = cmd;
+
 		System.out.println("Commnd: " + cmd);
-		tty = new SshTtyConnector(info);
+		tty = new SshTtyConnector(info); // shell ? new SshTtyConnector(info)
+		// : new ExecTtyConnector(info, command);
 		term.setTtyConnector(tty);
 		term.start();
 
 		add(term);
 
-		String command = cmd;
+		if (shell) {
+			new Thread(() -> {
+				System.out.println("Command sending");
+				while (!stopFlag.get()) {
+					if (tty.isConnected()) {
+						TerminalPanel panel = term.getTerminalPanel();
+						Dimension d = panel.getTerminalSizeFromComponent();
+						term.getTerminalStarter().postResize(d,
+								RequestOrigin.User);
 
-		new Thread(() -> {
-			System.out.println("Command sending");
-			while (!stopFlag.get()) {
-				if (tty.isConnected()) {
-					TerminalPanel panel = term.getTerminalPanel();
-					Dimension d = panel.getTerminalSizeFromComponent();
-					term.getTerminalStarter().postResize(d, RequestOrigin.User);
-
-					if (command != null && command.length() > 0) {
-						System.out.println("Command sent");
-						term.getTerminalStarter().sendString(command + "\n");
-					}
-					break;
-				} else {
-					System.out.println("not connected");
-					if (tty.isCancelled()) {
-						System.out.println("operation cancelled");
+						if (command != null && command.length() > 0) {
+							System.out.println("Command sent");
+							term.getTerminalStarter()
+									.sendString(command + "\n");
+						}
 						break;
+					} else {
+						System.out.println("not connected");
+						if (((SshTtyConnector) tty).isCancelled()) {
+							System.out.println("operation cancelled");
+							break;
+						}
+					}
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
+			}).start();
+		}
 
 		add(term);
 
@@ -371,7 +372,7 @@ public final class TabbedConsoleWidget extends Widget
 	public void reconnect() {
 		new Thread(() -> {
 			if (tty != null) {
-				tty.stop();
+				((SshTtyConnector) tty).stop();
 			}
 
 			tty = new SshTtyConnector(info);
@@ -388,7 +389,7 @@ public final class TabbedConsoleWidget extends Widget
 					break;
 				} else {
 					System.out.println("not connected");
-					if (tty.isCancelled()) {
+					if (((SshTtyConnector) tty).isCancelled()) {
 						System.out.println("operation cancelled");
 						break;
 					}
@@ -405,7 +406,7 @@ public final class TabbedConsoleWidget extends Widget
 	@Override
 	public void close() {
 		stopFlag.set(true);
-		tty.stop();
+		((SshTtyConnector) tty).stop();
 		new Thread(() -> {
 			try {
 				System.out.println("Terminal connection closing...");

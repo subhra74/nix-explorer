@@ -123,7 +123,7 @@ public class ArchiveExtractWidget extends JDialog implements Runnable {
 					"xz -d -c <\"%s\"|tar -C \"%s\" -xvf -");
 			extractCommands.put(".txz",
 					"xz -d -c <\"%s\"|tar -C \"%s\" -xvf -");
-			extractCommands.put(".zip", "unzip \"%s\" -d \"%s\" ");
+			extractCommands.put(".zip", "unzip -o \"%s\" -d \"%s\" ");
 		}
 		for (String key : extractCommands.keySet()) {
 			System.out.println(file + " " + key + " " + (file.endsWith(key)));

@@ -16,14 +16,14 @@ import nixexplorer.widgets.util.Utility;
 
 public class FolderViewRenderer implements TableCellRenderer {
 	private JLabel label;
-	private FileIcon folderIcon, fileIcon;
+//	private FileIcon folderIcon, fileIcon;
 
 	public FolderViewRenderer() {
 		label = new JLabel();
 		label.setOpaque(true);
-		folderIcon = new FileIcon(UIManager.getIcon("ListView.smallFolder"),
-				true);
-		fileIcon = new FileIcon(UIManager.getIcon("ListView.smallFile"), true);
+//		folderIcon = new FileIcon(UIManager.getIcon("ListView.smallFolder"),
+//				true);
+//		fileIcon = new FileIcon(UIManager.getIcon("ListView.smallFile"), true);
 	}
 
 	public Component getTableCellRendererComponent(JTable table, Object value,
@@ -35,8 +35,7 @@ public class FolderViewRenderer implements TableCellRenderer {
 		FileInfo ent = folderViewModel.getItemAt(r);
 		switch (c) {
 		case 0:
-			label.setIcon(FolderViewUtility.getIconForFile(ent, folderIcon,
-					fileIcon));
+			label.setIcon(FolderViewUtility.getIconForFile(ent, false));
 			label.setText(ent.getName());
 			break;
 		case 1:
