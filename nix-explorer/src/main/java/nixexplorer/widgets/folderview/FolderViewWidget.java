@@ -718,7 +718,7 @@ public class FolderViewWidget extends JPanel
 							updateNavButtons();
 							lblDetails.setText(String.format("Total %d items",
 									folderTable.getRowCount()));
-							folderTable.requestFocus();
+							focus();
 						}
 					});
 				} catch (Exception e) {
@@ -2203,7 +2203,11 @@ public class FolderViewWidget extends JPanel
 	}
 
 	private void focus() {
-		folderTable.requestFocusInWindow();
+		if (toggleView.getViewMode() == ViewMode.List) {
+			fileListView.requestFocusInWindow();
+		} else {
+			folderTable.requestFocusInWindow();
+		}
 	}
 
 	private void createFolderTable() {
@@ -2418,7 +2422,7 @@ public class FolderViewWidget extends JPanel
 			 */
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if(fileListView.getSelectionModel().getValueIsAdjusting()) {
+				if (fileListView.getSelectionModel().getValueIsAdjusting()) {
 					return;
 				}
 //				if (e.isAltDown() || e.isControlDown() || e.isShiftDown()) {
