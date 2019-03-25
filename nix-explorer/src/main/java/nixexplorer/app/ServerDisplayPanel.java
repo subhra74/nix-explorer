@@ -34,6 +34,7 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 import nixexplorer.TextHolder;
 import nixexplorer.app.components.FlatTabbedPane;
 import nixexplorer.app.components.TabbedChild;
+import nixexplorer.app.components.WelcomeScreen;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.settings.ui.ConfigDialog;
 import nixexplorer.app.session.SessionInfo;
@@ -133,7 +134,7 @@ public class ServerDisplayPanel extends JPanel {
 		int gap = Utility.toPixel(8);
 		panel.setBorder(new EmptyBorder(gap, 0, gap, gap));
 
-		tabs = new FlatTabbedPane(true, true);
+		tabs = new FlatTabbedPane(true, true, null);
 		tabs.setClosable(true);
 //		tabs.setBorder(new MatteBorder(Utility.toPixel(0), Utility.toPixel(1),
 //				Utility.toPixel(1), Utility.toPixel(1),

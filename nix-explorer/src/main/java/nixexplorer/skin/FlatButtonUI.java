@@ -14,6 +14,7 @@ import javax.swing.JComponent;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicButtonUI;
 import javax.swing.plaf.metal.MetalButtonUI;
 
@@ -31,10 +32,22 @@ public class FlatButtonUI extends BasicButtonUI {
 
 	@Override
 	public void installUI(JComponent c) {
+//		JButton b = (JButton) c;
+//		Insets ins = b.getMargin();
+//		System.out.println("Margin1: " + ins);
 		// Insets gap = ((JButton) c).getInsets();
 		// System.out.println("insets: " + gap);
 		super.installUI(c);
-		//((JButton) c).setRolloverEnabled(true);
+//		System.out.println("Margin: " + b.getMargin());
+//		if (ins != null) {
+//			b.setMargin(ins);
+//		}
+
+//		JButton b=(JButton) c;
+//		if(b.getMargin() == null || (b.getMargin() instanceof UIResource)) {
+//            b.setMargin(UIManager.getInsets(pp + "margin"));
+//        }
+		// ((JButton) c).setRolloverEnabled(true);
 //MetalButtonUI
 //		if (gap != null) {
 //			if (c instanceof JButton) {
@@ -96,6 +109,7 @@ public class FlatButtonUI extends BasicButtonUI {
 	}
 
 	public void paint(Graphics g, JComponent c) {
+	//	System.out.println("Button inset: "+c.getInsets());
 		// System.out.println(((JButton)c).isRolloverEnabled());
 		// System.out.println(c + " " + c.getInsets());
 		Graphics2D g2 = (Graphics2D) g;

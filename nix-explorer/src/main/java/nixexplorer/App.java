@@ -1322,6 +1322,24 @@ public final class App {
 
 			// MetalCheckBoxIcon
 
+			UIManager.put("welcome.new",
+					new ScaledIcon(
+							App.class.getResource(
+									"/images/" + black + "_add_server.png"),
+							Utility.toPixel(32), Utility.toPixel(32)));
+
+			UIManager.put("welcome.settings",
+					new ScaledIcon(
+							App.class.getResource(
+									"/images/" + black + "_open_settings.png"),
+							Utility.toPixel(32), Utility.toPixel(32)));
+
+			UIManager.put("welcome.help",
+					new ScaledIcon(
+							App.class.getResource(
+									"/images/" + black + "_help.png"),
+							Utility.toPixel(32), Utility.toPixel(32)));
+
 			UIManager.put("Tab.roundCloseIcon",
 					new ScaledIcon(
 							App.class.getResource(
@@ -1355,6 +1373,36 @@ public final class App {
 							App.class.getResource(
 									"/images/" + black + "_checked.png"),
 							Utility.toPixel(20), Utility.toPixel(20)));
+
+			UIManager.put("RadioButtonMenuItem.checkIcon",
+					UIManager.get("RadioButton.selectedIcon"));
+
+			UIManager.put("CheckBoxMenuItem.checkIcon",
+					UIManager.get("CheckBox.icon"));
+			// UIManager.put("CheckBoxMenuItem.selectedIcon",UIManager.get("CheckBox.selectedIcon"));
+
+			UIManager.put("RadioButtonMenuItem.checkIcon", new StatefullIcon(
+					new ScaledIcon(
+							App.class.getResource("/images/" + black
+									+ "_radio_unchecked.png"),
+							Utility.toPixel(20), Utility.toPixel(20)),
+					new ScaledIcon(
+							App.class.getResource(
+									"/images/" + black + "_radio_checked.png"),
+							Utility.toPixel(20), Utility.toPixel(20))));
+			// UIManager.put("RadioButtonMenuItem.checkIcon",UIManager.get("CheckBox.icon"));
+			// UIManager.put("RadioButtonMenuItem.selectedIcon",UIManager.get("RadioButton.selectedIcon"));
+
+//			UIManager.put("RadioButton.selectedIcon",
+//					new ScaledIcon(
+//							App.class.getResource(
+//									"/images/" + black + "_radio_checked.png"),
+//							Utility.toPixel(20), Utility.toPixel(20)));
+//
+//			UIManager.put("RadioButtonMenuItem.checkIcon", new ScaledIcon(
+//					App.class.getResource(
+//							"/images/" + black + "_radio_unchecked.png"),
+//					Utility.toPixel(20), Utility.toPixel(20)));
 
 			UIManager.put("AddressBar.icon",
 					new ScaledIcon(
@@ -1831,10 +1879,12 @@ public final class App {
 
 			UIManager.put("Popup.background", background);
 
-			UIManager.put("Separator.background", border);
-			UIManager.put("Separator.foreground", border);
-			UIManager.put("Separator.thickness", Utility.toPixel(0));
-			UIManager.put("Separator.insets", new Insets(0, 0, 0, 0));
+			UIManager.put("Separator.background", defBorder);
+			UIManager.put("Separator.foreground", defBorder);
+			UIManager.put("Separator.thickness", Utility.toPixel(1));
+			UIManager.put("Separator.insets",
+					new Insets(Utility.toPixel(1), Utility.toPixel(1),
+							Utility.toPixel(1), Utility.toPixel(1)));
 			// UIManager.put("PopupMenu.font", normalFont);
 
 			UIManager.put("MenuItem.border",
@@ -2148,6 +2198,43 @@ public final class App {
 							UIManager.getColor("DefaultBorder.color")),
 					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
 							Utility.toPixel(5), Utility.toPixel(5))));
+
+			UIManager.put("ToolTip.background",
+					UIManager.getColor("DefaultBorder.color"));
+			UIManager.put("ToolTip.backgroundInactive", background);
+			UIManager.put("ToolTip.border",
+					new LineBorder(UIManager.getColor("DefaultBorder.color"),
+							Utility.toPixel(1)));
+			UIManager.put("ToolTip.borderInactive",
+					new LineBorder(UIManager.getColor("DefaultBorder.color"),
+							Utility.toPixel(1)));
+			UIManager.put("ToolTip.foreground", foreground);
+			UIManager.put("ToolTip.foregroundInactive", foreground);
+
+			UIManager.put("CheckBoxMenuItem.border",
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+							Utility.toPixel(5), Utility.toPixel(5)));
+			UIManager.put("CheckBoxMenuItem.background", background);
+			UIManager.put("CheckBoxMenuItem.foreground", foreground);
+			UIManager.put("CheckBoxMenuItem.font", normalFont);
+			UIManager.put("CheckBoxMenuItem.selectionBackground", selection);
+			UIManager.put("CheckBoxMenuItem.selectionForeground", foreground);
+			UIManager.put("CheckBoxMenuItem.acceleratorForeground", border);
+			UIManager.put("CheckBoxMenuItem.acceleratorSelectionForeground",
+					foreground);
+
+			UIManager.put("RadioButtonMenuItem.border",
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+							Utility.toPixel(5), Utility.toPixel(5)));
+			UIManager.put("RadioButtonMenuItem.background", background);
+			UIManager.put("RadioButtonMenuItem.foreground", foreground);
+			UIManager.put("RadioButtonMenuItem.font", normalFont);
+			UIManager.put("RadioButtonMenuItem.selectionBackground", selection);
+			UIManager.put("RadioButtonMenuItem.selectionForeground",
+					foreground);
+			UIManager.put("RadioButtonMenuItem.acceleratorForeground", border);
+			UIManager.put("RadioButtonMenuItem.acceleratorSelectionForeground",
+					foreground);
 
 			// MetalInternalFrameUI
 

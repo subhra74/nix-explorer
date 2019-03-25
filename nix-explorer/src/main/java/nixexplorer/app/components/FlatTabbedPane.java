@@ -29,11 +29,12 @@ public class FlatTabbedPane extends JPanel {
 	// private JButton closeAllBtn;
 	private boolean largeTabs = false;
 
-	public FlatTabbedPane() {
-		this(false, false);
+	public FlatTabbedPane(Component defaultComponent) {
+		this(false, false, defaultComponent);
 	}
 
-	public FlatTabbedPane(boolean closeAllCapable, boolean largeTabs) {
+	public FlatTabbedPane(boolean closeAllCapable, boolean largeTabs,
+			Component defaultComponent) {
 		super(new BorderLayout());
 		this.largeTabs = largeTabs;
 		setBackground(UIManager.getColor("Panel.secondary"));
@@ -53,6 +54,9 @@ public class FlatTabbedPane extends JPanel {
 
 		add(topContainer, BorderLayout.NORTH);
 		content = new JPanel(new BorderLayout());
+		if (defaultComponent != null) {
+			content.add(defaultComponent);
+		}
 		content.setOpaque(false);
 		add(content);
 

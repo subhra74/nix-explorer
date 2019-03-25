@@ -18,7 +18,7 @@ public class SeparatorUI extends BasicSeparatorUI {
 	@Override
 	public void paint(Graphics g, JComponent c) {
 //		// TODO Auto-generated method stub
-//		super.paint(g, c);
+		super.paint(g, c);
 	}
 
 	@Override

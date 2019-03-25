@@ -17,6 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import nixexplorer.TextHolder;
+import nixexplorer.app.components.WelcomeScreen;
 import nixexplorer.app.session.AppSessionImpl;
 import nixexplorer.app.settings.AppConfig;
 import nixexplorer.widgets.util.Utility;
@@ -66,6 +67,7 @@ public class MainAppFrame extends JFrame {
 		};
 
 		content = new JPanel(new BorderLayout());
+		content.add(new WelcomeScreen());
 		sidePanel.setListSelectionListener(e -> {
 			try {
 				content.removeAll();
