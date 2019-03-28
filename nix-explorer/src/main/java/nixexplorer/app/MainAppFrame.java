@@ -67,7 +67,7 @@ public class MainAppFrame extends JFrame {
 		};
 
 		content = new JPanel(new BorderLayout());
-		content.add(new WelcomeScreen());
+		content.add(new WelcomeScreen(this, context.getConfig(),sidePanel));
 		sidePanel.setListSelectionListener(e -> {
 			try {
 				content.removeAll();

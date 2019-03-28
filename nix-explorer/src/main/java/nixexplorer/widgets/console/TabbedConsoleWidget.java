@@ -116,7 +116,8 @@ public final class TabbedConsoleWidget extends Widget
 		JButton btnManageSnippets = new JButton(
 				TextHolder.getString("terminal.manageSnippets"));
 		btnManageSnippets.addActionListener(e -> {
-			ConfigDialog dlg = new ConfigDialog(getWindow(), appSession);
+			ConfigDialog dlg = new ConfigDialog(getWindow(),
+					appSession.getApplicationContext().getConfig());
 			dlg.selectPage(1);
 			dlg.setLocationRelativeTo(getWindow());
 			dlg.setVisible(true);

@@ -58,6 +58,7 @@ import org.fife.rsta.ui.search.SearchListener;
 //import org.fife.rsta.ui.search.ReplaceToolBar;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rtextarea.Gutter;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -107,6 +108,8 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 	private Cursor curBusy, curDef;
 	private JCheckBox chkWrapText;
 	private JSpinner spFont;
+
+	private JComboBox<String> cmbTheme;
 
 	public FormattedEditorWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window) {
@@ -272,6 +275,19 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 		spFont.setMaximumSize(new Dimension(
 				spFont.getPreferredSize().width + Utility.toPixel(30),
 				spFont.getPreferredSize().height));
+
+		cmbTheme = new JComboBox<>(new String[] { "idea", "dark", "default",
+				"default-alt", "default-alt", "monokai", "eclipse", "vs" });
+
+		cmbTheme.addItemListener(e -> {
+			applyTheme(e.getItem() + "");
+		});
+
+		Dimension d1 = new Dimension(Utility.toPixel(120),
+				cmbTheme.getPreferredSize().height);
+		cmbTheme.setPreferredSize(d1);
+		cmbTheme.setMaximumSize(d1);
+
 		toolbar.add(Box.createHorizontalGlue());
 		toolbar.add(new JLabel(TextHolder.getString("editor.syntax")));
 		toolbar.add(Box.createHorizontalStrut(Utility.toPixel(5)));
@@ -282,6 +298,10 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 		toolbar.add(spFont);
 		toolbar.add(Box.createHorizontalStrut(Utility.toPixel(15)));
 		toolbar.add(chkWrapText);
+		toolbar.add(Box.createHorizontalStrut(Utility.toPixel(15)));
+		toolbar.add(new JLabel(TextHolder.getString("editor.theme")));
+		toolbar.add(Box.createHorizontalStrut(Utility.toPixel(5)));
+		toolbar.add(cmbTheme);
 		toolbar.add(Box.createHorizontalStrut(Utility.toPixel(15)));
 		top.add(toolbar);
 		this.add(top, BorderLayout.NORTH);
@@ -453,7 +473,24 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 			}
 		});
 
+		cmbTheme.setSelectedItem(UIManager.getString("Editor.theme"));
+
 		loadFile();
+	}
+
+	/**
+	 * @param string
+	 */
+	private void applyTheme(String string) {
+		try {
+			Theme theme = Theme.load(getClass().getResourceAsStream(
+					"/org/fife/ui/rsyntaxtextarea/themes/" + string + ".xml"),
+					textArea.getFont());
+			theme.apply(textArea);
+			textArea.validate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

@@ -367,6 +367,7 @@ public final class App {
 		TextHolder.addString("editor.fontSize", "Font size");
 		TextHolder.addString("editor.wrapText", "Wrap text");
 		TextHolder.addString("editor.syntax", "Syntax");
+		TextHolder.addString("editor.theme", "Theme");
 
 		TextHolder.addString("searchbox.search", "Find");
 		TextHolder.addString("searchbox.replace", "Replace");
@@ -1310,6 +1311,7 @@ public final class App {
 			Color prgBg = new Color(51, 181, 229);
 			Color c1 = new Color(50, 50, 50);
 			Color c2 = new Color(150, 150, 150);
+			Color c3 = new Color(45, 45, 45);
 			Color brightFg = Color.WHITE;
 			Icon tabCloseIcon = new ScaledIcon(
 					App.class.getResource("/images/" + black + "_close.png"),
@@ -1821,6 +1823,7 @@ public final class App {
 			UIManager.put("DefaultBorder.color", defBorder);
 			UIManager.put("Panel.secondary", c1);
 			UIManager.put("Panel.highlight", c2);
+			UIManager.put("Panel.shadow", c3);
 
 			UIManager.put("Taskbar.height", Utility.toPixel(32));
 			UIManager.put("AddressBar.borderColor", border);
@@ -2235,6 +2238,8 @@ public final class App {
 			UIManager.put("RadioButtonMenuItem.acceleratorForeground", border);
 			UIManager.put("RadioButtonMenuItem.acceleratorSelectionForeground",
 					foreground);
+
+			UIManager.put("Editor.theme", "dark");
 
 			// MetalInternalFrameUI
 

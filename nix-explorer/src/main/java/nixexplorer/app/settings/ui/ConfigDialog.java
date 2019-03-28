@@ -52,7 +52,6 @@ public class ConfigDialog extends JDialog {
 	private JPanel cardPanel;
 	private JList<String> listIndex;
 	private JButton btnSave, btnCancel;
-	private AppSession appSession;
 	private SnippetManagerPanel snippetManager;
 	private LogHighlightConfigPanel logViewerPanel;
 
@@ -63,6 +62,7 @@ public class ConfigDialog extends JDialog {
 	private JComboBox<String> cmbSidePanelViewMode;
 	private JTextField txtExternalEditor;
 	private JButton btnBrowseEditor;
+	private AppConfig config;
 
 	// terminal ui elements
 	private JCheckBox chkX11CopyPaste;
@@ -73,12 +73,12 @@ public class ConfigDialog extends JDialog {
 	/**
 	 * 
 	 */
-	public ConfigDialog(Window window, AppSession session) {
+	public ConfigDialog(Window window, AppConfig config) {
 		super(window);
-		this.appSession = session;
 		createUI();
 		setLocationRelativeTo(window);
-		setConfig(appSession.getApplicationContext().getConfig());
+		this.config = config;
+		setConfig(config);
 	}
 
 	public void selectPage(int pageIndex) {
@@ -95,7 +95,6 @@ public class ConfigDialog extends JDialog {
 		updateFolderViewConfig(config);
 		updateTerminalConfig(config);
 		updateLogViewerConfig(config);
-		appSession.getApplicationContext().configChanged();
 	}
 
 	private void setLogViewerConfig(AppConfig config) {
@@ -187,7 +186,7 @@ public class ConfigDialog extends JDialog {
 		btnCancel = new JButton(TextHolder.getString("config.button.cancel"));
 
 		btnSave.addActionListener(e -> {
-			saveConfig(appSession.getApplicationContext().getConfig());
+			saveConfig(config);
 			dispose();
 		});
 

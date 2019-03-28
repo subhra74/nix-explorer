@@ -71,18 +71,7 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 		b1.add(Box.createHorizontalGlue());
 		JButton btnNew = new JButton(UIManager.getIcon("SidePanel.addIcon"));
 		btnNew.addActionListener(e -> {
-			SessionInfo info = new SessionManagerPanel().newSession();
-			if (info == null) {
-				return;
-			}
-			AppSessionImpl appSession = new AppSessionImpl(info, false, window,
-					this.context);
-			this.context.addSession(appSession);
-			ServerDisplayPanel display=new ServerDisplayPanel(info, window, this, appSession);
-			appSession.setDisplay(display);
-			display.createInitialFolderView();
-			serverListModel.addElement(appSession);
-			serverList.setSelectedIndex(serverListModel.size() - 1);
+			makeNewSession();
 		});
 		// btnNew.setBorderPainted(false);
 		b1.add(btnNew);
@@ -127,6 +116,25 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 		add(b1, BorderLayout.NORTH);
 		add(jsp);
 //		add(bottomPanel, BorderLayout.SOUTH);
+	}
+
+	/**
+		 * 
+		 */
+	public void makeNewSession() {
+		SessionInfo info = new SessionManagerPanel().newSession();
+		if (info == null) {
+			return;
+		}
+		AppSessionImpl appSession = new AppSessionImpl(info, false, window,
+				this.context);
+		this.context.addSession(appSession);
+		ServerDisplayPanel display = new ServerDisplayPanel(info, window, this,
+				appSession);
+		appSession.setDisplay(display);
+		display.createInitialFolderView();
+		serverListModel.addElement(appSession);
+		serverList.setSelectedIndex(serverListModel.size() - 1);
 	}
 
 //	/**

@@ -322,8 +322,10 @@ public class ServerDisplayPanel extends JPanel {
 					public void actionPerformed(ActionEvent e) {
 						try {
 							System.out.println("called");
-							new ConfigDialog(window, appSession)
-									.setVisible(true);
+							new ConfigDialog(window, appSession
+									.getApplicationContext().getConfig())
+											.setVisible(true);
+							appSession.getApplicationContext().configChanged();
 						} catch (Exception e2) {
 							e2.printStackTrace();
 						}

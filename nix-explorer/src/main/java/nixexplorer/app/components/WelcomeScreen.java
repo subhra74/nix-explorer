@@ -7,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.Window;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -16,6 +17,9 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import nixexplorer.Constants;
+import nixexplorer.app.AppSidePanel;
+import nixexplorer.app.settings.AppConfig;
+import nixexplorer.app.settings.ui.ConfigDialog;
 import nixexplorer.drawables.icons.ScaledIcon;
 import nixexplorer.widgets.util.Utility;
 
@@ -27,7 +31,7 @@ public class WelcomeScreen extends JPanel {
 	/**
 	 * 
 	 */
-	public WelcomeScreen() {
+	public WelcomeScreen(Window window, AppConfig config, AppSidePanel panel) {
 		setLayout(new WelcomePageLayout());// new BorderLayout());
 		JLabel lblMainIcon = new JLabel(
 				new ScaledIcon(getClass().getResource("/images/app-logo.png"),
@@ -48,9 +52,9 @@ public class WelcomeScreen extends JPanel {
 		btn2.setHorizontalAlignment(JButton.LEFT);
 		btn3.setHorizontalAlignment(JButton.LEFT);
 
-		btn1.setBackground(UIManager.getColor("DefaultBorder.color"));
-		btn2.setBackground(UIManager.getColor("DefaultBorder.color"));
-		btn3.setBackground(UIManager.getColor("DefaultBorder.color"));
+		btn1.setBackground(UIManager.getColor("Panel.shadow"));
+		btn2.setBackground(UIManager.getColor("Panel.shadow"));
+		btn3.setBackground(UIManager.getColor("Panel.shadow"));
 
 		Font font = Utility.getFont(Constants.NORMAL);
 
@@ -66,12 +70,20 @@ public class WelcomeScreen extends JPanel {
 		btn2.setFont(font);
 		btn3.setFont(font);
 
-		btn1.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10),
-				Utility.toPixel(10), Utility.toPixel(10)));
-		btn2.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10),
-				Utility.toPixel(10), Utility.toPixel(10)));
-		btn3.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10),
-				Utility.toPixel(10), Utility.toPixel(10)));
+		btn1.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+				Utility.toPixel(5), Utility.toPixel(5)));
+		btn2.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+				Utility.toPixel(5), Utility.toPixel(5)));
+		btn3.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+				Utility.toPixel(5), Utility.toPixel(5)));
+
+		btn1.addActionListener(e -> {
+			panel.makeNewSession();
+		});
+
+		btn2.addActionListener(e -> {
+			new ConfigDialog(window, config).setVisible(true);
+		});
 
 		// Dimension d = btn1.getPreferredSize();
 

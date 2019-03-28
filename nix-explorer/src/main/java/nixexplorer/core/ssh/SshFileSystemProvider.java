@@ -6,12 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-
-import javax.swing.plaf.FileChooserUI;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
@@ -91,7 +88,7 @@ public class SshFileSystemProvider implements FileSystemProvider {
 					path = sftp.getHome();
 				}
 				synchronized (sftp) {
-					Vector files = sftp.ls(path);
+					Vector<?> files = sftp.ls(path);
 					if (files.size() > 0) {
 						for (int i = 0; i < files.size(); i++) {
 							ChannelSftp.LsEntry ent = (LsEntry) files.get(i);
