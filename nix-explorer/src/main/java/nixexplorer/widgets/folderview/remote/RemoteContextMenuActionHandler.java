@@ -25,26 +25,22 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
 import nixexplorer.AppClipboard;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
 import nixexplorer.app.session.AppSession;
+import nixexplorer.app.session.SessionStore;
 import nixexplorer.core.FileInfo;
 import nixexplorer.core.FileType;
-import nixexplorer.core.SessionStore;
-import nixexplorer.core.ssh.SshFileSystemProvider;
 import nixexplorer.registry.contextmenu.ContextMenuEntry;
 import nixexplorer.registry.contextmenu.ContextMenuRegistry;
-import nixexplorer.widgets.console.TerminalDialog;
 import nixexplorer.widgets.dnd.TransferFileInfo;
 import nixexplorer.widgets.dnd.TransferFileInfo.Action;
 import nixexplorer.widgets.editor.ExternalEditorWidget;
 import nixexplorer.widgets.editor.FormattedEditorWidget;
 import nixexplorer.widgets.folderview.ContextMenuActionHandler;
-import nixexplorer.widgets.folderview.FavouritePlaceEntry;
 import nixexplorer.widgets.folderview.FolderViewWidget;
 import nixexplorer.widgets.folderview.PermissionsDialog;
 import nixexplorer.widgets.folderview.ShellActions;
@@ -806,8 +802,10 @@ public class RemoteContextMenuActionHandler
 				}
 			}
 		}
+		SessionStore.updateFavourites(remoteFolderView.getInfo().getId(),
+				remoteFolderView.getInfo().getFavouriteFolders());
 		loadFavourites();
-		SessionStore.getSharedInstance().save(null);
+		//SessionStore.getSharedInstance().save(null);
 	}
 
 	private void addBookmark(String str) {

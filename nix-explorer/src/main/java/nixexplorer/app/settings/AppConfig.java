@@ -46,7 +46,8 @@ public class AppConfig {
 	}
 
 	public synchronized static AppConfig load() {
-		File file = new File(App.getConfig("app.dir"), Constants.CONFIG_DB_FILE);
+		File file = new File(App.getConfig("app.dir"),
+				Constants.CONFIG_DB_FILE);
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			return objectMapper.readValue(file, new TypeReference<AppConfig>() {
@@ -58,7 +59,8 @@ public class AppConfig {
 	}
 
 	public void save() {
-		File file = new File(App.getConfig("app.dir"), Constants.CONFIG_DB_FILE);
+		File file = new File(App.getConfig("app.dir"),
+				Constants.CONFIG_DB_FILE);
 		System.out.println("saving config to: " + file);
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
@@ -191,6 +193,9 @@ public class AppConfig {
 		private boolean confirmBeforeDelete;
 		private String externalEditor;
 
+		private List<String> remoteBookmarks = new ArrayList<>();
+		private List<String> localBookmarks = new ArrayList<>();
+
 		/**
 		 * @return the folderCachingEnabled
 		 */
@@ -303,6 +308,14 @@ public class AppConfig {
 		 */
 		public void setExternalEditor(String externalEditor) {
 			this.externalEditor = externalEditor;
+		}
+
+		public synchronized List<String> getRemoteBookmarks() {
+			return remoteBookmarks;
+		}
+
+		public synchronized List<String> getLocalBookmarks() {
+			return localBookmarks;
 		}
 	}
 

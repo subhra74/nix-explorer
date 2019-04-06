@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Window;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -79,6 +81,7 @@ public class ConfigDialog extends JDialog {
 		setLocationRelativeTo(window);
 		this.config = config;
 		setConfig(config);
+		listIndex.setSelectedIndex(0);
 	}
 
 	public void selectPage(int pageIndex) {
@@ -111,6 +114,7 @@ public class ConfigDialog extends JDialog {
 		chkConfirmBeforeDelete.setSelected(fb.isConfirmBeforeDelete());
 		cmbDblClickAction.setSelectedIndex(fb.getDblClickAction());
 		cmbSidePanelViewMode.setSelectedIndex(fb.getSidePanelViewMode());
+		txtExternalEditor.setText(fb.getExternalEditor());
 	}
 
 	private void updateFolderViewConfig(AppConfig config) {
@@ -124,6 +128,7 @@ public class ConfigDialog extends JDialog {
 
 		fb.setDblClickAction(cmbDblClickAction.getSelectedIndex());
 		fb.setSidePanelViewMode(cmbSidePanelViewMode.getSelectedIndex());
+		fb.setExternalEditor(txtExternalEditor.getText());
 	}
 
 	private void setTerminalConfig(AppConfig config) {
@@ -379,6 +384,15 @@ public class ConfigDialog extends JDialog {
 
 		btnBrowseEditor = new JButton(
 				TextHolder.getString("config.folderview.browse"));
+		btnBrowseEditor.addActionListener(e -> {
+			JFileChooser jfc = new JFileChooser();
+			jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			jfc.setMultiSelectionEnabled(false);
+			if (jfc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+				File file = jfc.getSelectedFile();
+				txtExternalEditor.setText(file.getAbsolutePath());
+			}
+		});
 
 		JLabel lblExtEdit = new JLabel(
 				TextHolder.getString("config.folderview.externalEditor"));

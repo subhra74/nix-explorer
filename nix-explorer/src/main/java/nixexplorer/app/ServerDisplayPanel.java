@@ -4,8 +4,6 @@
 package nixexplorer.app;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -13,41 +11,31 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
-import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JDesktopPane;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
-import javax.swing.plaf.DimensionUIResource;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 import nixexplorer.TextHolder;
 import nixexplorer.app.components.FlatTabbedPane;
 import nixexplorer.app.components.TabbedChild;
-import nixexplorer.app.components.WelcomeScreen;
 import nixexplorer.app.session.AppSession;
-import nixexplorer.app.settings.ui.ConfigDialog;
 import nixexplorer.app.session.SessionInfo;
-import nixexplorer.widgets.Widget;
+import nixexplorer.app.settings.ui.ConfigDialog;
+import nixexplorer.widgets.BaseSysInfoWidget;
 import nixexplorer.widgets.console.TabbedConsoleWidget;
 import nixexplorer.widgets.du.DiskUsageViewerWidget;
-import nixexplorer.widgets.editor.FormattedEditorWidget;
 //import nixexplorer.widgets.folderview.foreign.ForeignFolderViewWidget;
 import nixexplorer.widgets.folderview.local.LocalFolderViewWidget;
 import nixexplorer.widgets.folderview.remote.RemoteFolderViewWidget;
 import nixexplorer.widgets.http.HttpClient;
-import nixexplorer.widgets.logviewer.LogViewerWidget;
-import nixexplorer.widgets.scp.ScpTransferWidget;
 import nixexplorer.widgets.search.FileSearchWidget;
 import nixexplorer.widgets.sysmon.SystemMonitorWidget;
 import nixexplorer.widgets.util.Utility;
@@ -365,8 +353,10 @@ public class ServerDisplayPanel extends JPanel {
 
 	public void createInitialFolderView() {
 		try {
-			RemoteFolderViewWidget w = new RemoteFolderViewWidget(info,
-					new String[] {}, appSession, window);
+//			RemoteFolderViewWidget w = new RemoteFolderViewWidget(info,
+//					new String[] {}, appSession, window);
+			BaseSysInfoWidget w = new BaseSysInfoWidget(info, new String[] {},
+					appSession, window);
 			appSession.addToSession(w);
 			addTab(w);
 		} catch (Exception e2) {

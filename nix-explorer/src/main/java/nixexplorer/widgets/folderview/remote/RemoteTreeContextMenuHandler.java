@@ -7,17 +7,13 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileNotFoundException;
 
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
-import nixexplorer.core.FileInfo;
-import nixexplorer.core.FileType;
-import nixexplorer.core.SessionStore;
+import nixexplorer.app.session.SessionStore;
 import nixexplorer.widgets.folderview.FolderViewWidget;
 import nixexplorer.widgets.folderview.TreeContextMenuHandler;
 
@@ -118,8 +114,9 @@ public class RemoteTreeContextMenuHandler implements TreeContextMenuHandler {
 
 	protected void addToFavourites() {
 		addBookmark(path);
+		SessionStore.updateFavourites(remoteFolderView.getInfo().getId(),
+				remoteFolderView.getInfo().getFavouriteFolders());
 		loadFavourites();
-		SessionStore.getSharedInstance().save(null);
 	}
 
 	private void loadFavourites() {

@@ -142,8 +142,6 @@ public final class App {
 
 		loadDarkTheme();
 
-		// loadLightTheme();
-
 //		nixexplorer.core.ssh.filetransfer.SshConnectionPool.getSharedInstance();
 
 		loadStrings();
@@ -2248,5 +2246,7 @@ public final class App {
 			e.printStackTrace();
 		}
 	}
+
+	
 
 }

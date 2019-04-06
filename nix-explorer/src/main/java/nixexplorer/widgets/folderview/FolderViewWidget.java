@@ -4,16 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -42,7 +38,6 @@ import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
@@ -66,28 +61,18 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import nixexplorer.AppClipboard;
 import nixexplorer.Constants;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
-import nixexplorer.app.session.AppSession;
-import nixexplorer.core.FileInfo;
-import nixexplorer.core.FileType;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.app.settings.AppConfig;
-import nixexplorer.core.SessionStore;
-import nixexplorer.core.ssh.SshFileSystemProvider;
-import nixexplorer.registry.contextmenu.ContextMenuEntry;
-import nixexplorer.registry.contextmenu.ContextMenuRegistry;
+import nixexplorer.core.FileInfo;
+import nixexplorer.core.FileType;
 import nixexplorer.widgets.component.AddressBarPanel;
 import nixexplorer.widgets.dnd.FolderViewBaseTransferHandler;
-import nixexplorer.widgets.dnd.TransferFileInfo;
-import nixexplorer.widgets.dnd.TransferFileInfo.Action;
 import nixexplorer.widgets.dnd.TreeBaseTransferHandler;
 import nixexplorer.widgets.folderview.ViewTogglePanel.ViewMode;
 import nixexplorer.widgets.folderview.common.FolderViewSelectionHelper;
-import nixexplorer.widgets.folderview.remote.AskForPriviledgeDlg;
-import nixexplorer.widgets.folderview.remote.RemoteFolderViewWidget;
 import nixexplorer.widgets.listeners.AppEventListener;
 import nixexplorer.widgets.util.Utility;
 
@@ -255,7 +240,7 @@ public class FolderViewWidget extends JPanel
 			}
 		});
 
-		loadFavourites();
+		// loadFavourites();
 
 		createViewComboBox();
 
@@ -718,6 +703,9 @@ public class FolderViewWidget extends JPanel
 							updateNavButtons();
 							lblDetails.setText(String.format("Total %d items",
 									folderTable.getRowCount()));
+
+							loadFavourites(tabCallback.getInfo()
+									.getFavouriteFolders());
 							focus();
 						}
 					});
@@ -766,39 +754,6 @@ public class FolderViewWidget extends JPanel
 				: table.getBackground());
 		return label;
 	}
-
-//	public boolean handleRemoteFileDrop(TransferFileInfo infoList,
-//			String file) {
-//		System.out.println("called1");
-//		System.out.println("Remote files dropped: " + infoList + " in "
-//				+ (tabCallback.getFs().isLocal() ? "local browser"
-//						: "remote browser"));
-//		infoList.setBaseFolder(file);
-//		addSftpRemote2Local(infoList);
-//		return true;
-//	}
-
-//	public boolean handleRemoteFileDrop(TransferFileInfo infoList) {
-//		return handleRemoteFileDrop(infoList, file);
-//	}
-//
-//	public boolean handleLocalFileDrop(TransferFileInfo infoList, String file) {
-//		System.out.println("called2");
-//		System.out.println("Localfiles dropped: " + infoList + " in "
-//				+ (tabCallback.getFs().isLocal() ? "local browser"
-//						: "remote browser"));
-//		infoList.setBaseFolder(file);
-//		if (infoList.getInfo().size() > 1) {
-//			addSftpRemote2Remote(infoList);
-//		} else {
-//			addSftpLocal2Remote(infoList);
-//		}
-//		return true;
-//	}
-
-//	public boolean handleLocalFileDrop(TransferFileInfo infoList) {
-//		return handleLocalFileDrop(infoList, file);
-//	}
 
 	public FileInfo[] getSelectedFiles() {
 		if (toggleView.getViewMode() == ViewMode.Details) {
@@ -926,578 +881,6 @@ public class FolderViewWidget extends JPanel
 		popup3.setInvoker(tree);
 	}
 
-	private TransferFileInfo createTransferInfo() {
-		if (isLocal()) {
-			TransferFileInfo sf = new TransferFileInfo();
-			List<String> filelist = new ArrayList<>();
-			List<String> folderlist = new ArrayList<>();
-			for (FileInfo f : getSelectedFiles()) {
-				if (f.getType() == FileType.Directory) {
-					folderlist.add(f.getPath());
-				} else {
-					filelist.add(f.getPath());
-				}
-			}
-			sf.setSourceFiles(filelist);
-			sf.setSourceFolders(folderlist);
-			return sf;
-		} else {
-			TransferFileInfo sf = new TransferFileInfo();
-			sf.addInfo(getTabCallback().getInfo());
-			List<String> filelist = new ArrayList<>();
-			List<String> folderlist = new ArrayList<>();
-			for (FileInfo f : getSelectedFiles()) {
-				if (f.getType() == FileType.Directory) {
-					folderlist.add(f.getPath());
-				} else {
-					filelist.add(f.getPath());
-				}
-			}
-			sf.setSourceFiles(filelist);
-			sf.setSourceFolders(folderlist);
-			return sf;
-		}
-
-	}
-
-	protected void copyToClipboard(boolean cut) {
-		TransferFileInfo info = createTransferInfo();
-		if (info != null) {
-			info.setAction(cut ? TransferFileInfo.Action.CUT
-					: TransferFileInfo.Action.COPY);
-			AppClipboard.setContent(info);
-
-		}
-	}
-
-	protected void newFile() {
-
-	}
-
-	protected void newFolder() {
-		String text = JOptionPane.showInputDialog(
-				TextHolder.getString("folderview.renameTitle"));
-		if (text != null && text.length() > 0) {
-			disableView();
-			new Thread(() -> {
-				try {
-					ensureConnected();
-					tabCallback.getFs().mkdir(PathUtils.combine(file, text,
-							isLocal() ? File.separator : "/"));
-					render(file, false);
-				} catch (Exception e1) {
-					e1.printStackTrace();
-					JOptionPane.showMessageDialog(null,
-							TextHolder.getString("folderview.genericError"));
-				}
-			}).start();
-		}
-	}
-
-	private void createMenuItem(ContextMenuEntry ent, JPopupMenu popup) {
-		System.out.println(ent);
-		JMenuItem item = new JMenuItem(ent.getMenuText());
-		item.addActionListener(e -> {
-			for (ContextMenuEntry c : ContextMenuRegistry.getEntryList()) {
-				if (c == ent) {
-					try {
-						AppSession desktop = tabCallback.getSession();
-						if (desktop != null) {
-							int[] selectedRows = folderTable.getSelectedRows();
-							List<String> argsList = new ArrayList<>();
-							for (int i = 0; i < ent.getArgs().length; i++) {
-								String arg = ent.getArgs()[i];
-								if ("%d".equals(arg)) {
-									argsList.add(file);
-								} else if ("%f".equals(arg)) {
-									for (int j = 0; j < selectedRows.length; j++) {
-										int index = selectedRows[j];
-										FileInfo info = folderViewModel
-												.getItemAt(getRow(index));
-										if (!info.getProtocol()
-												.equals(ent.getProtocol())) {
-											System.out.println("returing.. "
-													+ info.getProtocol() + "-"
-													+ ent.getProtocol());
-											return;
-										}
-										argsList.add(info.getPath());
-									}
-								} else {
-									argsList.add(arg);
-								}
-							}
-							String[] a = new String[argsList.size()];
-							a = argsList.toArray(a);
-							desktop.createWidget(ent.getClassName(), a);
-						}
-					} catch (Exception e2) {
-						e2.printStackTrace();
-					}
-					break;
-				}
-			}
-		});
-		popup.add(item);
-	}
-
-	private void createBuitinItems1(int selectionCount) {
-		popup.add(mOpen);
-		if (selectionCount == 1) {
-//			int row = getRow(folderTable.getSelectedRow());
-//			FileInfo info = folderViewModel.getItemAt(getRow(row));
-//			if (info.getType() == FileType.Directory
-//					|| info.getType() == FileType.DirLink) {
-//				popup.add(mOpen);
-//			}
-
-			popup.add(mRename);
-		}
-
-		if (selectionCount > 0) {
-			popup.add(mCopy);
-			popup.add(mCut);
-		}
-
-		if (AppClipboard.getContent() instanceof TransferFileInfo) {
-			popup.add(mPaste);
-		}
-	}
-
-	private void createBuitinItems2(int selectionCount) {
-		if (selectionCount > 0) {
-			popup.add(mDelete);
-		}
-		popup.add(mNewFolder);
-		popup.add(mNewFile);
-		// check only if folder is selected
-		popup.add(mAddToFav);
-
-		if (selectionCount == 1 && (getSelectedFiles()[0]
-				.getType() == FileType.File
-				|| getSelectedFiles()[0].getType() == FileType.FileLink)) {
-			popup.add(mEditExtern);
-			popup.add(mOpenExtern);
-		}
-		if (!isLocal()) {
-			if (selectionCount >= 1) {
-				popup.add(mChangePerm);
-			}
-		}
-	}
-
-	private void createMenuContext() {
-		popup.removeAll();
-		ListSelectionModel sm = folderTable.getSelectionModel();
-		if (sm.getValueIsAdjusting() || embedded) {
-			return;
-		}
-
-		int selectionCount = folderTable.getSelectedRowCount();
-		createBuitinItems1(selectionCount);
-
-		for (ContextMenuEntry ent : ContextMenuRegistry.getEntryList()) {
-			// System.out.println(ent);
-			if (selectionCount > 1) {
-				if (ent.isSupportsMultipleItems()) {
-					createMenuItem(ent, popup);
-				}
-			} else if (selectionCount == 1) {
-				int row = getRow(folderTable.getSelectedRow());
-				FileInfo info = folderViewModel.getItemAt(row);
-				System.out.println(info);
-				if (!info.getProtocol().equals(ent.getProtocol())) {
-					continue;
-				}
-				if (info.getType() == FileType.Directory
-						|| info.getType() == FileType.DirLink) {
-					if (ent.isFolderSupported()) {
-						createMenuItem(ent, popup);
-					}
-				} else {
-					String path = info.getPath();
-					String[] supportedExts = ent.getFileExt();
-					if (supportedExts.length > 0) {
-						boolean supported = false;
-						for (String ext : supportedExts) {
-							if (ext.length() == 0 || path.endsWith(ext)) {
-								supported = true;
-								break;
-							}
-						}
-						if (!supported) {
-							continue;
-						}
-						createMenuItem(ent, popup);
-					}
-				}
-			} else {
-				if (ent.isSupportsEmptySelection()) {
-					createMenuItem(ent, popup);
-				}
-			}
-		}
-
-		createBuitinItems2(selectionCount);
-
-//		if (sm.isSelectionEmpty()) {
-//			popup.add(mOpen);
-//			popup.add(mOpenTerm);
-//		} else if (folderTable.getSelectedRowCount() == 1) {
-//			int x = folderTable.getSelectedRow();
-//			FileInfo info = folderViewModel.getItemAt(getRow(x));
-//			if (info.getType() == FileType.Directory) {
-//				popup.add(mOpen);
-//				popup.add(mOpenTerm);
-//				popup.add(mCompress);
-//			} else {
-//				popup.add(mEdit);
-//				popup.add(mLogViewer);
-//				popup.add(mRunInTerm);
-//				popup.add(mRunWithArgs);
-//				popup.add(mCompress);
-//
-//				int index = info.getName().lastIndexOf('.');
-//				if (index != -1) {
-//					String ext = info.getName().substring(index);
-//					if (ArchiveExtractWidget.getExtractCmd(ext) != null) {
-//						popup.add(mExtract);
-//						popup.add(mExtractTo);
-//					}
-//				}
-//			}
-//		} else {
-//			popup.add(mCompress);
-//		}
-//		popup.add(mOpen);
-//		popup.add(mEdit);
-//		popup.add(mOpenTerm);
-//		popup.add(mRunInTerm);
-//		popup.add(mRunWithArgs);
-//		popup.add(mCompress);
-//		popup.add(mExtractTo);
-//
-//		popup.add(mExtract);
-	}
-
-//	public int promptDuplicate(String fileName) {
-//		JCheckBox chkApplyAction = new JCheckBox(
-//				TextHolder.getString("duplicate.apply"));
-//		chkApplyAction.addActionListener(e -> {
-//			applyPreviousAction = chkApplyAction.isSelected();
-//		});
-//
-//		return JOptionPane.showInternalOptionDialog(this,
-//				new Object[] {
-//						String.format(TextHolder.getString("duplicate.prompt"),
-//								fileName),
-//						chkApplyAction },
-//				TextHolder.getString("duplicate.confirm"),
-//				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null,
-//				new Object[] { TextHolder.getString("duplicate.overwrite"),
-//						TextHolder.getString("duplicate.skip"),
-//						TextHolder.getString("duplicate.rename"),
-//						TextHolder.getString("duplicate.cancel") },
-//				null);
-//	}
-
-//	public String autoRename(String name) {
-//		String newName = name;
-//		boolean moreCheck = true;
-//		while (moreCheck) {
-//			newName = "copy_of_" + newName;
-//			moreCheck = false;
-//			for (int i = 0; i < folderViewModel.getRowCount(); i++) {
-//				FileInfo info = folderViewModel.getItemAt(i);
-//				String n = info.getName();
-//				if (n.equals(newName)) {
-//					moreCheck = true;
-//					break;
-//				}
-//			}
-//		}
-//		return newName;
-//	}
-
-//	private void addSftpLocal2Remote(TransferFileInfo data) {
-//		this.applyPreviousAction = false;
-//		int resp = -1;
-//		List<String> folders = data.getSourceFolders();
-//		List<String> files = data.getSourceFiles();
-//		String baseRemoteFolder = data.getBaseFolder();
-//
-//		if (files != null && files.size() > 0) {
-//			for (String f : files) {
-//				outer: {
-//					File localFile = new File(f);
-//					String fileName = localFile.getName();
-//					for (int i = 0; i < folderViewModel.getRowCount(); i++) {
-//						FileInfo info = folderViewModel.getItemAt(i);
-//						String n = info.getName();
-//						if (n.equals(fileName)) {
-//							System.out.println(
-//									"File '" + n + "' already exists...");
-//							if (!applyPreviousAction) {
-//								resp = promptDuplicate(fileName);
-//							}
-//							System.out.println("Resp: " + resp);
-//							if (resp == 1) {
-//								System.out.println("skipped");
-//								break outer;
-//							} else if (resp == 2) {
-//								// do the rename stuff
-//								fileName = autoRename(fileName);
-//							} else if (resp != 0) {
-//								return;
-//							}
-//						}
-//
-//					}
-//
-//					String remoteFile = PathUtils.combineUnix(baseRemoteFolder,
-//							fileName);
-//					System.out
-//							.println("Adding files for upload: " + remoteFile);
-//					try {
-//						BasicFileUploader fd = new BasicFileUploader(
-//								data.getInfo().get(0), remoteFile,
-//								localFile.getAbsolutePath(),
-//								tabCallback.getDesktop().getBgTransferQueue());
-//
-//						tabCallback.getAppListener().getTransferWatcher()
-//								.addTransfer(fd);
-//					} catch (Exception e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//		}
-//
-//		if (folders != null && folders.size() > 0) {
-//			for (String f : folders) {
-//				File localFolder = new File(f);
-//				outer: {
-//					String folderName = localFolder.getName();
-//
-//					for (int i = 0; i < folderViewModel.getRowCount(); i++) {
-//						FileInfo info = folderViewModel.getItemAt(i);
-//						String n = info.getName();
-//						if (n.equals(folderName)) {
-//							System.out.println(
-//									"File '" + n + "' already exists...");
-//							if (!applyPreviousAction) {
-//								resp = promptDuplicate(folderName);
-//							}
-//							System.out.println("Resp: " + resp);
-//							if (resp == 1) {
-//								System.out.println("skipped");
-//								break outer;
-//							} else if (resp == 2) {
-//								// do the rename stuff
-//								folderName = autoRename(folderName);
-//							} else if (resp != 0) {
-//								return;
-//							}
-//						}
-//
-//					}
-//
-//					String remoteFolder = PathUtils
-//							.combineUnix(baseRemoteFolder, folderName);
-//
-//					System.out
-//							.println("Adding folder for upload: " + folderName);
-//
-//					DirectoryUploader dd = new DirectoryUploader(
-//							data.getInfo().get(0),
-//							localFolder.getAbsolutePath(), remoteFolder,
-//							tabCallback.getDesktop().getBgTransferQueue());
-//					tabCallback.getAppListener().getTransferWatcher()
-//							.addTransfer(dd);
-//				}
-//			}
-//		}
-//
-//	}
-//
-//	private void addSftpRemote2Local(TransferFileInfo data) {
-//		List<String> folders = data.getSourceFolders();
-//		List<String> files = data.getSourceFiles();
-//		String baseLocalFolder = data.getBaseFolder();
-//		applyPreviousAction = false;
-//		int resp = -1;
-//		if (files != null && files.size() > 0) {
-//			for (String f : files) {
-//				String fileName = PathUtils.getFileName(f);
-//				outer: {
-//					for (int i = 0; i < folderViewModel.getRowCount(); i++) {
-//						FileInfo info = folderViewModel.getItemAt(i);
-//						String n = info.getName();
-//						if (n.equals(fileName)) {
-//							System.out.println(
-//									"File '" + n + "' already exists...");
-//							if (!applyPreviousAction) {
-//								resp = promptDuplicate(fileName);
-//							}
-//							System.out.println("Resp: " + resp);
-//							if (resp == 1) {
-//								System.out.println("skipped");
-//								break outer;
-//							} else if (resp == 2) {
-//								// do the rename stuff
-//								fileName = autoRename(fileName);
-//							} else if (resp != 0) {
-//								return;
-//							}
-//						}
-//
-//					}
-//
-//					System.out.println("Adding files for download: " + f);
-//					try {
-//						BasicFileDownloader fd = new BasicFileDownloader(
-//								data.getInfo().get(0), f,
-//								new File(baseLocalFolder, fileName)
-//										.getAbsolutePath(),
-//								tabCallback.getDesktop().getBgTransferQueue());
-//
-//						tabCallback.getDesktop().getTransferWatcher()
-//								.addTransfer(fd);
-//					} catch (Exception e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//		}
-//
-//		if (folders != null && folders.size() > 0) {
-//			for (String f : folders) {
-//				outer: {
-//					String folderName = PathUtils.getFileName(f);
-//
-//					for (int i = 0; i < folderViewModel.getRowCount(); i++) {
-//						FileInfo info = folderViewModel.getItemAt(i);
-//						String n = info.getName();
-//						if (n.equals(folderName)) {
-//							System.out.println(
-//									"File '" + n + "' already exists...");
-//							if (!applyPreviousAction) {
-//								resp = promptDuplicate(folderName);
-//							}
-//							System.out.println("Resp: " + resp);
-//							if (resp == 1) {
-//								System.out.println("skipped");
-//								break outer;
-//							} else if (resp == 2) {
-//								// do the rename stuff
-//								folderName = autoRename(folderName);
-//							} else if (resp != 0) {
-//								return;
-//							}
-//						}
-//
-//					}
-//
-//					DirectoryDownloader dd = new DirectoryDownloader(
-//							data.getInfo().get(0),
-//							new File(baseLocalFolder, folderName)
-//									.getAbsolutePath(),
-//							f, tabCallback.getDesktop().getBgTransferQueue());
-//					tabCallback.getAppListener().getTransferWatcher()
-//							.addTransfer(dd);
-//				}
-//			}
-//		}
-//	}
-//
-//	private void addSftpRemote2Remote(TransferFileInfo data) {
-//		applyPreviousAction = true;
-//		List<String> folders = data.getSourceFolders();
-//		List<String> files = data.getSourceFiles();
-//		String targetFolder = data.getBaseFolder();
-//		int resp = -1;
-//		if (files != null && files.size() > 0) {
-//			for (String f : files) {
-//				String fileName = PathUtils.getFileName(f);
-//				outer: {
-//					for (int i = 0; i < folderViewModel.getRowCount(); i++) {
-//						FileInfo info = folderViewModel.getItemAt(i);
-//						String n = info.getName();
-//						if (n.equals(fileName)) {
-//							System.out.println(
-//									"File '" + n + "' already exists...");
-//							if (!applyPreviousAction) {
-//								resp = promptDuplicate(fileName);
-//							}
-//							System.out.println("Resp: " + resp);
-//							if (resp == 1) {
-//								System.out.println("skipped");
-//								break outer;
-//							} else if (resp == 2) {
-//								// do the rename stuff
-//								fileName = autoRename(fileName);
-//							} else if (resp != 0) {
-//								return;
-//							}
-//						}
-//
-//					}
-//
-//					System.out.println("Adding files for download: " + f);
-//					try {
-//						BasicFileSender fd = new BasicFileSender(
-//								data.getInfo().get(0), data.getInfo().get(1), f,
-//								PathUtils.combineUnix(targetFolder, fileName),
-//								tabCallback.getDesktop().getBgTransferQueue());
-//
-//						tabCallback.getAppListener().getTransferWatcher()
-//								.addTransfer(fd);
-//					} catch (Exception e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//		}
-//
-//		if (folders != null && folders.size() > 0) {
-//			for (String f : folders) {
-//				outer: {
-//					String folderName = PathUtils.getFileName(f);
-//
-//					for (int i = 0; i < folderViewModel.getRowCount(); i++) {
-//						FileInfo info = folderViewModel.getItemAt(i);
-//						String n = info.getName();
-//						if (n.equals(folderName)) {
-//							System.out.println(
-//									"File '" + n + "' already exists...");
-//							if (!applyPreviousAction) {
-//								resp = promptDuplicate(folderName);
-//							}
-//							System.out.println("Resp: " + resp);
-//							if (resp == 1) {
-//								System.out.println("skipped");
-//								break outer;
-//							} else if (resp == 2) {
-//								// do the rename stuff
-//								folderName = autoRename(folderName);
-//							} else if (resp != 0) {
-//								return;
-//							}
-//						}
-//					}
-//
-//					DirectorySender dd = new DirectorySender(
-//							data.getInfo().get(0), data.getInfo().get(1), f,
-//							PathUtils.combineUnix(targetFolder, folderName),
-//							tabCallback.getDesktop().getBgTransferQueue());
-//					tabCallback.getAppListener().getTransferWatcher()
-//							.addTransfer(dd);
-//				}
-//			}
-//		}
-//
-//	}
-
 	public boolean isEmbedded() {
 		return embedded;
 	}
@@ -1519,10 +902,6 @@ public class FolderViewWidget extends JPanel
 	}
 
 	private void disableView() {
-//		System.out.println("disabling");
-//		this.txtAddressBar.setEnabled(false);
-//		this.btnUp.setEnabled(false);
-//		this.folderTable.setEnabled(false);
 		SwingUtilities.invokeLater(() -> {
 			tabCallback.disableUI();
 		});
@@ -1533,11 +912,6 @@ public class FolderViewWidget extends JPanel
 		SwingUtilities.invokeLater(() -> {
 			tabCallback.enableUI();
 		});
-//		System.out.println("enabling");
-//		this.txtAddressBar.setEnabled(true);
-//		this.btnUp.setEnabled(true);
-//		this.folderTable.setEnabled(true);
-
 	}
 
 	private int getRow(int r) {
@@ -1545,14 +919,6 @@ public class FolderViewWidget extends JPanel
 			return -1;
 		}
 		return folderTable.convertRowIndexToModel(r);
-	}
-
-	private int[] getRows(int[] r) {
-		int rs[] = new int[r.length];
-		for (int i = 0; i < r.length; i++) {
-			rs[i] = folderTable.convertRowIndexToModel(r[i]);
-		}
-		return rs;
 	}
 
 	public TabCallback getTabCallback() {
@@ -1663,216 +1029,14 @@ public class FolderViewWidget extends JPanel
 		return selectedPath;
 	}
 
-	private void renameAsync(String oldName, String newName) {
-		disableView();
-		new Thread(() -> {
-			try {
-				ensureConnected();
-				tabCallback.getFs().rename(oldName, newName);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				if (tabCallback.getFs().getProtocol()
-						.equals(SshFileSystemProvider.PROTO_SFTP)) {
-					SwingUtilities.invokeLater(() -> {
-						String suCmd = AskForPriviledgeDlg.askForPriviledge();
-						StringBuilder command = new StringBuilder();
-						command.append(suCmd + " ");
-						boolean sudo = false;
-						sudo = suCmd.startsWith("sudo");
-						if (!sudo) {
-							command.append("'");
-						}
-						command.append(
-								"mv \"" + oldName + "\" \"" + newName + "\"");
-						if (!sudo) {
-							command.append("; exit'");
-						}
-						System.out.println("Command: " + command);
-						String[] args = new String[2];
-						args[0] = "-c";
-						args[1] = command.toString();
-						tabCallback.openTerminal(command.toString());
-					});
-				} else {
-					SwingUtilities.invokeLater(() -> {
-						JOptionPane.showMessageDialog(null, TextHolder
-								.getString("folderview.renameFailed"));
-						enableView();
-						return;
-					});
-				}
-				return;
-			} catch (Exception e) {
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(null,
-						TextHolder.getString("folderview.genericError"));
-			} finally {
-				enableView();
-			}
-		}).start();
-	}
-
-	private void rename() {
-		if (folderTable.getSelectedRowCount() < 1) {
-			return;
-		}
-		int x = folderTable.getSelectedRow();
-		int row = getRow(x);
-
-		FileInfo info = folderViewModel.getItemAt(row);
-
-		String text = JOptionPane
-				.showInputDialog(TextHolder.getString("folderview.renameTitle")
-						+ "\n" + info.getName());
-		if (text != null && text.length() > 0) {
-			renameAsync(info.getPath(), isLocal()
-					? PathUtils.combine(PathUtils.getParent(info.getPath()),
-							text, File.separator)
-					: PathUtils.combineUnix(PathUtils.getParent(info.getPath()),
-							text));
-		}
-	}
-
-//	public boolean checkFile(String targetFolder, List<String> sourceFiles,
-//			List<FileInfo> list, Map<String, String> mvMap) {
-//		int resp = -1;
-//		for (String file : sourceFiles) {
-//			boolean duplicate = false;
-//			for (int i = 0; i < list.size(); i++) {
-//				String name1 = list.get(i).getName();
-//				String name2 = PathUtils.getFileName(file);
-//				if (name1.equals(name2)) {
-//					duplicate = true;
-//					break;
-//				}
-//				boolean skip = false;
-//				if (duplicate) {
-//					if (!applyPreviousAction) {
-//						resp = promptDuplicate(name1);
-//					}
-//					System.out.println("Resp: " + resp);
-//					if (resp == 1) {
-//						System.out.println("skipped");
-//						skip = true;
-//					} else if (resp == 2) {
-//						// do the rename stuff
-//						name2 = autoRename(name2);
-//					} else if (resp != 0) {
-//						return false;
-//					}
-//				}
-//				if (!skip) {
-//					mvMap.put(file, PathUtils.combine(targetFolder, name2,
-//							isLocal() ? File.separator : "/"));
-//				}
-//			}
-//		}
-//		return true;
-//
-//	}
-
 	public SessionInfo getSessionInfo() {
 		return tabCallback.getInfo();
 	}
-
-//	public void moveFiles(String targetFolder, List<String> sourceFiles,
-//			List<String> sourceFolders, boolean copy) {
-//		disableView();
-//		new Thread(() -> {
-//			try {
-//				System.out.println("Moving...");
-//				applyPreviousAction = false;
-//				ensureConnected();
-//				List<FileInfo> list = tabCallback.getFs().ll(targetFolder,
-//						false);
-//				Map<String, String> mvMap = new HashMap<>();
-//				if (!checkFile(targetFolder, sourceFiles, list, mvMap)) {
-//					System.out.println("Returing...");
-//					return;
-//				}
-//
-//				if (!checkFile(targetFolder, sourceFolders, list, mvMap)) {
-//					System.out.println("Returing...");
-//					return;
-//				}
-//
-//				for (String key : mvMap.keySet()) {
-//					System.out.println(
-//							"Moving file: " + key + " -> " + mvMap.get(key));
-//					if (copy) {
-//						if (isLocal()) {
-//							Copy.copy(new String[] { "-r", "-p", key,
-//									mvMap.get(key) });
-//						} else {
-//							ShellActions.copy(key, mvMap.get(key),
-//									((RemoteFolderViewWidget) tabCallback
-//											.getWidget()).getWrapper());
-//						}
-//					} else {
-//						tabCallback.getFs().rename(key, mvMap.get(key));
-//					}
-//				}
-//
-//			} catch (FileNotFoundException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//				MessageDialog.show(tabCallback.getWidget(),
-//						TextHolder.getString("folderview.genericError"),
-//						MessageDialog.MessageType.Ok);
-//			} finally {
-//				enableView();
-//			}
-//		}).start();
-//	}
 
 	private void updateNavButtons() {
 		btnBack.setEnabled(history.hasPrevElement());
 		btnForward.setEnabled(history.hasNextElement());
 	}
-
-//	private void copyLocal(TransferFileInfo info) {
-//		copy(info, info.getAction() == Action.COPY);
-//	}
-
-//	private void copy(TransferFileInfo info, boolean copy) {
-//		info.setBaseFolder(file);
-//		List<String> droppedFiles = info.getSourceFiles();
-//		List<String> droppedFolders = info.getSourceFolders();
-//		System.out.println("copying files to: " + file + " dropped files: "
-//				+ droppedFiles + " dropped folders: " + droppedFolders);
-//		moveFiles(file, droppedFiles, droppedFolders, copy);
-//	}
-
-//	private void pasteItem(TransferFileInfo info) {
-//		if (isLocal()) {
-//			if (info.getInfo() == null || info.getInfo().size() == 0) {
-//				copyLocal(info);
-//			} else {
-//				// download drop
-//				handleRemoteFileDrop(info);
-//			}
-//		} else {
-//			if (info.getInfo() == null || info.getInfo().size() == 0) {
-//				// initiate upload
-//				info.addInfo(getSessionInfo());
-//				handleLocalFileDrop(info);
-//			} else {
-//				if (FolderViewUtility.sameSession(getSessionInfo(),
-//						info.getInfo().get(0))) {
-//					copy(info, info.getAction() == Action.COPY);
-//				} else {
-//					info.addInfo(getSessionInfo());
-//					handleLocalFileDrop(info);
-//				}
-//			}
-//		}
-//	}
 
 	private void selectRow(MouseEvent e) {
 		int r = folderTable.rowAtPoint(e.getPoint());
@@ -1892,105 +1056,44 @@ public class FolderViewWidget extends JPanel
 		}
 	}
 
-	private void selectListRow(MouseEvent e) {
-//		if (fileListView.getSelectionModel().getValueIsAdjusting()) {
+//	private void selectListRow(MouseEvent e) {
+////		if (fileListView.getSelectionModel().getValueIsAdjusting()) {
+////			return;
+////		}
+//		if (e.isAltDown() || e.isControlDown() || e.isShiftDown()) {
 //			return;
 //		}
-		if (e.isAltDown() || e.isControlDown() || e.isShiftDown()) {
-			return;
-		}
-		System.out.println("Selecting row");
-		int r = fileListView.locationToIndex(e.getPoint());// folderTable.rowAtPoint(e.getPoint());
-		System.out.println("List Row at point: " + r);
-		if (r == -1) {
-			fileListView.clearSelection();// folderTable.clearSelection();
-			return;
-		}
-
-		Rectangle rect = fileListView.getCellBounds(r, r);
-		System.out.println("Rect: " + rect);
-		if (rect != null && !rect.contains(e.getPoint())) {
-			fileListView.clearSelection();
-			return;
-		}
-
-		if (fileListView.getSelectedIndices().length > 0) {
-			int[] rows = fileListView.getSelectedIndices();
-			for (int row : rows) {
-				if (r == row) {
-					return;
-				}
-			}
-		}
-		fileListView.setSelectedIndex(r);
-	}
-
-	private void loadFavourites() {
-		List<String> favourites = isLocal()
-				? SessionStore.getSharedInstance().getLocalFolders()
-				: getSessionInfo().getFavouriteFolders();
-		modelPlaces.removeAllElements();
-		for (String f : favourites) {
-			modelPlaces.addElement(
-					new FavouritePlaceEntry(f, PathUtils.getFileName(f)));
-		}
-	}
+//		System.out.println("Selecting row");
+//		int r = fileListView.locationToIndex(e.getPoint());// folderTable.rowAtPoint(e.getPoint());
+//		System.out.println("List Row at point: " + r);
+//		if (r == -1) {
+//			fileListView.clearSelection();// folderTable.clearSelection();
+//			return;
+//		}
+//
+//		Rectangle rect = fileListView.getCellBounds(r, r);
+//		System.out.println("Rect: " + rect);
+//		if (rect != null && !rect.contains(e.getPoint())) {
+//			fileListView.clearSelection();
+//			return;
+//		}
+//
+//		if (fileListView.getSelectedIndices().length > 0) {
+//			int[] rows = fileListView.getSelectedIndices();
+//			for (int row : rows) {
+//				if (r == row) {
+//					return;
+//				}
+//			}
+//		}
+//		fileListView.setSelectedIndex(r);
+//	}
 
 	public void loadFavourites(List<String> favourites) {
 		modelPlaces.removeAllElements();
 		for (String f : favourites) {
 			modelPlaces.addElement(
 					new FavouritePlaceEntry(f, PathUtils.getFileName(f)));
-		}
-	}
-
-	private void addBookmark(String str) {
-		if (!isLocal()) {
-			getSessionInfo().getFavouriteFolders().add(str);
-		} else {
-			SessionStore.getSharedInstance().getLocalFolders().add(str);
-		}
-	}
-
-	protected void addToFavourites() {
-		FileInfo[] files = getSelectedFiles();
-		if (files.length == 0) {
-			addBookmark(file);
-		} else {
-			for (FileInfo f : files) {
-				if (f.getType() == FileType.Directory
-						|| f.getType() == FileType.DirLink) {
-					addBookmark(f.getPath());
-				}
-			}
-		}
-		loadFavourites();
-		SessionStore.getSharedInstance().save(null);
-	}
-
-	protected void editExternal() {
-		if (!isLocal()) {
-			FileInfo[] files = getSelectedFiles();
-			if (files.length == 1 && (files[0].getType() == FileType.File
-					|| files[0].getType() == FileType.FileLink)) {
-//				tabCallback.getDesktop().getEditorHelper()
-//						.openForEdit(files[0].getPath());
-			}
-		} else {
-			//
-		}
-	}
-
-	protected void openExternal() {
-		if (!isLocal()) {
-			FileInfo[] files = getSelectedFiles();
-			if (files.length == 1 && (files[0].getType() == FileType.File
-					|| files[0].getType() == FileType.FileLink)) {
-//				tabCallback.getDesktop().getEditorHelper()
-//						.openDefault(files[0].getPath());
-			}
-		} else {
-			//
 		}
 	}
 
@@ -2019,67 +1122,6 @@ public class FolderViewWidget extends JPanel
 			System.out.println("reconnecting again");
 			tabCallback.reconnectFs();
 		}
-	}
-
-//	private void toggleSidePane() {
-//		if (!noSidePane) {
-//			remove(contentHolder);
-//			splitPane.setRightComponent(contentHolder);
-//			add(splitPane);
-//			btnSplit.setIcon(UIManager.getIcon("AddressBar.split1"));
-//			splitPane.setDividerLocation(dividerPos);
-//		} else {
-//			dividerPos = splitPane.getDividerLocation();
-//			splitPane.remove(contentHolder);
-//			remove(splitPane);
-//			add(contentHolder);
-//			btnSplit.setIcon(UIManager.getIcon("AddressBar.split2"));
-//		}
-//	}
-
-	private void changePermission() {
-		PermissionsDialog pdlg = new PermissionsDialog(
-				tabCallback.getWidget().getWindow(),
-				folderTable.getSelectedRowCount() == 1);
-		int rc = folderTable.getSelectedRowCount();
-		if (rc < 1) {
-			return;
-		}
-		if (rc == 1) {
-			pdlg.setDetails(getSelectedFiles()[0]);
-		} else {
-			pdlg.setMultipleDetails(getSelectedFiles());
-		}
-		pdlg.setVisible(true);
-		if (pdlg.getDialogResult() == JOptionPane.OK_OPTION) {
-			int perm = pdlg.getPermissions();
-			String[] paths = new String[folderTable.getSelectedRowCount()];
-			int i = 0;
-			for (int r : folderTable.getSelectedRows()) {
-				int row = getRow(r);
-				FileInfo info = folderViewModel.getItemAt(row);
-				paths[i++] = info.getPath();
-			}
-			chmodAsync(perm, paths);
-		}
-	}
-
-	private void chmodAsync(int perm, String paths[]) {
-		disableView();
-		new Thread(() -> {
-			try {
-				ensureConnected();
-				for (String path : paths) {
-					tabCallback.getFs().chmod(perm, path);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(null,
-						TextHolder.getString("folderview.genericError"));
-			}
-
-			enableView();
-		}).start();
 	}
 
 	public String getCurrentPath() {
@@ -2223,7 +1265,7 @@ public class FolderViewWidget extends JPanel
 		}
 		folderTable.setDropMode(DropMode.USE_SELECTION);
 		folderTable.setShowGrid(false);
-		folderTable.setRowHeight(r.getPreferredHeight() + Utility.toPixel(5));
+		folderTable.setRowHeight(r.getPreferredHeight() + Utility.toPixel(10));
 		folderTable.setFillsViewportHeight(true);
 
 		folderTable.setSelectionMode(
@@ -2420,16 +1462,16 @@ public class FolderViewWidget extends JPanel
 			 * @see java.awt.event.MouseAdapter#mousePressed(java.awt.event.
 			 * MouseEvent)
 			 */
-			@Override
-			public void mousePressed(MouseEvent e) {
-				if (fileListView.getSelectionModel().getValueIsAdjusting()) {
-					return;
-				}
-//				if (e.isAltDown() || e.isControlDown() || e.isShiftDown()) {
+//			@Override
+//			public void mousePressed(MouseEvent e) {
+//				if (fileListView.getSelectionModel().getValueIsAdjusting()) {
 //					return;
 //				}
-				selectListRow(e);
-			}
+////				if (e.isAltDown() || e.isControlDown() || e.isShiftDown()) {
+////					return;
+////				}
+//				selectListRow(e);
+//			}
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -2438,7 +1480,7 @@ public class FolderViewWidget extends JPanel
 					System.out.println("List Value adjusting");
 					return;
 				}
-				selectListRow(e);
+				// selectListRow(e);
 				if (e.getClickCount() == 2) {
 					System.out.println("Double click");
 					Point p = e.getPoint();
@@ -2462,7 +1504,7 @@ public class FolderViewWidget extends JPanel
 					}
 				} else if (e.isPopupTrigger()
 						|| e.getButton() == MouseEvent.BUTTON3) {
-					selectListRow(e);
+					// selectListRow(e);
 					menuHandler.createMenu(popup, getSelectedFiles());
 					popup.pack();
 					popup.show(fileListView, e.getX(), e.getY());
@@ -2477,7 +1519,7 @@ public class FolderViewWidget extends JPanel
 	 */
 	private void createListView(TransferHandler transferHandler) {
 		fileListModel = new TableListModel(folderTable);
-		fileListView = new JList<>(fileListModel);
+		fileListView = new ListView(fileListModel);
 		fileListView.setCellRenderer(new ListViewRenderer());
 		fileListView.setFixedCellWidth(Utility.toPixel(100));
 		fileListView.setFixedCellHeight(Utility.toPixel(100));

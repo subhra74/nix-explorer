@@ -7,8 +7,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Window;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.Box;
 import javax.swing.DefaultListModel;
@@ -24,15 +22,11 @@ import javax.swing.border.MatteBorder;
 import javax.swing.event.ListSelectionListener;
 
 import nixexplorer.TextHolder;
-import nixexplorer.app.borders.RoundedCornerBorder;
 import nixexplorer.app.server.list.ServerListCellRenderer;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.AppSessionImpl;
-import nixexplorer.app.session.SessionManagerPanel;
-import nixexplorer.app.settings.AppConfig;
 import nixexplorer.app.session.SessionInfo;
-import nixexplorer.core.SessionStore;
-import nixexplorer.drawables.icons.ScaledIcon;
+import nixexplorer.app.session.SessionManagerPanel;
 import nixexplorer.widgets.util.Utility;
 
 /**

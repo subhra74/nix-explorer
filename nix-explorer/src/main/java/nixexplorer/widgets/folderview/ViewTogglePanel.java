@@ -19,7 +19,7 @@ public class ViewTogglePanel {
 		List, Details
 	}
 
-	private ViewMode viewMode = ViewMode.List;
+	private ViewMode viewMode = ViewMode.Details;
 
 	public ViewTogglePanel(ViewMode viewMode) {
 		this.viewMode = viewMode;

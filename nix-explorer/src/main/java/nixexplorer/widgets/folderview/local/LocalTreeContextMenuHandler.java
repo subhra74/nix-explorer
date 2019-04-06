@@ -13,10 +13,9 @@ import javax.swing.JPopupMenu;
 
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
-import nixexplorer.core.SessionStore;
+import nixexplorer.app.session.SessionStore;
 import nixexplorer.widgets.folderview.FolderViewWidget;
 import nixexplorer.widgets.folderview.TreeContextMenuHandler;
-import nixexplorer.widgets.folderview.remote.RemoteFolderViewWidget;
 
 /**
  * @author subhro
@@ -105,8 +104,9 @@ public class LocalTreeContextMenuHandler implements TreeContextMenuHandler {
 
 	protected void addToFavourites() {
 		addBookmark(path);
+		SessionStore.updateFavourites(localFolderView.getInfo().getId(),
+				localFolderView.getInfo().getFavouriteFolders());
 		loadFavourites();
-		SessionStore.getSharedInstance().save(null);
 	}
 
 	private void loadFavourites() {

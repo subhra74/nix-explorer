@@ -3,9 +3,7 @@ package nixexplorer.widgets.folderview.local;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JMenuItem;
@@ -15,18 +13,12 @@ import javax.swing.JPopupMenu;
 import nixexplorer.AppClipboard;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
-import nixexplorer.app.session.AppSession;
 import nixexplorer.core.FileInfo;
 import nixexplorer.core.FileType;
-import nixexplorer.core.SessionStore;
-import nixexplorer.registry.contextmenu.ContextMenuEntry;
-import nixexplorer.registry.contextmenu.ContextMenuRegistry;
 import nixexplorer.widgets.dnd.TransferFileInfo;
 import nixexplorer.widgets.dnd.TransferFileInfo.Action;
 import nixexplorer.widgets.folderview.ContextMenuActionHandler;
-import nixexplorer.widgets.folderview.FavouritePlaceEntry;
 import nixexplorer.widgets.folderview.FolderViewWidget;
-import nixexplorer.widgets.folderview.ShellActions;
 
 public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 
@@ -287,11 +279,12 @@ public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 			}
 		}
 		loadFavourites();
-		SessionStore.getSharedInstance().save(null);
 	}
 
 	private void addBookmark(String str) {
-		SessionStore.getSharedInstance().getLocalFolders().add(str);
+		localFolderView.getSession().getApplicationContext().getConfig()
+				.getFileBrowser().getLocalBookmarks().add(str);
+		localFolderView.getSession().getApplicationContext().getConfig().save();
 	}
 
 	private void loadFavourites() {

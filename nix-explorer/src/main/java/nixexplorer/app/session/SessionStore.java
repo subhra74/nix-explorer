@@ -23,7 +23,8 @@ import nixexplorer.Constants;
  */
 public class SessionStore {
 	public synchronized static SavedSessionTree load() {
-		File file = new File(App.getConfig("app.dir"), Constants.SESSION_DB_FILE);
+		File file = new File(App.getConfig("app.dir"),
+				Constants.SESSION_DB_FILE);
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			return objectMapper.readValue(file,
@@ -41,7 +42,8 @@ public class SessionStore {
 
 	public synchronized static void save(SessionFolder folder,
 			String lastSelectionPath) {
-		File file = new File(App.getConfig("app.dir"), Constants.SESSION_DB_FILE);
+		File file = new File(App.getConfig("app.dir"),
+				Constants.SESSION_DB_FILE);
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			SavedSessionTree tree = new SavedSessionTree();
@@ -95,5 +97,29 @@ public class SessionStore {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public synchronized static void updateFavourites(String id,
+			List<String> folders) {
+		SavedSessionTree tree = load();
+		SessionFolder folder = tree.getFolder();
+		updateFavourites(folder, id, folders);
+		save(folder, tree.getLastSelection());
+	}
+
+	private static boolean updateFavourites(SessionFolder folder, String id,
+			List<String> folders) {
+		for (SessionInfo info : folder.getItems()) {
+			if (info.id == id) {
+				info.setFavouriteFolders(folders);
+				return true;
+			}
+		}
+		for (SessionFolder childFolder : folder.getFolders()) {
+			if (updateFavourites(childFolder, id, folders)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
