@@ -67,7 +67,7 @@ public class ServerDisplayPanel extends JPanel {
 	public ServerDisplayPanel(SessionInfo info, Window window,
 			SessionListCallback callback, AppSession appSession) {
 		this.info = info;
-		setBackground(UIManager.getColor("Panel.secondary"));// "DefaultBorder.color"));//"Panel.secondary"));
+		setBackground(UIManager.getColor("DefaultBorder.color"));// "Panel.secondary"));
 		this.window = window;
 		this.callback = callback;
 		this.appSession = appSession;
@@ -213,7 +213,7 @@ public class ServerDisplayPanel extends JPanel {
 		toolbar.addButton("app.control.files", new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				createInitialFolderView();
+				createFolderView();
 			}
 		}, TextHolder.getString("app.control.files"),
 				UIManager.getIcon("ServerTools.filesIcon"));
@@ -310,10 +310,10 @@ public class ServerDisplayPanel extends JPanel {
 					public void actionPerformed(ActionEvent e) {
 						try {
 							System.out.println("called");
-							new ConfigDialog(window, appSession
-									.getApplicationContext().getConfig())
+							new ConfigDialog(window,
+									AppContext.INSTANCE.getConfig())
 											.setVisible(true);
-							appSession.getApplicationContext().configChanged();
+							AppContext.INSTANCE.configChanged();
 						} catch (Exception e2) {
 							e2.printStackTrace();
 						}
@@ -351,12 +351,23 @@ public class ServerDisplayPanel extends JPanel {
 		return toolbar;
 	}
 
-	public void createInitialFolderView() {
+	public void createInitialView() {
 		try {
 //			RemoteFolderViewWidget w = new RemoteFolderViewWidget(info,
 //					new String[] {}, appSession, window);
 			BaseSysInfoWidget w = new BaseSysInfoWidget(info, new String[] {},
 					appSession, window);
+			appSession.addToSession(w);
+			addTab(w);
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+	}
+
+	public void createFolderView() {
+		try {
+			RemoteFolderViewWidget w = new RemoteFolderViewWidget(info,
+					new String[] {}, appSession, window);
 			appSession.addToSession(w);
 			addTab(w);
 		} catch (Exception e2) {

@@ -42,6 +42,7 @@ import nixexplorer.app.settings.AppConfig;
 import nixexplorer.app.settings.AppConfig.FolderBrowser;
 import nixexplorer.app.settings.AppConfig.LogViewer;
 import nixexplorer.app.settings.AppConfig.Terminal;
+import nixexplorer.widgets.folderview.ViewTogglePanel.ViewMode;
 import nixexplorer.widgets.util.Utility;
 
 /**
@@ -61,6 +62,7 @@ public class ConfigDialog extends JDialog {
 	private JCheckBox chkFolderCachingEnabled, chkReloadFolderAfterOperation,
 			chkSidePanelVisible, chkPreferShellOverSftp, chkConfirmBeforeDelete;
 	private JComboBox<String> cmbDblClickAction;
+	private JComboBox<String> cmbMainViewMode;
 	private JComboBox<String> cmbSidePanelViewMode;
 	private JTextField txtExternalEditor;
 	private JButton btnBrowseEditor;
@@ -115,6 +117,8 @@ public class ConfigDialog extends JDialog {
 		cmbDblClickAction.setSelectedIndex(fb.getDblClickAction());
 		cmbSidePanelViewMode.setSelectedIndex(fb.getSidePanelViewMode());
 		txtExternalEditor.setText(fb.getExternalEditor());
+		cmbMainViewMode
+				.setSelectedIndex(fb.getViewMode() == ViewMode.List ? 0 : 1);
 	}
 
 	private void updateFolderViewConfig(AppConfig config) {
@@ -129,6 +133,8 @@ public class ConfigDialog extends JDialog {
 		fb.setDblClickAction(cmbDblClickAction.getSelectedIndex());
 		fb.setSidePanelViewMode(cmbSidePanelViewMode.getSelectedIndex());
 		fb.setExternalEditor(txtExternalEditor.getText());
+		fb.setViewMode(cmbMainViewMode.getSelectedIndex() == 0 ? ViewMode.List
+				: ViewMode.Details);
 	}
 
 	private void setTerminalConfig(AppConfig config) {
@@ -362,6 +368,10 @@ public class ConfigDialog extends JDialog {
 		JLabel lblSidePanelViewMode = new JLabel(
 				TextHolder.getString("config.folderview.viewMode"));
 		lblSidePanelViewMode.setAlignmentX(Box.LEFT_ALIGNMENT);
+		
+		JLabel lblMainPanelViewMode = new JLabel(
+				TextHolder.getString("config.folderview.view"));
+		lblMainPanelViewMode.setAlignmentX(Box.LEFT_ALIGNMENT);
 
 		cmbDblClickAction = new JComboBox<>(new String[] {
 				TextHolder.getString("config.folderview.openWithTextEditor"),
@@ -371,12 +381,18 @@ public class ConfigDialog extends JDialog {
 						"config.folderview.openWithSystemDefaultApp") });
 		cmbDblClickAction.setAlignmentX(Box.LEFT_ALIGNMENT);
 
+		cmbMainViewMode = new JComboBox<>(new String[] {
+				TextHolder.getString("config.folderview.ListView"),
+				TextHolder.getString("config.folderview.DetailsView") });
+		cmbMainViewMode.setAlignmentX(Box.LEFT_ALIGNMENT);
+
 		cmbSidePanelViewMode = new JComboBox<>(new String[] {
 				TextHolder.getString("config.folderview.treeView"),
 				TextHolder.getString("config.folderview.listView") });
 		cmbSidePanelViewMode.setAlignmentX(Box.LEFT_ALIGNMENT);
 
 		adjustFieldForBox(cmbDblClickAction);
+		adjustFieldForBox(cmbMainViewMode);
 		adjustFieldForBox(cmbSidePanelViewMode);
 
 		txtExternalEditor = new JTextField(30);
@@ -420,6 +436,10 @@ public class ConfigDialog extends JDialog {
 
 		box.add(lblSidePanelViewMode);
 		box.add(cmbSidePanelViewMode);
+		box.add(Box.createVerticalStrut(Utility.toPixel(10)));
+		
+		box.add(lblMainPanelViewMode);
+		box.add(cmbMainViewMode);
 		box.add(Box.createVerticalStrut(Utility.toPixel(10)));
 
 		box.add(lblDblClickAction);

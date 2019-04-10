@@ -41,4 +41,6 @@ public interface TabCallback {
 
 	public void moveFiles(String targetFolder, List<String> sourceFiles,
 			List<String> sourceFolders, boolean copy, FolderViewWidget w);
+
+	public List<String> listFavourites();
 }

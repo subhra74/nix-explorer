@@ -32,11 +32,7 @@ public class ListView extends JList<FileInfo> {
 		});
 	}
 	
-	@Override
-	public String getToolTipText(MouseEvent event) {
-		// TODO Auto-generated method stub
-		return super.getToolTipText(event);
-	}
+	
 
 	@Override
 	public final int locationToIndex(Point location) {

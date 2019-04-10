@@ -8,7 +8,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -172,7 +171,7 @@ public class FlatTabbedPane extends JPanel {
 				((JComponent) c).putClientProperty("tab.selected",
 						Boolean.FALSE);
 				((JComponent) c).setBackground(
-						UIManager.getColor("DefaultBorder.color"));
+						UIManager.getColor("Panel.secondary"));
 				if (closable) {
 					setIcon((JComponent) c,
 							UIManager.getIcon("FlatTabbedPane.blankIcon"));

@@ -109,18 +109,17 @@ public class RemoteTreeContextMenuHandler implements TreeContextMenuHandler {
 	}
 
 	private void addBookmark(String str) {
-		remoteFolderView.getInfo().getFavouriteFolders().add(str);
+		remoteFolderView.listFavourites().add(str);
 	}
 
 	protected void addToFavourites() {
 		addBookmark(path);
-		SessionStore.updateFavourites(remoteFolderView.getInfo().getId(),
-				remoteFolderView.getInfo().getFavouriteFolders());
+		SessionStore.updateFavourites(remoteFolderView.getInfo().getId(), null,
+				remoteFolderView.listFavourites());
 		loadFavourites();
 	}
 
 	private void loadFavourites() {
-		folderView.loadFavourites(
-				remoteFolderView.getInfo().getFavouriteFolders());
+		folderView.loadFavourites(remoteFolderView.listFavourites());
 	}
 }

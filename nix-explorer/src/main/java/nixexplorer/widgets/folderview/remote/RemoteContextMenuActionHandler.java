@@ -30,6 +30,7 @@ import javax.swing.SwingUtilities;
 import nixexplorer.AppClipboard;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
+import nixexplorer.app.AppContext;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionStore;
 import nixexplorer.core.FileInfo;
@@ -802,19 +803,18 @@ public class RemoteContextMenuActionHandler
 				}
 			}
 		}
-		SessionStore.updateFavourites(remoteFolderView.getInfo().getId(),
-				remoteFolderView.getInfo().getFavouriteFolders());
+		SessionStore.updateFavourites(remoteFolderView.getInfo().getId(), null,
+				remoteFolderView.listFavourites());
 		loadFavourites();
-		//SessionStore.getSharedInstance().save(null);
+		// SessionStore.getSharedInstance().save(null);
 	}
 
 	private void addBookmark(String str) {
-		remoteFolderView.getInfo().getFavouriteFolders().add(str);
+		remoteFolderView.listFavourites().add(str);
 	}
 
 	private void loadFavourites() {
-		folderView.loadFavourites(
-				remoteFolderView.getInfo().getFavouriteFolders());
+		folderView.loadFavourites(remoteFolderView.listFavourites());
 	}
 
 	private void createBuitinItems1(int selectionCount, JPopupMenu popup) {
@@ -1089,8 +1089,8 @@ public class RemoteContextMenuActionHandler
 
 			}
 		}
-		int action = remoteFolderView.getAppSession().getApplicationContext()
-				.getConfig().getFileBrowser().getDblClickAction();
+		int action = AppContext.INSTANCE.getConfig().getFileBrowser()
+				.getDblClickAction();
 		switch (action) {
 		case 0:
 			openTextEditor();

@@ -47,13 +47,11 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 	private DefaultListModel<AppSessionImpl> serverListModel;
 	// private List<SessionInfo> sessions;
 	private Window window;
-	private AppContext context;
 
-	public AppSidePanel(Window window, AppContext context) {
+	public AppSidePanel(Window window) {
 		System.out.println("Window-frame: " + window);
 		setLayout(new BorderLayout());
 		this.window = window;
-		this.context = context;
 		b1 = Box.createHorizontalBox();
 		b1.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10),
 				Utility.toPixel(10), Utility.toPixel(10)));
@@ -120,13 +118,12 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 		if (info == null) {
 			return;
 		}
-		AppSessionImpl appSession = new AppSessionImpl(info, false, window,
-				this.context);
-		this.context.addSession(appSession);
+		AppSessionImpl appSession = new AppSessionImpl(info, false, window);
+		AppContext.INSTANCE.addSession(appSession);
 		ServerDisplayPanel display = new ServerDisplayPanel(info, window, this,
 				appSession);
 		appSession.setDisplay(display);
-		display.createInitialFolderView();
+		display.createInitialView();
 		serverListModel.addElement(appSession);
 		serverList.setSelectedIndex(serverListModel.size() - 1);
 	}

@@ -112,7 +112,7 @@ public class LocalFolderViewWidget extends TabbedFolderViewWidget {
 		File tempFolder = new File(System.getProperty("java.io.tmpdir"),
 				UUID.randomUUID() + "");
 		tempFolder.mkdirs();
-		//File f = new File(tempFolder, fileName);
+		// File f = new File(tempFolder, fileName);
 
 	}
 
@@ -347,7 +347,7 @@ public class LocalFolderViewWidget extends TabbedFolderViewWidget {
 
 	@Override
 	public SessionInfo getInfo() {
-		return null;
+		return this.info;
 	}
 
 	public void pasteItem(TransferFileInfo info, FolderViewWidget w) {
@@ -445,6 +445,16 @@ public class LocalFolderViewWidget extends TabbedFolderViewWidget {
 	protected void cancel() {
 		// TODO Auto-generated method stub
 
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see nixexplorer.widgets.folderview.TabCallback#listFavourites()
+	 */
+	@Override
+	public List<String> listFavourites() {
+		return this.info.getFavouriteLocalFolders();
 	}
 
 }

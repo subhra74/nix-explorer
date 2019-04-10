@@ -13,6 +13,7 @@ import javax.swing.JPopupMenu;
 import nixexplorer.AppClipboard;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
+import nixexplorer.app.AppContext;
 import nixexplorer.core.FileInfo;
 import nixexplorer.core.FileType;
 import nixexplorer.widgets.dnd.TransferFileInfo;
@@ -282,14 +283,13 @@ public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 	}
 
 	private void addBookmark(String str) {
-		localFolderView.getSession().getApplicationContext().getConfig()
-				.getFileBrowser().getLocalBookmarks().add(str);
-		localFolderView.getSession().getApplicationContext().getConfig().save();
+		AppContext.INSTANCE.getConfig().getFileBrowser().getLocalBookmarks()
+				.add(str);
+		AppContext.INSTANCE.getConfig().save();
 	}
 
 	private void loadFavourites() {
-		folderView.loadFavourites(
-				localFolderView.getInfo().getFavouriteFolders());
+		folderView.loadFavourites(localFolderView.listFavourites());
 	}
 
 }

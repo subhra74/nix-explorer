@@ -22,6 +22,7 @@ import javax.swing.border.LineBorder;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
+import nixexplorer.app.AppContext;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.widgets.util.Utility;
 
@@ -106,6 +107,9 @@ public class UserInfoUI implements UserInfo, UIKeyboardInteractive {
 	@Override
 	public void showMessage(String message) {
 		System.out.println("showMessage: " + message);
+		if (!AppContext.INSTANCE.getConfig().isShowBanner()) {
+			return;
+		}
 		if (!UserInfoUI.suppressMessage.get()) {
 			JCheckBox chkHideWarn = new JCheckBox("Hide warnings");
 			chkHideWarn.setSelected(true);
@@ -124,6 +128,8 @@ public class UserInfoUI implements UserInfo, UIKeyboardInteractive {
 					null, null);
 			if (chkHideWarn.isSelected()) {
 				UserInfoUI.suppressMessage.set(true);
+				AppContext.INSTANCE.getConfig().setShowBanner(false);
+				AppContext.INSTANCE.getConfig().save();
 			}
 		}
 	}

@@ -71,6 +71,7 @@ import com.jcraft.jsch.SftpATTRS;
 
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
+import nixexplorer.app.AppContext;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.ssh.SshWrapper;
@@ -126,27 +127,27 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 		JPanel top = new JPanel(new BorderLayout());
 
 		chkWrapText = new JCheckBox(TextHolder.getString("editor.wrapText"));
-		chkWrapText.setSelected(this.appSession.getApplicationContext()
-				.getConfig().getEditor().isWrap());
+		chkWrapText.setSelected(
+				AppContext.INSTANCE.getConfig().getEditor().isWrap());
 		chkWrapText.addActionListener(e -> {
 			this.textArea.setLineWrap(chkWrapText.isSelected());
 			this.textArea.setWrapStyleWord(chkWrapText.isSelected());
-			this.appSession.getApplicationContext().getConfig().getEditor()
+			AppContext.INSTANCE.getConfig().getEditor()
 					.setWrap(chkWrapText.isSelected());
-			this.appSession.getApplicationContext().getConfig().save();
+			AppContext.INSTANCE.getConfig().save();
 		});
-		spFont = new JSpinner(
-				new SpinnerNumberModel(this.appSession.getApplicationContext()
-						.getConfig().getEditor().getFontSize(), 1, 100, 1));
+		spFont = new JSpinner(new SpinnerNumberModel(
+				AppContext.INSTANCE.getConfig().getEditor().getFontSize(), 1,
+				100, 1));
 		spFont.addChangeListener(e -> {
 			System.out.println("Setting font: " + (Integer) spFont.getValue());
 			Font font = this.textArea.getFont().deriveFont(
 					(float) Utility.toPixel((Integer) spFont.getValue()));
 			this.textArea.setFont(font);
 			this.sp.getGutter().setLineNumberFont(font);
-			this.appSession.getApplicationContext().getConfig().getEditor()
+			AppContext.INSTANCE.getConfig().getEditor()
 					.setFontSize(font.getSize());
-			this.appSession.getApplicationContext().getConfig().save();
+			AppContext.INSTANCE.getConfig().save();
 		});
 
 		JTextField txtFilePath = new JTextField(30);
@@ -307,9 +308,8 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 		this.add(top, BorderLayout.NORTH);
 
 		this.textArea = new RSyntaxTextArea();
-		this.textArea.setFont(new Font(Font.DIALOG, Font.PLAIN,
-				Utility.toPixel(this.appSession.getApplicationContext()
-						.getConfig().getEditor().getFontSize())));
+		this.textArea.setFont(new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(
+				AppContext.INSTANCE.getConfig().getEditor().getFontSize())));
 		this.textArea.setBackground(UIManager.getColor("TextArea.background"));
 		this.textArea.setForeground(UIManager.getColor("TextArea.foreground"));
 		this.textArea.setCurrentLineHighlightColor(
@@ -349,7 +349,9 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 
 		statusBox = Box.createVerticalBox();
 		statusBox.setOpaque(true);
-		statusBox.setBackground(UIManager.getColor("DefaultBorder.color"));
+		statusBox.setBorder(new MatteBorder(Utility.toPixel(1), 0, 0, 0,
+				UIManager.getColor("DefaultBorder.color")));
+		// statusBox.setBackground(UIManager.getColor("DefaultBorder.color"));
 
 		Box b1 = Box.createHorizontalBox();
 		b1.add(Box.createRigidArea(

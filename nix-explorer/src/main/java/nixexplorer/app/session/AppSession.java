@@ -28,8 +28,6 @@ public interface AppSession {
 
 	public boolean closeTab(TabbedChild c);
 
-	public AppContext getApplicationContext();
-
 	public void configChanged();
 
 	public void addToSession(Object obj);

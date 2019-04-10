@@ -48,6 +48,7 @@ import com.jcraft.jsch.ChannelExec;
 
 import nixexplorer.ShellScriptLoader;
 import nixexplorer.TextHolder;
+import nixexplorer.app.AppContext;
 import nixexplorer.app.components.CredentialsDialog;
 import nixexplorer.app.components.CustomTabbedPane;
 import nixexplorer.app.components.FlatTabbedPane;
@@ -153,18 +154,17 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		processTable.setRowSorter(sorter);
 		processTableModel.setTable(processTable);
 
-		spInterval = new JSpinner(
-				new SpinnerNumberModel(this.appSession.getApplicationContext()
-						.getConfig().getMonitor().getInterval(), 1, 100, 1));
+		spInterval = new JSpinner(new SpinnerNumberModel(
+				AppContext.INSTANCE.getConfig().getMonitor().getInterval(), 1,
+				100, 1));
 		spInterval.addChangeListener(e -> {
 			int interval = (Integer) spInterval.getValue();
 			System.out.println("New interval: " + interval);
 			this.sleepInterval = interval;
 			this.t.interrupt();
 
-			this.appSession.getApplicationContext().getConfig().getMonitor()
-					.setInterval(interval);
-			this.appSession.getApplicationContext().getConfig().save();
+			AppContext.INSTANCE.getConfig().getMonitor().setInterval(interval);
+			AppContext.INSTANCE.getConfig().save();
 		});
 
 		JLabel lblInterval = new JLabel(

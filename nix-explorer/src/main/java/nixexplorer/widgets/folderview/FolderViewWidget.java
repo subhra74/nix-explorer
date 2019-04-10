@@ -64,6 +64,7 @@ import javax.swing.tree.TreeSelectionModel;
 import nixexplorer.Constants;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
+import nixexplorer.app.AppContext;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.app.settings.AppConfig;
 import nixexplorer.core.FileInfo;
@@ -488,7 +489,8 @@ public class FolderViewWidget extends JPanel
 
 		scrollListView = new JScrollPane(fileListView);
 
-		toggleView = new ViewTogglePanel(ViewMode.List);
+		toggleView = new ViewTogglePanel(
+				AppContext.INSTANCE.getConfig().getFileBrowser().getViewMode());
 		toggleView.setViewListener(e -> {
 			updateContentView();
 			revalidate();
@@ -704,8 +706,7 @@ public class FolderViewWidget extends JPanel
 							lblDetails.setText(String.format("Total %d items",
 									folderTable.getRowCount()));
 
-							loadFavourites(tabCallback.getInfo()
-									.getFavouriteFolders());
+							loadFavourites(tabCallback.listFavourites());
 							focus();
 						}
 					});
@@ -1213,8 +1214,7 @@ public class FolderViewWidget extends JPanel
 	}
 
 	private AppConfig getConfig() {
-		return this.tabCallback.getSession().getApplicationContext()
-				.getConfig();
+		return AppContext.INSTANCE.getConfig();
 	}
 
 	public synchronized boolean isShowingHiddenFiles() {
@@ -1265,7 +1265,7 @@ public class FolderViewWidget extends JPanel
 		}
 		folderTable.setDropMode(DropMode.USE_SELECTION);
 		folderTable.setShowGrid(false);
-		folderTable.setRowHeight(r.getPreferredHeight() + Utility.toPixel(10));
+		folderTable.setRowHeight(r.getPreferredHeight() + Utility.toPixel(0));
 		folderTable.setFillsViewportHeight(true);
 
 		folderTable.setSelectionMode(
@@ -1423,6 +1423,7 @@ public class FolderViewWidget extends JPanel
 			contentHolder.remove(scrollListView);
 			contentHolder.add(scrollTable);
 		}
+		AppContext.INSTANCE.getConfig().getFileBrowser().setViewMode(viewMode);
 	}
 
 	public void sortView(int index, boolean asc) {
@@ -1521,9 +1522,9 @@ public class FolderViewWidget extends JPanel
 		fileListModel = new TableListModel(folderTable);
 		fileListView = new ListView(fileListModel);
 		fileListView.setCellRenderer(new ListViewRenderer());
-		fileListView.setFixedCellWidth(Utility.toPixel(100));
-		fileListView.setFixedCellHeight(Utility.toPixel(100));
-		fileListView.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+//		fileListView.setFixedCellWidth(Utility.toPixel(100));
+//		fileListView.setFixedCellHeight(Utility.toPixel(100));
+		// fileListView.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		fileListView.setVisibleRowCount(-1);
 		fileListView.setDragEnabled(true);
 

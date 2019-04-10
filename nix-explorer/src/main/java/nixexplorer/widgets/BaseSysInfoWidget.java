@@ -13,6 +13,7 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.UIManager;
 
 import nixexplorer.ShellScriptLoader;
 import nixexplorer.app.session.AppSession;
@@ -39,7 +40,7 @@ public class BaseSysInfoWidget extends Widget implements Runnable {
 			AppSession appSession, Window window) {
 		super(info, args, appSession, window);
 		txt = new JTextArea();
-		txt.setFont(new Font(Font.MONOSPACED, Font.BOLD, Utility.toPixel(12)));
+		txt.setFont(new Font(Font.MONOSPACED, Font.PLAIN, Utility.toPixel(14)));
 		txt.setEditable(false);
 		this.add(new JScrollPane(txt));
 		new Thread(this).start();

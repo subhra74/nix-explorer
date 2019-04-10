@@ -16,10 +16,12 @@ public class AppContext {
 	private WeakHashMap<AppSession, Boolean> sessionRefs = new WeakHashMap<>();
 	private AppConfig config;
 
+	public static final AppContext INSTANCE = new AppContext();
+
 	/**
 	 * 
 	 */
-	public AppContext() {
+	private AppContext() {
 		sessionRefs = new WeakHashMap<>();
 		config = AppConfig.load();
 	}

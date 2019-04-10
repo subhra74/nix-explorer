@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 
 import nixexplorer.app.components.FileIcon;
@@ -21,6 +22,7 @@ public class FolderViewRenderer implements TableCellRenderer {
 	public FolderViewRenderer() {
 		label = new JLabel();
 		label.setOpaque(true);
+		label.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
 //		folderIcon = new FileIcon(UIManager.getIcon("ListView.smallFolder"),
 //				true);
 //		fileIcon = new FileIcon(UIManager.getIcon("ListView.smallFile"), true);
@@ -66,6 +68,8 @@ public class FolderViewRenderer implements TableCellRenderer {
 
 		label.setBackground(isSelected ? table.getSelectionBackground()
 				: table.getBackground());
+		label.setForeground(isSelected ? table.getSelectionForeground()
+				: table.getForeground());
 		return label;
 	}
 

@@ -15,6 +15,9 @@ import java.util.Properties;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
 
 import nixexplorer.TextHolder;
 import nixexplorer.app.components.WelcomeScreen;
@@ -27,7 +30,6 @@ import nixexplorer.widgets.util.Utility;
  *
  */
 public class MainAppFrame extends JFrame {
-	private AppContext context;
 	private Cursor defCursor, resizeCursor;
 	private JPanel content;
 	private static MainAppFrame me;
@@ -40,7 +42,6 @@ public class MainAppFrame extends JFrame {
 	}
 
 	private MainAppFrame() {
-		context = new AppContext();
 		initUI();
 	}
 
@@ -50,7 +51,7 @@ public class MainAppFrame extends JFrame {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		adjustWindowSize();
 
-		AppSidePanel sidePanel = new AppSidePanel(this, context);
+		AppSidePanel sidePanel = new AppSidePanel(this);
 		// JPanel serverDisplayPanel = new ServerDisplayPanel();
 		// serverDisplayPanel.setCursor(defCursor);
 
@@ -66,8 +67,13 @@ public class MainAppFrame extends JFrame {
 			}
 		};
 
+		JPanel mainPanel = new JPanel(new BorderLayout());
+		mainPanel.setBorder(new LineBorder(
+				UIManager.getColor("DefaultBorder.color"), Utility.toPixel(1)));
+
 		content = new JPanel(new BorderLayout());
-		content.add(new WelcomeScreen(this, context.getConfig(),sidePanel));
+		content.add(new WelcomeScreen(this, AppContext.INSTANCE.getConfig(),
+				sidePanel));
 		sidePanel.setListSelectionListener(e -> {
 			try {
 				content.removeAll();
@@ -91,12 +97,13 @@ public class MainAppFrame extends JFrame {
 		});
 		// serverDisplayPanel.addMouseListener(adapter);
 		// serverDisplayPanel.addMouseMotionListener(adapter);
-		add(sidePanel, BorderLayout.WEST);
-		add(content);
+		mainPanel.add(sidePanel, BorderLayout.WEST);
+		mainPanel.add(content);
+		add(mainPanel);
 	}
 
 	private void adjustWindowSize() {
-		AppConfig config = context.getConfig();
+		AppConfig config = AppContext.INSTANCE.getConfig();
 		if (config.getWindowWidth() < 1 || config.getWindowHeight() < 1) {
 			Insets inset = Toolkit.getDefaultToolkit().getScreenInsets(
 					GraphicsEnvironment.getLocalGraphicsEnvironment()

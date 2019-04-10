@@ -730,4 +730,14 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 		}).start();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see nixexplorer.widgets.folderview.TabCallback#listFavourites()
+	 */
+	@Override
+	public List<String> listFavourites() {
+		return info.getFavouriteRemoteFolders();
+	}
+
 }

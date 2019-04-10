@@ -18,8 +18,8 @@ public class TreeViewCellRenderer implements TreeCellRenderer {
 		lblRenderer
 				.setBackground(UIManager.getColor("Tree.selectionBackground"));
 		lblRenderer.setIcon(UIManager.getIcon("Tree.openIcon"));
-		lblRenderer.setBorder(new EmptyBorder(Utility.toPixel(2),
-				Utility.toPixel(5), Utility.toPixel(2), Utility.toPixel(5)));
+		lblRenderer.setBorder(new EmptyBorder(Utility.toPixel(5),
+				Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 	}
 
 	@Override
@@ -29,8 +29,10 @@ public class TreeViewCellRenderer implements TreeCellRenderer {
 		lblRenderer.setText(value.toString());
 		if (selected) {
 			lblRenderer.setOpaque(true);
+			lblRenderer.setForeground(UIManager.getColor("Tree.selectionForeground"));
 		} else {
 			lblRenderer.setOpaque(false);
+			lblRenderer.setForeground(UIManager.getColor("Tree.foreground"));
 		}
 		return lblRenderer;
 	}

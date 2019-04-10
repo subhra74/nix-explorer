@@ -34,7 +34,7 @@ public class ServerListCellRenderer extends JPanel
 		icon = new JLabel(UIManager.getIcon("ServerList.offlineIcon"));
 		title = new JLabel();
 		desc = new JLabel();
-		desc.setForeground(UIManager.getColor("Panel.highlight"));
+		//desc.setForeground(UIManager.getColor("Panel.highlight"));
 		title.setFont(new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(14)));
 
 		setOpaque(false);
@@ -68,13 +68,18 @@ public class ServerListCellRenderer extends JPanel
 	 */
 	@Override
 	public Component getListCellRendererComponent(
-			JList<? extends AppSessionImpl> list, AppSessionImpl value, int index,
-			boolean isSelected, boolean cellHasFocus) {
+			JList<? extends AppSessionImpl> list, AppSessionImpl value,
+			int index, boolean isSelected, boolean cellHasFocus) {
 		setOpaque(isSelected);
 		this.title.setText(value.getSession().getName());
 		this.desc.setText(value.getSession().getHost());
-		desc.setForeground(isSelected ? UIManager.getColor("Label.foreground")
-				: UIManager.getColor("Panel.highlight"));
+//		desc.setForeground(isSelected ? UIManager.getColor("Label.foreground")
+//				: UIManager.getColor("Panel.highlight"));
+		this.title.setForeground(isSelected ? list.getSelectionForeground()
+				: list.getForeground());
+//		this.desc.setForeground(
+//				isSelected ? UIManager.getColor("DefaultBorder.color")
+//						: UIManager.getColor("Panel.highlight"));
 		return this;
 	}
 

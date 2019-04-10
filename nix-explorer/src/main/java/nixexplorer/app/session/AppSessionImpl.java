@@ -30,17 +30,14 @@ public final class AppSessionImpl implements AppSession {
 	private EditWatcher editWatcher;
 	private Window window;
 	private File sessionFolder;
-	private AppContext context;
 	private WeakHashMap<SessionEventAware, Boolean> eventAwareComponents;
 	private WeakHashMap<DisposableView, Boolean> components;
 
-	public AppSessionImpl(SessionInfo session, boolean running, Window window,
-			AppContext context) {
+	public AppSessionImpl(SessionInfo session, boolean running, Window window) {
 		super();
 		this.eventAwareComponents = new WeakHashMap<SessionEventAware, Boolean>();
 		this.session = session;
 		this.running = running;
-		this.context = context;
 		this.components = new WeakHashMap<>();
 		this.window = window;
 		System.out.println("AppSessionImpl - window: " + window);
@@ -156,15 +153,7 @@ public final class AppSessionImpl implements AppSession {
 		return display.closeTab(c);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see nixexplorer.app.session.AppSession#getApplicationConfiguration()
-	 */
-	@Override
-	public AppContext getApplicationContext() {
-		return context;
-	}
+	
 
 	/*
 	 * (non-Javadoc)

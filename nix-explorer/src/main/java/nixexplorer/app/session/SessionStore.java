@@ -12,6 +12,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import nixexplorer.App;
@@ -26,6 +27,8 @@ public class SessionStore {
 		File file = new File(App.getConfig("app.dir"),
 				Constants.SESSION_DB_FILE);
 		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(
+				DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			return objectMapper.readValue(file,
 					new TypeReference<SavedSessionTree>() {
@@ -100,23 +103,29 @@ public class SessionStore {
 	}
 
 	public synchronized static void updateFavourites(String id,
-			List<String> folders) {
+			List<String> localFolders, List<String> remoteFolders) {
 		SavedSessionTree tree = load();
 		SessionFolder folder = tree.getFolder();
-		updateFavourites(folder, id, folders);
+		updateFavourites(folder, id, localFolders, remoteFolders);
 		save(folder, tree.getLastSelection());
 	}
 
 	private static boolean updateFavourites(SessionFolder folder, String id,
-			List<String> folders) {
+			List<String> localFolders, List<String> remoteFolders) {
 		for (SessionInfo info : folder.getItems()) {
 			if (info.id == id) {
-				info.setFavouriteFolders(folders);
+				if (remoteFolders != null) {
+					info.setFavouriteRemoteFolders(remoteFolders);
+				}
+				if (localFolders != null) {
+					info.setFavouriteLocalFolders(localFolders);
+				}
 				return true;
 			}
 		}
 		for (SessionFolder childFolder : folder.getFolders()) {
-			if (updateFavourites(childFolder, id, folders)) {
+			if (updateFavourites(childFolder, id, localFolders,
+					remoteFolders)) {
 				return true;
 			}
 		}

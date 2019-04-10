@@ -10,11 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import nixexplorer.App;
 import nixexplorer.Constants;
 import nixexplorer.app.settings.snippet.SnippetItem;
+import nixexplorer.widgets.folderview.ViewTogglePanel.ViewMode;
 import nixexplorer.widgets.logviewer.LogHighlightEntry;
 
 /**
@@ -24,7 +26,6 @@ import nixexplorer.widgets.logviewer.LogHighlightEntry;
 public class AppConfig {
 	public static final int OPEN_WITH_TEXT_EDITOR = 0, OPEN_IN_TERMINAL = 1,
 			OPEN_WITH_EXTERNAL_EDITOR = 2, OPEN_WITH_SYS_DEF_APP = 3;
-	public static final int LIST_VIEW = 1, TREE_VIEW = 0;
 
 	private int windowWidth, windowHeight, windowState, x = -1, y = -1;
 
@@ -33,6 +34,7 @@ public class AppConfig {
 	private Editor editor;
 	private LogViewer logViewer;
 	private ProcessMonitor monitor;
+	private boolean showBanner = true;
 
 	/**
 	 * 
@@ -49,6 +51,8 @@ public class AppConfig {
 		File file = new File(App.getConfig("app.dir"),
 				Constants.CONFIG_DB_FILE);
 		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(
+				DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			return objectMapper.readValue(file, new TypeReference<AppConfig>() {
 			});
@@ -192,6 +196,7 @@ public class AppConfig {
 		private boolean preferShellOverSftp;
 		private boolean confirmBeforeDelete;
 		private String externalEditor;
+		private ViewMode viewMode = ViewMode.Details;
 
 		private List<String> remoteBookmarks = new ArrayList<>();
 		private List<String> localBookmarks = new ArrayList<>();
@@ -316,6 +321,20 @@ public class AppConfig {
 
 		public synchronized List<String> getLocalBookmarks() {
 			return localBookmarks;
+		}
+
+		/**
+		 * @return the viewMode
+		 */
+		public ViewMode getViewMode() {
+			return viewMode;
+		}
+
+		/**
+		 * @param viewMode the viewMode to set
+		 */
+		public void setViewMode(ViewMode viewMode) {
+			this.viewMode = viewMode;
 		}
 	}
 
@@ -508,5 +527,19 @@ public class AppConfig {
 	 */
 	public void setMonitor(ProcessMonitor monitor) {
 		this.monitor = monitor;
+	}
+
+	/**
+	 * @return the showBanner
+	 */
+	public boolean isShowBanner() {
+		return showBanner;
+	}
+
+	/**
+	 * @param showBanner the showBanner to set
+	 */
+	public void setShowBanner(boolean showBanner) {
+		this.showBanner = showBanner;
 	}
 }

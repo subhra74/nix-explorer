@@ -60,6 +60,7 @@ import com.jcraft.jsch.SftpATTRS;
 
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
+import nixexplorer.app.AppContext;
 import nixexplorer.app.components.FlatTabbedPane;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
@@ -230,7 +231,7 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 //				adjustColumnSize();
 //			}
 //		});
-		
+
 		chkLiveMode = new JCheckBox(TextHolder.getString("logviewer.liveMode"));
 		chkLiveMode.addActionListener(e -> {
 			if (chkLiveMode.isSelected()) {
@@ -265,18 +266,18 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 			}
 		});
 
-		spFont = new JSpinner(
-				new SpinnerNumberModel(this.appSession.getApplicationContext()
-						.getConfig().getEditor().getFontSize(), 1, 100, 1));
+		spFont = new JSpinner(new SpinnerNumberModel(
+				AppContext.INSTANCE.getConfig().getEditor().getFontSize(), 1,
+				100, 1));
 		spFont.addChangeListener(e -> {
 			System.out.println("Setting font: " + (Integer) spFont.getValue());
 			Font font = this.list.getFont().deriveFont(
 					(float) Utility.toPixel((Integer) spFont.getValue()));
 			this.list.setFont(font);
 			this.renderer.setFont(font);
-			this.appSession.getApplicationContext().getConfig().getLogViewer()
+			AppContext.INSTANCE.getConfig().getLogViewer()
 					.setFontSize(font.getSize());
-			this.appSession.getApplicationContext().getConfig().save();
+			AppContext.INSTANCE.getConfig().save();
 		});
 		spFont.setMaximumSize(new Dimension(
 				spFont.getPreferredSize().width + Utility.toPixel(30),
@@ -328,13 +329,13 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 
 		list = new JList<>(model);
 		list.setFixedCellHeight(Utility.toPixel(20));
-		//list.setFont(new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(14)));
-		
+		// list.setFont(new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(14)));
+
 		renderer = new LogTableRenderer(
-				appSession.getApplicationContext().getConfig().getLogViewer());
+				AppContext.INSTANCE.getConfig().getLogViewer());
 		renderer.setFont(this.list.getFont().deriveFont(
 				(float) Utility.toPixel((Integer) spFont.getValue())));
-		
+
 //		logTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 //		TableRowSorter<LoggingTableModel> sorter = new TableRowSorter<LoggingTableModel>(
 //				model);

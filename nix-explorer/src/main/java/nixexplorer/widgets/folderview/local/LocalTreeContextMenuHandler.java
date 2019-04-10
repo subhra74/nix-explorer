@@ -99,19 +99,18 @@ public class LocalTreeContextMenuHandler implements TreeContextMenuHandler {
 	}
 
 	private void addBookmark(String str) {
-		localFolderView.getInfo().getFavouriteFolders().add(str);
+		localFolderView.listFavourites().add(str);
 	}
 
 	protected void addToFavourites() {
 		addBookmark(path);
 		SessionStore.updateFavourites(localFolderView.getInfo().getId(),
-				localFolderView.getInfo().getFavouriteFolders());
+				localFolderView.listFavourites(), null);
 		loadFavourites();
 	}
 
 	private void loadFavourites() {
-		folderView.loadFavourites(
-				localFolderView.getInfo().getFavouriteFolders());
+		folderView.loadFavourites(localFolderView.listFavourites());
 	}
 
 	/**

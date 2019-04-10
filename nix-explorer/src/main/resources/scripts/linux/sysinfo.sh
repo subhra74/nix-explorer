@@ -15,7 +15,9 @@ my_whereis(){
 }
 
 sysinfo(){
+echo " "
 echo "System information:"
+echo " "
 
 KERNEL_NAME=`uname -s`
 KERNEL_RELEASE=`uname -r`
@@ -34,34 +36,19 @@ elif [ -e /etc/lsb-release ]; then
 	cat /etc/lsb-release|grep PRETTY_NAME=|sed 's/PRETTY_NAME=//g'|sed 's/"//g'
 fi	
 
-echo " "
-
 if [ -e /proc/cpuinfo ]; then
-	echo "Processor information:"
 	CPU=`cat /proc/cpuinfo|grep 'model name'|head -n 1|sed -E 's/model name\s*\:+\s*//g'`
 	PC=`grep processor /proc/cpuinfo | wc -l`
 	echo "CPU model               $CPU"
 	echo "CPU count               $PC"
 fi;
 
-echo " "
-
 if [ -e /proc/cpuinfo ];then
-     echo "Memory information:"
 	MEM=`cat /proc/meminfo|grep 'MemTotal:'|sed -E 's/MemTotal:\s+//g'`
 	SWAP=`cat /proc/meminfo|grep 'SwapTotal:'|sed -E 's/SwapTotal:\s+//g`
 	echo "Total memory            $MEM"
 	echo "Total swap              $SWAP"
 fi
-
-echo " "
-
-echo "Diskspace usage"
-df -h
-#DISKSPACE=`df / -h|tail -n 1|sed -E 's/\s+/ /g'|cut -d ' ' -f 5`
-#echo "Diskspace used on /     $DISKSPACE"
-
-echo " "
 
 echo "Kernel name             $KERNEL_NAME"
 echo "Kernel release          $KERNEL_RELEASE"
@@ -73,6 +60,17 @@ echo "Logged in user          $USER"
 echo "User group              $GROUP"
 
 echo " "
+echo " "
+
+echo "Diskspace usage"
+echo " "
+df -h
+#DISKSPACE=`df / -h|tail -n 1|sed -E 's/\s+/ /g'|cut -d ' ' -f 5`
+#echo "Diskspace used on /     $DISKSPACE"
+
+echo " "
+echo " "
+
 
 #echo "Uptime:"
 #uptime
@@ -86,9 +84,10 @@ echo " "
 #	cat /etc/*release
 #fi
 
-echo " "
 
-echo "Network information:"
+
+echo "Network interfaces:"
+echo " "
 
 my_whereis ip
 

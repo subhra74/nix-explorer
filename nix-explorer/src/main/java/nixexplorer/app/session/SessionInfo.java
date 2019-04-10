@@ -14,7 +14,8 @@ import java.util.UUID;
 public class SessionInfo extends NamedItem {
 	private String host, user, password, localFolder, remoteFolder;
 	private int port = 22;
-	private List<String> favouriteFolders = new ArrayList<>();
+	private List<String> favouriteRemoteFolders = new ArrayList<>();
+	private List<String> favouriteLocalFolders = new ArrayList<>();
 	private String privateKeyFile;
 
 	@Override
@@ -137,15 +138,15 @@ public class SessionInfo extends NamedItem {
 	/**
 	 * @return the favouriteFolders
 	 */
-	public List<String> getFavouriteFolders() {
-		return favouriteFolders;
+	public List<String> getFavouriteRemoteFolders() {
+		return favouriteRemoteFolders;
 	}
 
 	/**
 	 * @param favouriteFolders the favouriteFolders to set
 	 */
-	public void setFavouriteFolders(List<String> favouriteFolders) {
-		this.favouriteFolders = favouriteFolders;
+	public void setFavouriteRemoteFolders(List<String> favouriteFolders) {
+		this.favouriteRemoteFolders = favouriteFolders;
 	}
 
 	/**
@@ -167,7 +168,8 @@ public class SessionInfo extends NamedItem {
 		info.setId(UUID.randomUUID().toString());
 		info.setHost(this.host);
 		info.setPort(this.port);
-		info.getFavouriteFolders().addAll(favouriteFolders);
+		info.getFavouriteRemoteFolders().addAll(favouriteRemoteFolders);
+		info.getFavouriteLocalFolders().addAll(favouriteLocalFolders);
 		info.setLocalFolder(this.localFolder);
 		info.setRemoteFolder(this.remoteFolder);
 		info.setPassword(this.password);
@@ -175,5 +177,19 @@ public class SessionInfo extends NamedItem {
 		info.setUser(user);
 		info.setName(name);
 		return info;
+	}
+
+	/**
+	 * @return the favouriteLocalFolders
+	 */
+	public List<String> getFavouriteLocalFolders() {
+		return favouriteLocalFolders;
+	}
+
+	/**
+	 * @param favouriteLocalFolders the favouriteLocalFolders to set
+	 */
+	public void setFavouriteLocalFolders(List<String> favouriteLocalFolders) {
+		this.favouriteLocalFolders = favouriteLocalFolders;
 	}
 }

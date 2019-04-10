@@ -34,6 +34,7 @@ import com.jediterm.terminal.ui.settings.DefaultSettingsProvider;
 
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
+import nixexplorer.app.AppContext;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionEventAware;
 import nixexplorer.app.session.SessionInfo;
@@ -70,8 +71,8 @@ public final class TabbedConsoleWidget extends Widget
 		this.setLayout(new BorderLayout());
 
 		model = new DefaultComboBoxModel<>();
-		model.addAll(appSession.getApplicationContext().getConfig()
-				.getTerminal().getSnippets());
+		model.addAll(
+				AppContext.INSTANCE.getConfig().getTerminal().getSnippets());
 		cmbSnippets = new JComboBox<>(model);
 		cmbSnippets.addActionListener(e -> {
 			try {
@@ -117,7 +118,7 @@ public final class TabbedConsoleWidget extends Widget
 				TextHolder.getString("terminal.manageSnippets"));
 		btnManageSnippets.addActionListener(e -> {
 			ConfigDialog dlg = new ConfigDialog(getWindow(),
-					appSession.getApplicationContext().getConfig());
+					AppContext.INSTANCE.getConfig());
 			dlg.selectPage(1);
 			dlg.setLocationRelativeTo(getWindow());
 			dlg.setVisible(true);
@@ -138,7 +139,7 @@ public final class TabbedConsoleWidget extends Widget
 
 		icon = UIManager.getIcon("ServerTools.terminalIcon16");
 
-		AppConfig config = appSession.getApplicationContext().getConfig();
+		AppConfig config = AppContext.INSTANCE.getConfig();
 
 		DefaultSettingsProvider p = new DefaultSettingsProvider() {
 
@@ -253,8 +254,8 @@ public final class TabbedConsoleWidget extends Widget
 
 		if (!embedded) {
 			snippetProvider = new SnippetActionProvider();
-			snippetProvider.setList(appSession.getApplicationContext()
-					.getConfig().getTerminal().getSnippets());
+			snippetProvider.setList(AppContext.INSTANCE.getConfig()
+					.getTerminal().getSnippets());
 			term.setNextProvider(snippetProvider);
 		}
 
@@ -470,12 +471,12 @@ public final class TabbedConsoleWidget extends Widget
 	public void configChanged() {
 		System.out.println("Config changed on console");
 		if (!embedded) {
-			snippetProvider.setList(appSession.getApplicationContext()
-					.getConfig().getTerminal().getSnippets());
+			snippetProvider.setList(AppContext.INSTANCE.getConfig()
+					.getTerminal().getSnippets());
 
 			model.removeAllElements();
-			model.addAll(appSession.getApplicationContext().getConfig()
-					.getTerminal().getSnippets());
+			model.addAll(AppContext.INSTANCE.getConfig().getTerminal()
+					.getSnippets());
 		}
 //term.setNextProvider(snippetProvider);
 //		model.removeAllElements();
@@ -540,8 +541,8 @@ public final class TabbedConsoleWidget extends Widget
 
 		public void setList(List<SnippetItem> snippets) {
 			list.clear();
-			for (SnippetItem item : appSession.getApplicationContext()
-					.getConfig().getTerminal().getSnippets()) {
+			for (SnippetItem item : AppContext.INSTANCE.getConfig()
+					.getTerminal().getSnippets()) {
 				TerminalAction ta = new TerminalAction(item.getName(),
 						new KeyStroke[] { getKeystroke(item) }, e -> {
 							System.out.println("Insert snippet: "

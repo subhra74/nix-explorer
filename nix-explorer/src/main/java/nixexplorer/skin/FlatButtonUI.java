@@ -1,26 +1,24 @@
 package nixexplorer.skin;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.font.FontRenderContext;
 
 import javax.swing.AbstractButton;
 import javax.swing.ButtonModel;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.UIManager;
-import javax.swing.border.Border;
 import javax.swing.plaf.ComponentUI;
-import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicButtonUI;
-import javax.swing.plaf.metal.MetalButtonUI;
-
-import nixexplorer.widgets.util.Utility;
 
 public class FlatButtonUI extends BasicButtonUI {
+
+	public static final FontRenderContext DEFAULT_FRC = new FontRenderContext(
+			null, false, false);
 
 	public static ComponentUI createUI(JComponent c) {
 //		if (buttonUI == null) {
@@ -109,7 +107,7 @@ public class FlatButtonUI extends BasicButtonUI {
 	}
 
 	public void paint(Graphics g, JComponent c) {
-	//	System.out.println("Button inset: "+c.getInsets());
+		// System.out.println("Button inset: "+c.getInsets());
 		// System.out.println(((JButton)c).isRolloverEnabled());
 		// System.out.println(c + " " + c.getInsets());
 		Graphics2D g2 = (Graphics2D) g;
@@ -130,10 +128,28 @@ public class FlatButtonUI extends BasicButtonUI {
 		}
 	}
 
-	@Override
-	protected void paintFocus(Graphics g, AbstractButton b, Rectangle viewRect,
-			Rectangle textRect, Rectangle iconRect) {
-		// TODO Auto-generated method stub
-		// super.paintFocus(g, b, viewRect, textRect, iconRect);
-	}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.plaf.basic.BasicButtonUI#paintText(java.awt.Graphics,
+	 * javax.swing.AbstractButton, java.awt.Rectangle, java.lang.String)
+	 */
+//	@Override
+//	protected void paintText(Graphics g, AbstractButton b, Rectangle textRect,
+//			String text) {
+//
+//		ButtonModel bm = b.getModel();
+//		Color c = b.getForeground();
+//		if (bm.isRollover()) {
+//			System.out.println("Called");
+//			g.setColor(UIManager.getColor("TextField.selectionForeground"));
+//		} else if (bm.isPressed()) {
+//			g.setColor(UIManager.getColor("TextField.selectionForeground"));
+//		} else {
+//			g.setColor(UIManager.getColor("TextField.foreground"));
+//		}
+//		super.paintText(g, (JComponent) b, textRect, text);
+//		g.setColor(c);
+//	}
+
 }
