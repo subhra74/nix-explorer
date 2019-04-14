@@ -23,6 +23,7 @@ public class FolderViewRenderer implements TableCellRenderer {
 		label = new JLabel();
 		label.setOpaque(true);
 		label.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
+		label.setIconTextGap(Utility.toPixel(10));
 //		folderIcon = new FileIcon(UIManager.getIcon("ListView.smallFolder"),
 //				true);
 //		fileIcon = new FileIcon(UIManager.getIcon("ListView.smallFile"), true);

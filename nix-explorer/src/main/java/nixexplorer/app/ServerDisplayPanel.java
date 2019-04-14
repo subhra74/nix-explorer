@@ -68,7 +68,7 @@ public class ServerDisplayPanel extends JPanel {
 	public ServerDisplayPanel(SessionInfo info, Window window,
 			SessionListCallback callback, AppSession appSession) {
 		this.info = info;
-		setBackground(UIManager.getColor("DefaultBorder.color"));// "Panel.secondary"));
+		setBackground(UIManager.getColor("Panel.secondary"));//"DefaultBorder.color"));// "Panel.secondary"));
 		this.window = window;
 		this.callback = callback;
 		this.appSession = appSession;
@@ -353,18 +353,18 @@ public class ServerDisplayPanel extends JPanel {
 	}
 
 	public void createInitialView() {
-		try {
-			TabbedConsoleWidget w = new TabbedConsoleWidget(info,
-					new String[] {}, appSession, window);
-//			RemoteFolderViewWidget w = new RemoteFolderViewWidget(info,
+//		try {
+//			TabbedConsoleWidget w = new TabbedConsoleWidget(info,
 //					new String[] {}, appSession, window);
-//			BaseSysInfoWidget w = new BaseSysInfoWidget(info, new String[] {},
-//					appSession, window);
-			appSession.addToSession(w);
-			addTab(w);
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
+////			RemoteFolderViewWidget w = new RemoteFolderViewWidget(info,
+////					new String[] {}, appSession, window);
+////			BaseSysInfoWidget w = new BaseSysInfoWidget(info, new String[] {},
+////					appSession, window);
+//			appSession.addToSession(w);
+//			addTab(w);
+//		} catch (Exception e2) {
+//			e2.printStackTrace();
+//		}
 	}
 
 	public void createFolderView() {

@@ -33,6 +33,7 @@ public class WelcomeScreen extends JPanel {
 	 */
 	public WelcomeScreen(Window window, AppConfig config, AppSidePanel panel) {
 		setLayout(new WelcomePageLayout());// new BorderLayout());
+		setBackground(UIManager.getColor("Panel.secondary"));
 		JLabel lblMainIcon = new JLabel(
 				new ScaledIcon(getClass().getResource("/images/app-logo.png"),
 						Utility.toPixel(256), Utility.toPixel(256)));
@@ -48,13 +49,17 @@ public class WelcomeScreen extends JPanel {
 		JButton btn2 = new JButton("Settings");
 		JButton btn3 = new JButton("Help and support");
 
+//		btn1.setHorizontalAlignment(JButton.LEFT);
+//		btn2.setHorizontalAlignment(JButton.LEFT);
+//		btn3.setHorizontalAlignment(JButton.LEFT);
+		
 		btn1.setHorizontalAlignment(JButton.LEFT);
 		btn2.setHorizontalAlignment(JButton.LEFT);
 		btn3.setHorizontalAlignment(JButton.LEFT);
 
-//		btn1.setBackground(UIManager.getColor("Panel.shadow"));
-//		btn2.setBackground(UIManager.getColor("Panel.shadow"));
-//		btn3.setBackground(UIManager.getColor("Panel.shadow"));
+		btn1.setBackground(UIManager.getColor("Panel.secondary"));
+		btn2.setBackground(UIManager.getColor("Panel.secondary"));
+		btn3.setBackground(UIManager.getColor("Panel.secondary"));
 
 		Font font = Utility.getFont(Constants.NORMAL);
 

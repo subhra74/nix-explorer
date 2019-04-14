@@ -9,7 +9,7 @@ import java.awt.LayoutManager;
 import nixexplorer.widgets.util.Utility;
 
 public class WelcomePageLayout implements LayoutManager {
-	private int gap = Utility.toPixel(15);
+	private int gap = Utility.toPixel(5);
 
 	@Override
 	public void addLayoutComponent(String name, Component comp) {
