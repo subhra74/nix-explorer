@@ -52,9 +52,9 @@ public class WelcomeScreen extends JPanel {
 		btn2.setHorizontalAlignment(JButton.LEFT);
 		btn3.setHorizontalAlignment(JButton.LEFT);
 
-		btn1.setBackground(UIManager.getColor("Panel.shadow"));
-		btn2.setBackground(UIManager.getColor("Panel.shadow"));
-		btn3.setBackground(UIManager.getColor("Panel.shadow"));
+//		btn1.setBackground(UIManager.getColor("Panel.shadow"));
+//		btn2.setBackground(UIManager.getColor("Panel.shadow"));
+//		btn3.setBackground(UIManager.getColor("Panel.shadow"));
 
 		Font font = Utility.getFont(Constants.NORMAL);
 

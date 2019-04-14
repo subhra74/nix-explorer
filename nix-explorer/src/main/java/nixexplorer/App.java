@@ -65,6 +65,9 @@ import nixexplorer.widgets.util.Utility;
  *
  */
 public final class App {
+
+	private static String theme;
+
 	private static Properties config = new Properties();
 
 	public static String getConfig(String key) {
@@ -1305,6 +1308,7 @@ public final class App {
 	public static void loadDarkTheme() {
 		try {
 
+			setTheme("light");
 			String black = "light";
 
 			Color background = new Color(40, 40, 40);
@@ -2256,6 +2260,7 @@ public final class App {
 	public static void loadLightTheme() {
 		try {
 
+			setTheme("dark");
 			String black = "dark";
 
 			Color background = Color.WHITE;
@@ -2264,7 +2269,7 @@ public final class App {
 			Color defBorder = new Color(230, 230, 230);
 			Color selection = new Color(220, 234, 245);// new Color(51, 181,
 														// 229);
-			Color prgBg = new Color(220, 234, 245);//new Color(51, 181, 229);
+			Color prgBg = new Color(220, 234, 245);// new Color(51, 181, 229);
 			Color c1 = new Color(248, 248, 248);
 			Color c2 = new Color(220, 220, 220);
 			Color c3 = new Color(245, 245, 245);
@@ -3203,6 +3208,20 @@ public final class App {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * @return the theme
+	 */
+	public static synchronized String getTheme() {
+		return theme;
+	}
+
+	/**
+	 * @param theme the theme to set
+	 */
+	public static synchronized void setTheme(String theme) {
+		App.theme = theme;
 	}
 
 }

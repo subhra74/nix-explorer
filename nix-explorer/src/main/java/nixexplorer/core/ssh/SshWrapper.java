@@ -128,6 +128,11 @@ public class SshWrapper implements Closeable {
 
 		session.setTimeout(60000);
 		session.connect();
+		
+		System.out.println("Client version: "+session.getClientVersion());
+		System.out.println("Server host: "+session.getHost());
+		System.out.println("Server version: "+session.getServerVersion());
+		System.out.println("Hostkey: "+session.getHostKey().getFingerPrint(jsch));
 	}
 
 	public void disconnect() {

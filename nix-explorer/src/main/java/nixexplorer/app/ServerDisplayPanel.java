@@ -32,6 +32,7 @@ import nixexplorer.app.settings.ui.ConfigDialog;
 import nixexplorer.widgets.BaseSysInfoWidget;
 import nixexplorer.widgets.console.TabbedConsoleWidget;
 import nixexplorer.widgets.du.DiskUsageViewerWidget;
+import nixexplorer.widgets.folderview.files.FileBrowserWidget;
 //import nixexplorer.widgets.folderview.foreign.ForeignFolderViewWidget;
 import nixexplorer.widgets.folderview.local.LocalFolderViewWidget;
 import nixexplorer.widgets.folderview.remote.RemoteFolderViewWidget;
@@ -52,17 +53,17 @@ public class ServerDisplayPanel extends JPanel {
 	private ServerToolbar toolbar;
 	private SessionInfo info;
 	private AppSession appSession;
-	private JPanel bottomBar;
-	private JPanel bottomPanel;
+//	private JPanel bottomBar;
+//	private JPanel bottomPanel;
 	private MouseAdapter adapter;
 	private JLabel lblDragSide;
-	private JSplitPane vertSplit;
-	private int lastBottomDivider;
-	private MatteBorder expB, clpB;
+//	private JSplitPane vertSplit;
+//	private int lastBottomDivider;
+//	private MatteBorder expB, clpB;
 	private Window window;
 	private SessionListCallback callback;
 //
-	private LocalFolderViewWidget localFileView;
+	//private LocalFolderViewWidget localFileView;
 
 	public ServerDisplayPanel(SessionInfo info, Window window,
 			SessionListCallback callback, AppSession appSession) {
@@ -72,36 +73,36 @@ public class ServerDisplayPanel extends JPanel {
 		this.callback = callback;
 		this.appSession = appSession;
 		setLayout(new BorderLayout());
-		vertSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		vertSplit.setBorder(new EmptyBorder(0, 0, 0, 0));
-		clpB = new MatteBorder(Utility.toPixel(1), Utility.toPixel(0),
-				Utility.toPixel(0), Utility.toPixel(0),
-				UIManager.getColor("DefaultBorder.color"));
-		expB = new MatteBorder(Utility.toPixel(1), Utility.toPixel(0),
-				Utility.toPixel(0), Utility.toPixel(0),
-				UIManager.getColor("DefaultBorder.color"));
-		vertSplit.setUI(new BasicSplitPaneUI() {
-			@Override
-			public BasicSplitPaneDivider createDefaultDivider() {
-				BasicSplitPaneDivider d = new BasicSplitPaneDivider(this) {
-					@Override
-					public Border getBorder() {
-						return null;
-					}
-				};
-				d.setBorder(null);
-				return d;
-			}
-		});
-		vertSplit.setOpaque(false);
-		vertSplit.setDividerSize(Utility.toPixel(8));
-		vertSplit.setContinuousLayout(true);
+//		vertSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+//		vertSplit.setBorder(new EmptyBorder(0, 0, 0, 0));
+//		clpB = new MatteBorder(Utility.toPixel(1), Utility.toPixel(0),
+//				Utility.toPixel(0), Utility.toPixel(0),
+//				UIManager.getColor("DefaultBorder.color"));
+//		expB = new MatteBorder(Utility.toPixel(1), Utility.toPixel(0),
+//				Utility.toPixel(0), Utility.toPixel(0),
+//				UIManager.getColor("DefaultBorder.color"));
+//		vertSplit.setUI(new BasicSplitPaneUI() {
+//			@Override
+//			public BasicSplitPaneDivider createDefaultDivider() {
+//				BasicSplitPaneDivider d = new BasicSplitPaneDivider(this) {
+//					@Override
+//					public Border getBorder() {
+//						return null;
+//					}
+//				};
+//				d.setBorder(null);
+//				return d;
+//			}
+//		});
+//		vertSplit.setOpaque(false);
+//		vertSplit.setDividerSize(Utility.toPixel(8));
+//		vertSplit.setContinuousLayout(true);
 		// vertSplit.getd
 		toolbar = createToolbar();
 		add(toolbar, BorderLayout.NORTH);
 		add(createContentPanel());
-		localFileView = new LocalFolderViewWidget(info, new String[] {},
-				appSession, window);
+		//localFileView = new LocalFolderViewWidget(info, new String[] {},
+		//		appSession, window);
 		lblDragSide = new JLabel();
 		lblDragSide.setMinimumSize(
 				new Dimension(Utility.toPixel(8), Utility.toPixel(8)));
@@ -129,66 +130,66 @@ public class ServerDisplayPanel extends JPanel {
 //				UIManager.getColor("DefaultBorder.color")));
 		panel.add(tabs);
 
-		bottomBar = new JPanel(new BorderLayout());
-		bottomBar.setOpaque(true);
-		JLabel lblTitle = new JLabel(TextHolder.getString("app.local.title"));
-		lblTitle.setFont(
-				new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(14)));
-		JButton btnExpandCollapse = new JButton(
-				UIManager.getIcon("ExpandPanel.upIcon"));
-		btnExpandCollapse.addActionListener(e -> {
-			if (btnExpandCollapse
-					.getClientProperty("button.expanded") == null) {
-				panel.removeAll();
-				vertSplit.setTopComponent(tabs);
-				bottomPanel.putClientProperty("panel.size",
-						bottomPanel.getPreferredSize());
-				bottomPanel.removeAll();
-				if (lastBottomDivider == 0) {
-					lastBottomDivider = panel.getHeight() / 2;
-				}
-//				bottomPanel.setPreferredSize(new DimensionUIResource(
-//						Utility.toPixel(100), Utility.toPixel(300)));
-				bottomPanel.add(bottomBar, BorderLayout.NORTH);
-				bottomPanel.setBorder(expB);
-				btnExpandCollapse.putClientProperty("button.expanded",
-						Boolean.TRUE);
-				btnExpandCollapse
-						.setIcon(UIManager.getIcon("ExpandPanel.downIcon"));
-				bottomPanel.add(localFileView);
-				vertSplit.setBottomComponent(bottomPanel);
-				panel.add(vertSplit);
-				vertSplit.setDividerLocation(lastBottomDivider);
-			} else {
-				lastBottomDivider = vertSplit.getDividerLocation();
-				panel.removeAll();
-				bottomPanel.removeAll();
-				bottomPanel.setPreferredSize((Dimension) bottomPanel
-						.getClientProperty("panel.size"));
-				bottomPanel.add(bottomBar);
-				bottomPanel.setBorder(clpB);
-				btnExpandCollapse.putClientProperty("button.expanded", null);
-				btnExpandCollapse
-						.setIcon(UIManager.getIcon("ExpandPanel.upIcon"));
-				panel.add(tabs);
-				panel.add(bottomPanel, BorderLayout.SOUTH);
-			}
-			doLayout();
-			revalidate();
-			repaint();
-		});
-		bottomBar.add(lblTitle, BorderLayout.WEST);
-		bottomBar.add(btnExpandCollapse, BorderLayout.EAST);
-//		tabs1.add(Box.createRigidArea(
-//				new Dimension(Utility.toPixel(10), Utility.toPixel(30))));
-		bottomBar.setBorder(new EmptyBorder(Utility.toPixel(5),
-				Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
-
-		panel.add(tabs);
-		bottomPanel = new JPanel(new BorderLayout());
-		bottomPanel.setBorder(clpB);
-		bottomPanel.add(bottomBar);
-		panel.add(bottomPanel, BorderLayout.SOUTH);
+//		bottomBar = new JPanel(new BorderLayout());
+//		bottomBar.setOpaque(true);
+//		JLabel lblTitle = new JLabel(TextHolder.getString("app.local.title"));
+//		lblTitle.setFont(
+//				new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(14)));
+//		JButton btnExpandCollapse = new JButton(
+//				UIManager.getIcon("ExpandPanel.upIcon"));
+//		btnExpandCollapse.addActionListener(e -> {
+//			if (btnExpandCollapse
+//					.getClientProperty("button.expanded") == null) {
+//				panel.removeAll();
+//				vertSplit.setTopComponent(tabs);
+//				bottomPanel.putClientProperty("panel.size",
+//						bottomPanel.getPreferredSize());
+//				bottomPanel.removeAll();
+//				if (lastBottomDivider == 0) {
+//					lastBottomDivider = panel.getHeight() / 2;
+//				}
+////				bottomPanel.setPreferredSize(new DimensionUIResource(
+////						Utility.toPixel(100), Utility.toPixel(300)));
+//				bottomPanel.add(bottomBar, BorderLayout.NORTH);
+//				bottomPanel.setBorder(expB);
+//				btnExpandCollapse.putClientProperty("button.expanded",
+//						Boolean.TRUE);
+//				btnExpandCollapse
+//						.setIcon(UIManager.getIcon("ExpandPanel.downIcon"));
+//				bottomPanel.add(localFileView);
+//				vertSplit.setBottomComponent(bottomPanel);
+//				panel.add(vertSplit);
+//				vertSplit.setDividerLocation(lastBottomDivider);
+//			} else {
+//				lastBottomDivider = vertSplit.getDividerLocation();
+//				panel.removeAll();
+//				bottomPanel.removeAll();
+//				bottomPanel.setPreferredSize((Dimension) bottomPanel
+//						.getClientProperty("panel.size"));
+//				bottomPanel.add(bottomBar);
+//				bottomPanel.setBorder(clpB);
+//				btnExpandCollapse.putClientProperty("button.expanded", null);
+//				btnExpandCollapse
+//						.setIcon(UIManager.getIcon("ExpandPanel.upIcon"));
+//				panel.add(tabs);
+//				panel.add(bottomPanel, BorderLayout.SOUTH);
+//			}
+//			doLayout();
+//			revalidate();
+//			repaint();
+//		});
+//		bottomBar.add(lblTitle, BorderLayout.WEST);
+//		bottomBar.add(btnExpandCollapse, BorderLayout.EAST);
+////		tabs1.add(Box.createRigidArea(
+////				new Dimension(Utility.toPixel(10), Utility.toPixel(30))));
+//		bottomBar.setBorder(new EmptyBorder(Utility.toPixel(5),
+//				Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
+//
+//		panel.add(tabs);
+//		bottomPanel = new JPanel(new BorderLayout());
+//		bottomPanel.setBorder(clpB);
+//		bottomPanel.add(bottomBar);
+//		panel.add(bottomPanel, BorderLayout.SOUTH);
 		return panel;
 	}
 
@@ -353,10 +354,12 @@ public class ServerDisplayPanel extends JPanel {
 
 	public void createInitialView() {
 		try {
+			TabbedConsoleWidget w = new TabbedConsoleWidget(info,
+					new String[] {}, appSession, window);
 //			RemoteFolderViewWidget w = new RemoteFolderViewWidget(info,
 //					new String[] {}, appSession, window);
-			BaseSysInfoWidget w = new BaseSysInfoWidget(info, new String[] {},
-					appSession, window);
+//			BaseSysInfoWidget w = new BaseSysInfoWidget(info, new String[] {},
+//					appSession, window);
 			appSession.addToSession(w);
 			addTab(w);
 		} catch (Exception e2) {
@@ -366,8 +369,10 @@ public class ServerDisplayPanel extends JPanel {
 
 	public void createFolderView() {
 		try {
-			RemoteFolderViewWidget w = new RemoteFolderViewWidget(info,
-					new String[] {}, appSession, window);
+			FileBrowserWidget w = new FileBrowserWidget(info, new String[] {},
+					appSession, window);
+//			RemoteFolderViewWidget w = new RemoteFolderViewWidget(info,
+//					new String[] {}, appSession, window);
 			appSession.addToSession(w);
 			addTab(w);
 		} catch (Exception e2) {
@@ -387,7 +392,6 @@ public class ServerDisplayPanel extends JPanel {
 	 */
 	public void setAppSession(AppSession appSession) {
 		this.appSession = appSession;
-		this.localFileView.setAppSession(appSession);
 	}
 
 	/**
