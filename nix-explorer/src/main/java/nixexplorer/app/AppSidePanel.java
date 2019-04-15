@@ -51,13 +51,13 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 	public AppSidePanel(Window window) {
 		System.out.println("Window-frame: " + window);
 		setLayout(new BorderLayout());
+		setBackground(UIManager.getColor("Panel.secondary"));
 		this.window = window;
 		b1 = Box.createHorizontalBox();
-		b1.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10),
-				Utility.toPixel(10), Utility.toPixel(10)));
+		b1.setBorder(
+				new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
 		JLabel lblTitle = new JLabel(TextHolder.getString("app.connections"));
-		lblTitle.setFont(
-				new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(16)));
+		lblTitle.setFont(new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(16)));
 		b1.add(lblTitle);
 		b1.add(Box.createHorizontalStrut(Utility.toPixel(10)));
 		b1.add(Box.createHorizontalGlue());
@@ -65,6 +65,7 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 		btnNew.addActionListener(e -> {
 			makeNewSession();
 		});
+		//btnNew.setBackground(UIManager.getColor("Panel.secondary"));
 		// btnNew.setBorderPainted(false);
 		b1.add(btnNew);
 		b1.add(Box.createHorizontalStrut(Utility.toPixel(5)));
@@ -72,22 +73,23 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 		btnCollapse.addActionListener(e -> {
 			shrink();
 		});
+		//btnCollapse.setBackground(UIManager.getColor("Panel.secondary"));
 
 		btnExpand = new JButton(UIManager.getIcon("SidePanel.expandIcon"));
 		btnExpand.addActionListener(e -> {
 			expand();
 		});
+		//btnExpand.setBackground(UIManager.getColor("Panel.secondary"));
 		// btnCollapse.setBorderPainted(false);
 		b1.add(btnCollapse);
 
 		b2 = Box.createHorizontalBox();
-		b2.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10),
-				Utility.toPixel(10), Utility.toPixel(10)));
+		b2.setBorder(
+				new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
 
 		b2.add(btnExpand);
 
-		setBorder(new MatteBorder(0, 0, 0, Utility.toPixel(1),
-				UIManager.getColor("DefaultBorder.color")));
+		setBorder(new MatteBorder(0, 0, 0, Utility.toPixel(1), UIManager.getColor("DefaultBorder.color")));
 
 		serverListModel = new DefaultListModel<>();
 		// sessions = SessionStore.getSharedInstance().getSessions();
@@ -95,13 +97,13 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 		// loadList();
 
 		serverList = new JList<>(serverListModel);
+		serverList.setBackground(UIManager.getColor("Panel.secondary"));
 		// serverList.setBackground(UIManager.getColor("Panel.secondary"));
 		serverList.setCellRenderer(new ServerListCellRenderer());
 
 		jsp = new JScrollPane(serverList);
 		jsp.setViewportBorder(null);
-		jsp.setBorder(new MatteBorder(Utility.toPixel(1), 0, 0, 0,
-				UIManager.getColor("DefaultBorder.color")));
+		jsp.setBorder(new MatteBorder(Utility.toPixel(1), 0, 0, 0, UIManager.getColor("DefaultBorder.color")));
 
 //		bottomPanel = createBottomPanel();
 
@@ -120,8 +122,7 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 		}
 		AppSessionImpl appSession = new AppSessionImpl(info, false, window);
 		AppContext.INSTANCE.addSession(appSession);
-		ServerDisplayPanel display = new ServerDisplayPanel(info, window, this,
-				appSession);
+		ServerDisplayPanel display = new ServerDisplayPanel(info, window, this, appSession);
 		appSession.setDisplay(display);
 		display.createInitialView();
 		serverListModel.addElement(appSession);
@@ -163,8 +164,7 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 		JPanel panel = new JPanel(new BorderLayout());
 		JTextField txt = new JTextField(20);
 		txt.setBorder(null);
-		JButton btnSearch = new JButton(
-				UIManager.getIcon("ServerList.searchIcon"));
+		JButton btnSearch = new JButton(UIManager.getIcon("ServerList.searchIcon"));
 		btnSearch.setBorderPainted(false);
 		panel.add(txt);
 		panel.add(btnSearch, BorderLayout.EAST);
@@ -203,7 +203,6 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 	@Override
 	public void close(AppSession session) {
 		System.out.println("Removing");
-		System.out.println(
-				"Found and removed: " + serverListModel.removeElement(session));
+		System.out.println("Found and removed: " + serverListModel.removeElement(session));
 	}
 }

@@ -22,17 +22,17 @@ public class FolderViewRenderer implements TableCellRenderer {
 	public FolderViewRenderer() {
 		label = new JLabel();
 		label.setOpaque(true);
-		label.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
+		label.setBorder(
+				new EmptyBorder(Utility.toPixel(5), Utility.toPixel(10), Utility.toPixel(5), Utility.toPixel(10)));
 		label.setIconTextGap(Utility.toPixel(10));
 //		folderIcon = new FileIcon(UIManager.getIcon("ListView.smallFolder"),
 //				true);
 //		fileIcon = new FileIcon(UIManager.getIcon("ListView.smallFile"), true);
 	}
 
-	public Component getTableCellRendererComponent(JTable table, Object value,
-			boolean isSelected, boolean hasFocus, int row, int column) {
-		FolderViewTableModel folderViewModel = (FolderViewTableModel) table
-				.getModel();
+	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+			int row, int column) {
+		FolderViewTableModel folderViewModel = (FolderViewTableModel) table.getModel();
 		int r = table.convertRowIndexToModel(row);
 		int c = table.convertColumnIndexToModel(column);
 		FileInfo ent = folderViewModel.getItemAt(r);
@@ -43,12 +43,10 @@ public class FolderViewRenderer implements TableCellRenderer {
 			break;
 		case 1:
 			label.setIcon(null);
-			if (ent.getType() == FileType.Directory
-					|| ent.getType() == FileType.DirLink) {
+			if (ent.getType() == FileType.Directory || ent.getType() == FileType.DirLink) {
 				label.setText("");
 			} else {
-				label.setText(
-						Utility.humanReadableByteCount(ent.getSize(), true));
+				label.setText(Utility.humanReadableByteCount(ent.getSize(), true));
 			}
 			break;
 		case 2:
@@ -67,10 +65,8 @@ public class FolderViewRenderer implements TableCellRenderer {
 			break;
 		}
 
-		label.setBackground(isSelected ? table.getSelectionBackground()
-				: table.getBackground());
-		label.setForeground(isSelected ? table.getSelectionForeground()
-				: table.getForeground());
+		label.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+		label.setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
 		return label;
 	}
 

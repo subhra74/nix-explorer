@@ -59,10 +59,10 @@ public class ViewTogglePanel {
 
 	private void updateButtonState() {
 		btnDetailsView.setBackground(this.viewMode == ViewMode.Details
-				? UIManager.getColor("DefaultBorder.color")
+				? UIManager.getColor("Button.highlight")
 				: UIManager.getColor("Button.background"));
 		btnListView.setBackground(this.viewMode == ViewMode.List
-				? UIManager.getColor("DefaultBorder.color")
+				? UIManager.getColor("Button.highlight")
 				: UIManager.getColor("Button.background"));
 	}
 

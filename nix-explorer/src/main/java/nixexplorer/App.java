@@ -30,6 +30,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.jcraft.jsch.ChannelExec;
 
+import nixexplorer.app.AppContext;
 import nixexplorer.app.MainAppFrame;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.ssh.SshWrapper;
@@ -78,8 +79,7 @@ public final class App {
 
 	}
 
-	public static void main(String[] args)
-			throws Exception, URISyntaxException {
+	public static void main(String[] args) throws Exception, URISyntaxException {
 
 //		SessionInfo info = new SessionInfo();
 //		info.setUser("subhro");
@@ -113,13 +113,10 @@ public final class App {
 			e.printStackTrace();
 		}
 
-		config.put("temp.dir",
-				PathUtils.combine(System.getProperty("user.home"),
-						"nix-explorer" + File.separator + "temp",
-						File.separator));
+		config.put("temp.dir", PathUtils.combine(System.getProperty("user.home"),
+				"nix-explorer" + File.separator + "temp", File.separator));
 
-		config.put("app.dir", PathUtils.combine(System.getProperty("user.home"),
-				"nix-explorer", File.separator));
+		config.put("app.dir", PathUtils.combine(System.getProperty("user.home"), "nix-explorer", File.separator));
 
 		new File(config.get("app.dir").toString()).mkdirs();
 		new File(config.get("temp.dir").toString()).mkdirs();
@@ -143,9 +140,15 @@ public final class App {
 
 		System.out.println(UIManager.get("TabbedPaneUI"));
 
+		if (AppContext.INSTANCE.getConfig().isUseDarkTheme()) {
+			loadDarkTheme();
+		} else {
+			loadLightTheme();
+		}
+
 		// loadDarkTheme();
 
-		loadLightTheme();
+		// loadLightTheme();
 
 //		nixexplorer.core.ssh.filetransfer.SshConnectionPool.getSharedInstance();
 
@@ -176,19 +179,15 @@ public final class App {
 		TextHolder.addString("sessionTab.viewTabbed", "Tabbed view");
 		TextHolder.addString("sessionTab.viewTiled", "Tiled view");
 		TextHolder.addString("sessionTab.splitVertically", "Split vertically");
-		TextHolder.addString("sessionTab.splitHorizontally",
-				"Split Horizontally");
+		TextHolder.addString("sessionTab.splitHorizontally", "Split Horizontally");
 		TextHolder.addString("toolbar.localFileBrowser", "Local file browser");
-		TextHolder.addString("toolbar.remoteFileBrowser",
-				"Remote file browser");
+		TextHolder.addString("toolbar.remoteFileBrowser", "Remote file browser");
 		TextHolder.addString("toolbar.terminal", "Terminal");
 		TextHolder.addString("toolbar.sysmon", "System monitor");
 		TextHolder.addString("toolbar.transfers", "Idle");
 		TextHolder.addString("toolbar.workspace", "Workspace");
-		TextHolder.addString("message.NoHost",
-				"Host name can not be left blank");
-		TextHolder.addString("message.NoUser",
-				"User name can not be left blank");
+		TextHolder.addString("message.NoHost", "Host name can not be left blank");
+		TextHolder.addString("message.NoUser", "User name can not be left blank");
 		TextHolder.addString("sessionTree.defaultText", "My sites");
 		TextHolder.addString("sessionTree.defaultFolderText", "New folder");
 		TextHolder.addString("session.newHost", "New site");
@@ -237,15 +236,11 @@ public final class App {
 		TextHolder.addString("folderview.showHidden", "Show hidden files");
 		TextHolder.addString("folderview.selectAll", "Select All");
 		TextHolder.addString("folderview.clearSelection", "Clear selection");
-		TextHolder.addString("folderview.inverseSelection",
-				"Inverse selection");
+		TextHolder.addString("folderview.inverseSelection", "Inverse selection");
 		TextHolder.addString("folderview.selectByPattern", "Select by pattern");
-		TextHolder.addString("folderview.unselectByPattern",
-				"Unselect by pattern");
-		TextHolder.addString("folderview.selectSimilar",
-				"Select similar file types");
-		TextHolder.addString("folderview.unSelectSimilar",
-				"Unselect similar file types");
+		TextHolder.addString("folderview.unselectByPattern", "Unselect by pattern");
+		TextHolder.addString("folderview.selectSimilar", "Select similar file types");
+		TextHolder.addString("folderview.unSelectSimilar", "Unselect similar file types");
 		TextHolder.addString("folderview.filter", "Filter files");
 
 		TextHolder.addString("sysmon.processTitle", "Processes");
@@ -258,8 +253,7 @@ public final class App {
 		TextHolder.addString("sysmon.title", "System Monitor");
 		TextHolder.addString("sysmon.clear", "Clear");
 		TextHolder.addString("sysmon.filterTxt", "Filter");
-		TextHolder.addString("sysmon.searchTxt",
-				"Show entries containing search text");
+		TextHolder.addString("sysmon.searchTxt", "Show entries containing search text");
 		TextHolder.addString("sysmon.processFilter", "Filter process");
 		TextHolder.addString("sysmon.processFilterApply", "Apply");
 		TextHolder.addString("sysmon.processFilterClear", "Clear");
@@ -291,22 +285,18 @@ public final class App {
 		TextHolder.addString("folderview.sortAsc", "Ascending");
 		TextHolder.addString("folderview.sortDesc", "Descending");
 		TextHolder.addString("folderview.sortBy", "Sort by");
-		TextHolder.addString("folderview.renameFailed",
-				"Failed to rename file/folder");
+		TextHolder.addString("folderview.renameFailed", "Failed to rename file/folder");
 		TextHolder.addString("folderview.copy", "Copy");
 		TextHolder.addString("folderview.paste", "Paste");
 		TextHolder.addString("folderview.cut", "Cut");
 		TextHolder.addString("folderview.bookmark", "Add to favourites");
-		TextHolder.addString("folderview.editExternal",
-				"Open with external editor");
-		TextHolder.addString("folderview.openExternal",
-				"Open with default app");
+		TextHolder.addString("folderview.editExternal", "Open with external editor");
+		TextHolder.addString("folderview.openExternal", "Open with default app");
 		TextHolder.addString("folderview.props", "Properties");
 		TextHolder.addString("folderview.upload", "Upload files here");
 		TextHolder.addString("folderview.download", "Download selected files");
 
-		TextHolder.addString("archiver.unknownformat",
-				"Format is not supported");
+		TextHolder.addString("archiver.unknownformat", "Format is not supported");
 		TextHolder.addString("archiver.title", "Archiver");
 		TextHolder.addString("archiver.stop", "Stop");
 		TextHolder.addString("archiver.close", "Close");
@@ -323,8 +313,7 @@ public final class App {
 		TextHolder.addString("archiver.extractto", "Extract to");
 		TextHolder.addString("archiver.extracthere", "Extract here");
 		TextHolder.addString("archiver.preview", "View archive");
-		TextHolder.addString("archiver.addext",
-				"Automatically add extension: %s");
+		TextHolder.addString("archiver.addext", "Automatically add extension: %s");
 		TextHolder.addString("archiver.search", "Search");
 		TextHolder.addString("archiver.open", "Open");
 		TextHolder.addString("archiver.cancel", "Cancel");
@@ -334,8 +323,7 @@ public final class App {
 		TextHolder.addString("duplicate.skip", "Skip");
 		TextHolder.addString("duplicate.rename", "Auto rename");
 		TextHolder.addString("duplicate.cancel", "Cancel");
-		TextHolder.addString("duplicate.apply",
-				"Apply same action for other conflicts");
+		TextHolder.addString("duplicate.apply", "Apply same action for other conflicts");
 		TextHolder.addString("duplicate.prompt",
 				"Below file already exists on target location\n%s\nPlease select an action");
 		TextHolder.addString("duplicate.confirm", "Confirm");
@@ -404,13 +392,10 @@ public final class App {
 		TextHolder.addString("logview.highlight.description", "Description");
 		TextHolder.addString("logview.highlight.pattern", "Pattern");
 		TextHolder.addString("logview.highlight.color", "Highlight color");
-		TextHolder.addString("logview.highlight.newHighlight",
-				"New pattern highlight");
-		TextHolder.addString("logview.highlight.blankField",
-				"Description or pattern can not be left blank");
+		TextHolder.addString("logview.highlight.newHighlight", "New pattern highlight");
+		TextHolder.addString("logview.highlight.blankField", "Description or pattern can not be left blank");
 		TextHolder.addString("logview.highlight.pattern", "Pattern");
-		TextHolder.addString("logview.highlight.title",
-				"Logviewer pattern highlight");
+		TextHolder.addString("logview.highlight.title", "Logviewer pattern highlight");
 
 		TextHolder.addString("filesearch.search", "Search");
 		TextHolder.addString("filesearch.searchItemCount", "%d items");
@@ -418,8 +403,7 @@ public final class App {
 		TextHolder.addString("filesearch.name", "In filename");
 		TextHolder.addString("filesearch.filename", "Name");
 		TextHolder.addString("filesearch.content", "In file content");
-		TextHolder.addString("filesearch.compress",
-				"Look inside compressed files");
+		TextHolder.addString("filesearch.compress", "Look inside compressed files");
 		TextHolder.addString("filesearch.contains", "Name");
 		TextHolder.addString("filesearch.folder", "Search in");
 		TextHolder.addString("filesearch.size", "Size");
@@ -452,15 +436,13 @@ public final class App {
 		TextHolder.addString("filesearch.folderonly", "Folder only");
 		TextHolder.addString("filesearch.title", "File search");
 		TextHolder.addString("filesearch.showInBrowser", "Show location");
-		TextHolder.addString("filesearch.deletingLabel",
-				"Deleting files, please wait...");
+		TextHolder.addString("filesearch.deletingLabel", "Deleting files, please wait...");
 		TextHolder.addString("filesearch.deletingTitle", "Please wait...");
 		TextHolder.addString("filesearch.delete", "Delete");
 		TextHolder.addString("filesearch.download", "Download");
 
 		TextHolder.addString("waiting.title", "Operation in progress");
-		TextHolder.addString("waiting.message",
-				"Operation in progress, please wait...");
+		TextHolder.addString("waiting.message", "Operation in progress, please wait...");
 
 		TextHolder.addString("downloader.urls", "Urls to download");
 		TextHolder.addString("downloader.folder", "Download folder");
@@ -500,15 +482,13 @@ public final class App {
 		TextHolder.addString("runas.cmd", "Command");
 		TextHolder.addString("runas.args", "Arguments");
 
-		TextHolder.addString("duplicate.prompt",
-				"Some files already exists, please select an action");
+		TextHolder.addString("duplicate.prompt", "Some files already exists, please select an action");
 		TextHolder.addString("duplicate.autorename", "Autorename");
 		TextHolder.addString("duplicate.overwrite", "Overwite");
 		TextHolder.addString("duplicate.skip", "Skip");
 		TextHolder.addString("duplicate.ok", "OK");
 		TextHolder.addString("duplicate.cancel", "Cancel");
-		TextHolder.addString("duplicate.failed",
-				"An error occured while copying files, do you want to retry?");
+		TextHolder.addString("duplicate.failed", "An error occured while copying files, do you want to retry?");
 
 		TextHolder.addString("edit.default", "Open with text editor");
 		TextHolder.addString("edit.extern", "Open with system default app");
@@ -532,11 +512,9 @@ public final class App {
 		TextHolder.addString("curl.title", "cURL");
 
 		TextHolder.addString("http.title", "Http client");
-		TextHolder.addString("appmenu.multiTerm",
-				"Run command on multiple servers");
+		TextHolder.addString("appmenu.multiTerm", "Run command on multiple servers");
 
-		TextHolder.addString("elevated.title",
-				"Perform operation as super user");
+		TextHolder.addString("elevated.title", "Perform operation as super user");
 		TextHolder.addString("elevated.details",
 				"Operation failed. Would you like to perform the operation as super user?");
 		TextHolder.addString("elevated.prompt", "Elevation command to use");
@@ -563,23 +541,21 @@ public final class App {
 
 		TextHolder.addString("app.control.settings", "Settings");
 
+		TextHolder.addString("config.title.general", "General");
 		TextHolder.addString("config.title.folderView", "File browser");
 		TextHolder.addString("config.title.terminal", "Terminal");
 
+		TextHolder.addString("config.general.useDarkTheme", "Use Dark Theme (Needs restart");
+
 		TextHolder.addString("config.folderview.caching", "Cache folder");
 		TextHolder.addString("config.folderview.browse", "Browse");
-		TextHolder.addString("config.folderview.externalEditor",
-				"External editor");
-		TextHolder.addString("config.folderview.autoReload",
-				"Reload folder after operation");
+		TextHolder.addString("config.folderview.externalEditor", "External editor");
+		TextHolder.addString("config.folderview.autoReload", "Reload folder after operation");
 		TextHolder.addString("config.folderview.sidePane", "Show side panel");
-		TextHolder.addString("config.folderview.preferShell",
-				"Prefer shell over sftp operation");
-		TextHolder.addString("config.folderview.delete",
-				"Confirm before delete");
+		TextHolder.addString("config.folderview.preferShell", "Prefer shell over sftp operation");
+		TextHolder.addString("config.folderview.delete", "Confirm before delete");
 
-		TextHolder.addString("config.folderview.dblClickText",
-				"Double click action");
+		TextHolder.addString("config.folderview.dblClickText", "Double click action");
 
 		TextHolder.addString("config.folderview.viewMode", "Sidebar view mode");
 		TextHolder.addString("config.folderview.view", "View mode");
@@ -587,22 +563,17 @@ public final class App {
 		TextHolder.addString("config.folderview.ListView", "List");
 		TextHolder.addString("config.folderview.DetailsView", "Details");
 
-		TextHolder.addString("config.folderview.openInTerminal",
-				"Open in Terminal");
-		TextHolder.addString("config.folderview.openWithExternalEditor",
-				"Open with External Editor");
-		TextHolder.addString("config.folderview.openWithSystemDefaultApp",
-				"Open with System Default App");
-		TextHolder.addString("config.folderview.openWithTextEditor",
-				"Open with Text Editor");
+		TextHolder.addString("config.folderview.openInTerminal", "Open in Terminal");
+		TextHolder.addString("config.folderview.openWithExternalEditor", "Open with External Editor");
+		TextHolder.addString("config.folderview.openWithSystemDefaultApp", "Open with System Default App");
+		TextHolder.addString("config.folderview.openWithTextEditor", "Open with Text Editor");
 
 		TextHolder.addString("config.folderview.treeView", "Tree view");
 		TextHolder.addString("config.folderview.listView", "List view");
 
 		TextHolder.addString("config.terminal.select", "Select color");
 		TextHolder.addString("config.terminal.foregroundColor", "Text color");
-		TextHolder.addString("config.terminal.backgroundColor",
-				"Background color");
+		TextHolder.addString("config.terminal.backgroundColor", "Background color");
 		TextHolder.addString("config.terminal.fontSize", "Font size");
 		TextHolder.addString("config.terminal.x11CopyPaste", "X11 copy paste");
 		TextHolder.addString("config.button.save", "Save");
@@ -617,12 +588,10 @@ public final class App {
 		TextHolder.addString("snippet.ctrl", "CTRL");
 		TextHolder.addString("snippet.new", "New snippet");
 		TextHolder.addString("snippet.chars", "Key combination");
-		TextHolder.addString("snippet.missingName",
-				"Name is missing,\nplease enter an valid name for snippet");
+		TextHolder.addString("snippet.missingName", "Name is missing,\nplease enter an valid name for snippet");
 		TextHolder.addString("snippet.missingCommand",
 				"Command is missing,\nplease enter an valid command for snippet");
-		TextHolder.addString("snippet.noCharSelected",
-				"No key combination is selected");
+		TextHolder.addString("snippet.noCharSelected", "No key combination is selected");
 		TextHolder.addString("snippet.command", "Command to execute");
 		TextHolder.addString("snippet.name", "Snippet name");
 		TextHolder.addString("snippet.key", "Key combination");
@@ -630,8 +599,7 @@ public final class App {
 		TextHolder.addString("terminal.snippet", "Command shortcuts");
 		TextHolder.addString("terminal.manageSnippets", "Manage");
 		TextHolder.addString("terminal.reconnect", "Reconnect");
-		TextHolder.addString("terminal.reconnectText",
-				"Connection interrupted");
+		TextHolder.addString("terminal.reconnectText", "Connection interrupted");
 
 		TextHolder.addString("diskUsageViewer.title", "Disk Usage");
 		TextHolder.addString("diskUsageViewer.fileName", "Directory name");
@@ -649,26 +617,20 @@ public final class App {
 	private static void registerPlugins() {
 
 		PluginShortcutRegistry.getList().add(new PluginShortcutEntry(
-				"nixexplorer.widgets.folderview.local.LocalFolderViewWidget",
-				new String[] {}, "Local files"));
+				"nixexplorer.widgets.folderview.local.LocalFolderViewWidget", new String[] {}, "Local files"));
 
 		PluginShortcutRegistry.getList().add(new PluginShortcutEntry(
-				"nixexplorer.widgets.folderview.remote.RemoteFolderViewWidget",
-				new String[] {}, "Server files"));
+				"nixexplorer.widgets.folderview.remote.RemoteFolderViewWidget", new String[] {}, "Server files"));
 
 		// load this from some file
 		try {
 			PluginRegistry.getSharedInstance().getPluginList()
-					.add(new PluginEntry(
-							"nixexplorer.widgets.folderview.local.LocalFolderViewWidget",
-							new ArrayList<>(),
-							TextHolder.getString("toolbar.localFileBrowser"),
-							new ScaledIcon(
-									App.class.getResource("/images/local.png"),
-									Utility.toPixel(48), Utility.toPixel(48)),
-							new ScaledIcon(
-									App.class.getResource("/images/local.png"),
-									Utility.toPixel(20), Utility.toPixel(20)),
+					.add(new PluginEntry("nixexplorer.widgets.folderview.local.LocalFolderViewWidget",
+							new ArrayList<>(), TextHolder.getString("toolbar.localFileBrowser"),
+							new ScaledIcon(App.class.getResource("/images/local.png"), Utility.toPixel(48),
+									Utility.toPixel(48)),
+							new ScaledIcon(App.class.getResource("/images/local.png"), Utility.toPixel(20),
+									Utility.toPixel(20)),
 							new String[] {}, true));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -676,18 +638,12 @@ public final class App {
 
 		try {
 			PluginRegistry.getSharedInstance().getPluginList()
-					.add(new PluginEntry(
-							"nixexplorer.widgets.folderview.remote.RemoteFolderViewWidget",
-							new ArrayList<>(),
-							TextHolder.getString("toolbar.remoteFileBrowser"),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/remote_folder.png"),
-									Utility.toPixel(48), Utility.toPixel(48)),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/remote_folder.png"),
-									Utility.toPixel(20), Utility.toPixel(20)),
+					.add(new PluginEntry("nixexplorer.widgets.folderview.remote.RemoteFolderViewWidget",
+							new ArrayList<>(), TextHolder.getString("toolbar.remoteFileBrowser"),
+							new ScaledIcon(App.class.getResource("/images/remote_folder.png"), Utility.toPixel(48),
+									Utility.toPixel(48)),
+							new ScaledIcon(App.class.getResource("/images/remote_folder.png"), Utility.toPixel(20),
+									Utility.toPixel(20)),
 							new String[] {}, true));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -781,38 +737,22 @@ public final class App {
 
 		try {
 			PluginRegistry.getSharedInstance().getPluginList()
-					.add(new PluginEntry(
-							"nixexplorer.widgets.console.TabbedConsoleWidget",
-							Arrays.asList(ContextMenuEntry.build(
-									TextHolder.getString("folderview.openterm"),
-									"nixexplorer.widgets.console.TabbedConsoleWidget",
-									new String[] { "-o", "%f" },
-									new String[] {}, "sftp", true, false,
-									false),
-									ContextMenuEntry.build(
-											TextHolder.getString(
-													"folderview.openterm"),
-											"nixexplorer.widgets.console.TabbedConsoleWidget",
-											new String[] { "-o", "%d" },
-											new String[] {}, "sftp", false,
-											false, true),
-									ContextMenuEntry.build(
-											TextHolder.getString(
-													"folderview.run1"),
-											"nixexplorer.widgets.console.TabbedConsoleWidget",
-											new String[] { "-r", "%f" },
-											new String[] { "" }, "sftp", false,
-											false, false)),
+					.add(new PluginEntry("nixexplorer.widgets.console.TabbedConsoleWidget", Arrays.asList(
+							ContextMenuEntry.build(TextHolder.getString("folderview.openterm"),
+									"nixexplorer.widgets.console.TabbedConsoleWidget", new String[] { "-o", "%f" },
+									new String[] {}, "sftp", true, false, false),
+							ContextMenuEntry.build(TextHolder.getString("folderview.openterm"),
+									"nixexplorer.widgets.console.TabbedConsoleWidget", new String[] { "-o", "%d" },
+									new String[] {}, "sftp", false, false, true),
+							ContextMenuEntry.build(TextHolder.getString("folderview.run1"),
+									"nixexplorer.widgets.console.TabbedConsoleWidget", new String[] { "-r", "%f" },
+									new String[] { "" }, "sftp", false, false, false)),
 
 							TextHolder.getString("folderview.openterm"),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/Terminalicon2.png"),
-									Utility.toPixel(48), Utility.toPixel(48)),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/Terminalicon2.png"),
-									Utility.toPixel(20), Utility.toPixel(20)),
+							new ScaledIcon(App.class.getResource("/images/Terminalicon2.png"), Utility.toPixel(48),
+									Utility.toPixel(48)),
+							new ScaledIcon(App.class.getResource("/images/Terminalicon2.png"), Utility.toPixel(20),
+									Utility.toPixel(20)),
 							new String[] { "" }, true));
 //							new PluginLauncherEntry(
 //									TextHolder.getString("folderview.openterm"),
@@ -833,22 +773,15 @@ public final class App {
 
 		try {
 			PluginRegistry.getSharedInstance().getPluginList()
-					.add(new PluginEntry(
-							"nixexplorer.widgets.runas.RunAsWidget",
+					.add(new PluginEntry("nixexplorer.widgets.runas.RunAsWidget",
 							Arrays.asList(ContextMenuEntry.build(
-									TextHolder.getString("folderview.run2"),
-									"nixexplorer.widgets.runas.RunAsWidget",
-									new String[] { "%f" }, new String[] { "" },
-									"sftp", false, false, false)),
+									TextHolder.getString("folderview.run2"), "nixexplorer.widgets.runas.RunAsWidget",
+									new String[] { "%f" }, new String[] { "" }, "sftp", false, false, false)),
 							TextHolder.getString("folderview.run2"),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/Run-icon.png"),
-									Utility.toPixel(48), Utility.toPixel(48)),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/Run-icon.png"),
-									Utility.toPixel(20), Utility.toPixel(20)),
+							new ScaledIcon(App.class.getResource("/images/Run-icon.png"), Utility.toPixel(48),
+									Utility.toPixel(48)),
+							new ScaledIcon(App.class.getResource("/images/Run-icon.png"), Utility.toPixel(20),
+									Utility.toPixel(20)),
 							new String[] { "" }, true));
 
 //							new PluginLauncherEntry(
@@ -872,23 +805,15 @@ public final class App {
 
 		try {
 			PluginRegistry.getSharedInstance().getPluginList()
-					.add(new PluginEntry(
-							"nixexplorer.widgets.archiver.ArchiveCompressWidget",
-							Arrays.asList(ContextMenuEntry.build(
-									TextHolder.getString("archiver.compress"),
-									"nixexplorer.widgets.archiver.ArchiveCompressWidget",
-									new String[] { "%d", "%f" },
-									new String[] { "" }, "sftp", true, true,
-									false)),
+					.add(new PluginEntry("nixexplorer.widgets.archiver.ArchiveCompressWidget",
+							Arrays.asList(ContextMenuEntry.build(TextHolder.getString("archiver.compress"),
+									"nixexplorer.widgets.archiver.ArchiveCompressWidget", new String[] { "%d", "%f" },
+									new String[] { "" }, "sftp", true, true, false)),
 							TextHolder.getString("archiver.compress"),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/editor128.png"),
-									Utility.toPixel(48), Utility.toPixel(48)),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/editor128.png"),
-									Utility.toPixel(20), Utility.toPixel(20)),
+							new ScaledIcon(App.class.getResource("/images/editor128.png"), Utility.toPixel(48),
+									Utility.toPixel(48)),
+							new ScaledIcon(App.class.getResource("/images/editor128.png"), Utility.toPixel(20),
+									Utility.toPixel(20)),
 							new String[] { "" }, false));
 //							new PluginLauncherEntry(
 //									TextHolder.getString("archiver.compress"),
@@ -906,26 +831,17 @@ public final class App {
 
 		try {
 			PluginRegistry.getSharedInstance().getPluginList()
-					.add(new PluginEntry(
-							"nixexplorer.widgets.archiver.ArchiveExtractWidget",
-							Arrays.asList(ContextMenuEntry.build(
-									TextHolder
-											.getString("archiver.extracthere"),
-									"nixexplorer.widgets.archiver.ArchiveExtractWidget",
-									new String[] { "%d", "%f" },
-									new String[] { ".gz", ".tar", ".xz", ".zip",
-											".bz2", ".tbz", ".txz", ".tgz",
+					.add(new PluginEntry("nixexplorer.widgets.archiver.ArchiveExtractWidget",
+							Arrays.asList(ContextMenuEntry.build(TextHolder.getString("archiver.extracthere"),
+									"nixexplorer.widgets.archiver.ArchiveExtractWidget", new String[] { "%d", "%f" },
+									new String[] { ".gz", ".tar", ".xz", ".zip", ".bz2", ".tbz", ".txz", ".tgz",
 											".tbz2" },
 									"sftp", false, false, false)),
 							TextHolder.getString("archiver.extracthere"),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/editor128.png"),
-									Utility.toPixel(48), Utility.toPixel(48)),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/editor128.png"),
-									Utility.toPixel(48), Utility.toPixel(48)),
+							new ScaledIcon(App.class.getResource("/images/editor128.png"), Utility.toPixel(48),
+									Utility.toPixel(48)),
+							new ScaledIcon(App.class.getResource("/images/editor128.png"), Utility.toPixel(48),
+									Utility.toPixel(48)),
 							null, false));
 //							new PluginLauncherEntry(
 //									TextHolder
@@ -945,25 +861,17 @@ public final class App {
 
 		try {
 			PluginRegistry.getSharedInstance().getPluginList()
-					.add(new PluginEntry(
-							"nixexplorer.widgets.archiver.ArchiveExtractToWidget",
-							Arrays.asList(ContextMenuEntry.build(
-									TextHolder.getString("archiver.extractto"),
-									"nixexplorer.widgets.archiver.ArchiveExtractToWidget",
-									new String[] { "%d", "%f" },
-									new String[] { ".gz", ".tar", ".xz", ".zip",
-											".bz2", ".tbz", ".txz", ".tgz",
+					.add(new PluginEntry("nixexplorer.widgets.archiver.ArchiveExtractToWidget",
+							Arrays.asList(ContextMenuEntry.build(TextHolder.getString("archiver.extractto"),
+									"nixexplorer.widgets.archiver.ArchiveExtractToWidget", new String[] { "%d", "%f" },
+									new String[] { ".gz", ".tar", ".xz", ".zip", ".bz2", ".tbz", ".txz", ".tgz",
 											".tbz2" },
 									"sftp", false, false, false)),
 							TextHolder.getString("archiver.extractto"),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/editor128.png"),
-									Utility.toPixel(48), Utility.toPixel(48)),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/editor128.png"),
-									Utility.toPixel(48), Utility.toPixel(48)),
+							new ScaledIcon(App.class.getResource("/images/editor128.png"), Utility.toPixel(48),
+									Utility.toPixel(48)),
+							new ScaledIcon(App.class.getResource("/images/editor128.png"), Utility.toPixel(48),
+									Utility.toPixel(48)),
 							null, false));
 //							new PluginLauncherEntry(
 //									TextHolder
@@ -1025,18 +933,12 @@ public final class App {
 
 		try {
 			PluginRegistry.getSharedInstance().getPluginList()
-					.add(new PluginEntry(
-							"nixexplorer.widgets.sysmon.SystemMonitorWidget",
-							new ArrayList<>(),
+					.add(new PluginEntry("nixexplorer.widgets.sysmon.SystemMonitorWidget", new ArrayList<>(),
 							TextHolder.getString("toolbar.sysmon"),
-							new ScaledIcon(
-									App.class
-											.getResource("/images/taskmgr.png"),
-									Utility.toPixel(48), Utility.toPixel(48)),
-							new ScaledIcon(
-									App.class
-											.getResource("/images/taskmgr.png"),
-									Utility.toPixel(20), Utility.toPixel(20)),
+							new ScaledIcon(App.class.getResource("/images/taskmgr.png"), Utility.toPixel(48),
+									Utility.toPixel(48)),
+							new ScaledIcon(App.class.getResource("/images/taskmgr.png"), Utility.toPixel(20),
+									Utility.toPixel(20)),
 							new String[] { "" }, true));
 //							new PluginLauncherEntry(
 //									TextHolder.getString("toolbar.sysmon"),
@@ -1081,18 +983,12 @@ public final class App {
 //
 		try {
 			PluginRegistry.getSharedInstance().getPluginList()
-					.add(new PluginEntry(
-							"nixexplorer.widgets.folderview.foregin.ForeignFolderViewWidget",
-							new ArrayList<>(),
-							TextHolder.getString("ftp.title"),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/file-transfer.png"),
-									Utility.toPixel(48), Utility.toPixel(48)),
-							new ScaledIcon(
-									App.class.getResource(
-											"/images/file-transfer.png"),
-									Utility.toPixel(20), Utility.toPixel(20)),
+					.add(new PluginEntry("nixexplorer.widgets.folderview.foregin.ForeignFolderViewWidget",
+							new ArrayList<>(), TextHolder.getString("ftp.title"),
+							new ScaledIcon(App.class.getResource("/images/file-transfer.png"), Utility.toPixel(48),
+									Utility.toPixel(48)),
+							new ScaledIcon(App.class.getResource("/images/file-transfer.png"), Utility.toPixel(20),
+									Utility.toPixel(20)),
 							new String[] { "" }, true));//
 //							new PluginLauncherEntry(
 //									TextHolder.getString("ftp.title"),
@@ -1158,18 +1054,13 @@ public final class App {
 
 		try {
 			PluginRegistry.getSharedInstance().getPluginList()
-					.add(new PluginEntry("nixexplorer.widgets.http.HttpClient",
-							new ArrayList<>(),
+					.add(new PluginEntry("nixexplorer.widgets.http.HttpClient", new ArrayList<>(),
 							TextHolder.getString("http.title"),
 
-							new ScaledIcon(
-									App.class
-											.getResource("/images/archive.png"),
-									Utility.toPixel(48), Utility.toPixel(48)),
-							new ScaledIcon(
-									App.class
-											.getResource("/images/archive.png"),
-									Utility.toPixel(20), Utility.toPixel(20)),
+							new ScaledIcon(App.class.getResource("/images/archive.png"), Utility.toPixel(48),
+									Utility.toPixel(48)),
+							new ScaledIcon(App.class.getResource("/images/archive.png"), Utility.toPixel(20),
+									Utility.toPixel(20)),
 							new String[] { "" }, true));
 //							new PluginLauncherEntry(
 //									TextHolder.getString("http.title"),
@@ -1195,8 +1086,7 @@ public final class App {
 	}
 
 	private static void buildPluginMenu() {
-		for (PluginEntry e : PluginRegistry.getSharedInstance()
-				.getPluginList()) {
+		for (PluginEntry e : PluginRegistry.getSharedInstance().getPluginList()) {
 			for (ContextMenuEntry ce : e.getContextMenuItems()) {
 				ContextMenuRegistry.getEntryList().add(ce);
 			}
@@ -1311,95 +1201,70 @@ public final class App {
 			setTheme("light");
 			String black = "light";
 
-			Color background = new Color(40, 40, 40);
-			Color foreground = new Color(240, 240, 240);
-			Color border = new Color(80, 80, 80);
-			Color defBorder = new Color(60, 60, 60);
-			Color selection = new Color(70, 70, 70);// new Color(51, 181, 229);
+			Color background = new Color(40, 44, 52);
+			Color foreground = new Color(140, 147, 161);
+			Color selectionForeground=new Color(215,218,224);
+			Color border = new Color(24, 26, 31);
+			Color defBorder = new Color(24, 26, 31);//new Color(60, 60, 60);
+			Color selection = new Color(62, 68, 81);// new Color(51, 181, 229);
 			Color prgBg = new Color(51, 181, 229);
-			Color c1 = new Color(50, 50, 50);
+			Color c1 = new Color(33, 37, 43);
 			Color c2 = new Color(150, 150, 150);
 			Color c3 = new Color(45, 45, 45);
 			Color brightFg = Color.WHITE;
-			Icon tabCloseIcon = new ScaledIcon(
-					App.class.getResource("/images/" + black + "_close.png"),
+			Icon tabCloseIcon = new ScaledIcon(App.class.getResource("/images/" + black + "_close.png"),
 					Utility.toPixel(14), Utility.toPixel(14));
 
-			Icon tabBlankIcon = new EmptyIcon(Utility.toPixel(14),
-					Utility.toPixel(14));
+			Icon tabBlankIcon = new EmptyIcon(Utility.toPixel(14), Utility.toPixel(14));
 			Font normalFont = Utility.getFont(Constants.SMALL);
 			Color titleColor = border;
 
 			// MetalCheckBoxIcon
 
-			UIManager.put("welcome.new",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_add_server.png"),
-							Utility.toPixel(32), Utility.toPixel(32)));
+			UIManager.put("welcome.new", new ScaledIcon(App.class.getResource("/images/" + black + "_add_server.png"),
+					Utility.toPixel(32), Utility.toPixel(32)));
 
 			UIManager.put("welcome.settings",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_open_settings.png"),
+					new ScaledIcon(App.class.getResource("/images/" + black + "_open_settings.png"),
 							Utility.toPixel(32), Utility.toPixel(32)));
 
-			UIManager.put("welcome.help",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_help.png"),
-							Utility.toPixel(32), Utility.toPixel(32)));
+			UIManager.put("welcome.help", new ScaledIcon(App.class.getResource("/images/" + black + "_help.png"),
+					Utility.toPixel(32), Utility.toPixel(32)));
 
 			UIManager.put("Tab.roundCloseIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_round_close.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_round_close.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("RadioButton.selectedIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_radio_checked.png"),
+					new ScaledIcon(App.class.getResource("/images/" + black + "_radio_checked.png"),
 							Utility.toPixel(20), Utility.toPixel(20)));
 
-			UIManager.put("RadioButton.icon", new ScaledIcon(
-					App.class.getResource(
-							"/images/" + black + "_radio_unchecked.png"),
-					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("RadioButton.icon",
+					new ScaledIcon(App.class.getResource("/images/" + black + "_radio_unchecked.png"),
+							Utility.toPixel(20), Utility.toPixel(20)));
 
 			UIManager.put("CheckBox.icon",
 					new StatefullIcon(
-							new ScaledIcon(
-									App.class.getResource("/images/" + black
-											+ "_unchecked.png"),
+							new ScaledIcon(App.class.getResource("/images/" + black + "_unchecked.png"),
 									Utility.toPixel(20), Utility.toPixel(20)),
-							new ScaledIcon(
-									App.class.getResource("/images/" + black
-											+ "_checked.png"),
+							new ScaledIcon(App.class.getResource("/images/" + black + "_checked.png"),
 									Utility.toPixel(20), Utility.toPixel(20))));
 
 			UIManager.put("CheckBox.selectedIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_checked.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_checked.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
-			UIManager.put("RadioButtonMenuItem.checkIcon",
-					UIManager.get("RadioButton.selectedIcon"));
+			UIManager.put("RadioButtonMenuItem.checkIcon", UIManager.get("RadioButton.selectedIcon"));
 
-			UIManager.put("CheckBoxMenuItem.checkIcon",
-					UIManager.get("CheckBox.icon"));
+			UIManager.put("CheckBoxMenuItem.checkIcon", UIManager.get("CheckBox.icon"));
 			// UIManager.put("CheckBoxMenuItem.selectedIcon",UIManager.get("CheckBox.selectedIcon"));
 
-			UIManager.put("RadioButtonMenuItem.checkIcon", new StatefullIcon(
-					new ScaledIcon(
-							App.class.getResource("/images/" + black
-									+ "_radio_unchecked.png"),
-							Utility.toPixel(20), Utility.toPixel(20)),
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_radio_checked.png"),
-							Utility.toPixel(20), Utility.toPixel(20))));
+			UIManager.put("RadioButtonMenuItem.checkIcon",
+					new StatefullIcon(
+							new ScaledIcon(App.class.getResource("/images/" + black + "_radio_unchecked.png"),
+									Utility.toPixel(20), Utility.toPixel(20)),
+							new ScaledIcon(App.class.getResource("/images/" + black + "_radio_checked.png"),
+									Utility.toPixel(20), Utility.toPixel(20))));
 			// UIManager.put("RadioButtonMenuItem.checkIcon",UIManager.get("CheckBox.icon"));
 			// UIManager.put("RadioButtonMenuItem.selectedIcon",UIManager.get("RadioButton.selectedIcon"));
 
@@ -1414,366 +1279,221 @@ public final class App {
 //							"/images/" + black + "_radio_unchecked.png"),
 //					Utility.toPixel(20), Utility.toPixel(20)));
 
-			UIManager.put("AddressBar.icon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_arrow.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("AddressBar.back",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_back.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
-			UIManager.put("AddressBar.up",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_up.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
-			UIManager.put("Table.ascendingSortIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_up.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("Table.descendingSortIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_down.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("AddressBar.icon", new ScaledIcon(App.class.getResource("/images/" + black + "_arrow.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("AddressBar.back", new ScaledIcon(App.class.getResource("/images/" + black + "_back.png"),
+					Utility.toPixel(24), Utility.toPixel(24)));
+			UIManager.put("AddressBar.up", new ScaledIcon(App.class.getResource("/images/" + black + "_up.png"),
+					Utility.toPixel(24), Utility.toPixel(24)));
+			UIManager.put("Table.ascendingSortIcon", new ScaledIcon(
+					App.class.getResource("/images/" + black + "_up.png"), Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("Table.descendingSortIcon", new ScaledIcon(
+					App.class.getResource("/images/" + black + "_down.png"), Utility.toPixel(20), Utility.toPixel(20)));
 			UIManager.put("AddressBar.forward",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_forward.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
-			UIManager.put("AddressBar.reload",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_reload.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_forward.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
+			UIManager.put("AddressBar.reload", new ScaledIcon(App.class.getResource("/images/" + black + "_reload.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
 			UIManager.put("AddressBar.moreMenu",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_more_menu.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("AddressBar.search",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_search.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("AddressBar.edit",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_edit.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("AddressBar.toggle",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_toggle.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("AddressBar.split1",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_split1.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("AddressBar.split2",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_split2.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("Desktop.menu",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_menu.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_more_menu.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
+			UIManager.put("AddressBar.search", new ScaledIcon(App.class.getResource("/images/" + black + "_search.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("AddressBar.edit", new ScaledIcon(App.class.getResource("/images/" + black + "_edit.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("AddressBar.toggle", new ScaledIcon(App.class.getResource("/images/" + black + "_toggle.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("AddressBar.split1", new ScaledIcon(App.class.getResource("/images/" + black + "_split1.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("AddressBar.split2", new ScaledIcon(App.class.getResource("/images/" + black + "_split2.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("Desktop.menu", new ScaledIcon(App.class.getResource("/images/" + black + "_menu.png"),
+					Utility.toPixel(24), Utility.toPixel(24)));
 
 			UIManager.put("Tree.collapsedIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_tree_closed.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_tree_closed.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("Tree.expandedIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_tree_open.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_tree_open.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("InternalFrame.iconifyIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_minimize.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_minimize.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("InternalFrame.closeIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_close.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_close.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("FlatTabbedPanel.closeAllIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_close.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_close.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("InternalFrame.maximizeIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_maximize.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_maximize.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("InternalFrame.minimizeIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_restore.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_restore.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("InternalFrame.icon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_restore.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_restore.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ComboBox.dropIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_tree_open.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_tree_open.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("Spinner.downIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_down_arrow.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_down_arrow.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
-			UIManager.put("Spinner.upIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_up_arrow.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+			UIManager.put("Spinner.upIcon", new ScaledIcon(App.class.getResource("/images/" + black + "_up_arrow.png"),
+					Utility.toPixel(16), Utility.toPixel(16)));
 
 			UIManager.put("AddressBar.home",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_home_icon.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_home_icon.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
-			UIManager.put("SidePanel.addIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_add.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("SidePanel.addIcon", new ScaledIcon(App.class.getResource("/images/" + black + "_add.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
 
 			UIManager.put("SidePanel.collapseIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_left_arrow.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_left_arrow.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("SidePanel.expandIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_expand.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_expand.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("ServerList.offlineIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_offline.png"),
-							Utility.toPixel(32), Utility.toPixel(32)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_offline.png"), Utility.toPixel(32),
+							Utility.toPixel(32)));
 
 			UIManager.put("ServerList.searchIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_search_icon.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_search_icon.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("ServerList.editIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_edit_icon.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_edit_icon.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("ServerList.deleteIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_delete.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_delete.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("ServerTools.filesIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_files.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_files.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.terminalIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_terminal.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_terminal.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.editorIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_text_editor.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_text_editor.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.logViewIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_logview.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_logview.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.taskmgrIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_taskmgr.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_taskmgr.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.fileshareIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_fileshare.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_fileshare.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
-			UIManager.put("ServerTools.curlIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_curl.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+			UIManager.put("ServerTools.curlIcon", new ScaledIcon(
+					App.class.getResource("/images/" + black + "_curl.png"), Utility.toPixel(24), Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.findFilesIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_search_icon.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_search_icon.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.settingsIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_settings.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_settings.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
-			UIManager.put("ExpandPanel.upIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_up.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+			UIManager.put("ExpandPanel.upIcon", new ScaledIcon(App.class.getResource("/images/" + black + "_up.png"),
+					Utility.toPixel(24), Utility.toPixel(24)));
 
-			UIManager.put("ExpandPanel.downIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_down.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+			UIManager.put("ExpandPanel.downIcon", new ScaledIcon(
+					App.class.getResource("/images/" + black + "_down.png"), Utility.toPixel(24), Utility.toPixel(24)));
 
-			UIManager.put("TextEditor.saveIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_save.png"),
-							Utility.toPixel(18), Utility.toPixel(18)));
+			UIManager.put("TextEditor.saveIcon", new ScaledIcon(App.class.getResource("/images/" + black + "_save.png"),
+					Utility.toPixel(18), Utility.toPixel(18)));
 			UIManager.put("TextEditor.findIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_find_in_page.png"),
-							Utility.toPixel(18), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_find_in_page.png"), Utility.toPixel(18),
+							Utility.toPixel(16)));
 			UIManager.put("TextEditor.replaceIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_find_replace.png"),
-							Utility.toPixel(18), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_find_replace.png"), Utility.toPixel(18),
+							Utility.toPixel(16)));
 			UIManager.put("TextEditor.gotoLineIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_goto_line.png"),
-							Utility.toPixel(18), Utility.toPixel(18)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_goto_line.png"), Utility.toPixel(18),
+							Utility.toPixel(18)));
 			UIManager.put("TextEditor.reloadIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_page_reload.png"),
-							Utility.toPixel(18), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_page_reload.png"), Utility.toPixel(18),
+							Utility.toPixel(16)));
 
 			UIManager.put("TextEditor.cutTextIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_cut_text.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_cut_text.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("TextEditor.pasteTextIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_paste_text.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_paste_text.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("TextEditor.copyTextIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_copy_text.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_copy_text.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("FolderView.hideSideBarIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_hide_sidebar.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_hide_sidebar.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("FolderView.showSideBarIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_show_sidebar.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_show_sidebar.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("ServerTools.terminalIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_terminal.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_terminal.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("ServerTools.editorIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_text_editor.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_text_editor.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("ServerTools.filesIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_files.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_files.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
-			UIManager.put("ServerTools.curlIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_curl.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+			UIManager.put("ServerTools.curlIcon16", new ScaledIcon(
+					App.class.getResource("/images/" + black + "_curl.png"), Utility.toPixel(16), Utility.toPixel(16)));
 
 			UIManager.put("ServerTools.logViewIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_logview.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_logview.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("ServerTools.findFilesIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_search_icon.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_search_icon.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("ServerTools.taskmgrIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_taskmgr.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_taskmgr.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("ViewMode.listIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_list_view.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_list_view.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("ViewMode.detailsIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_details_view.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_details_view.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 //			UIManager.put("TextEditor.reloadIcon",
 //					new ScaledIcon(
@@ -1804,31 +1524,25 @@ public final class App {
 //							Utility.toPixel(5), Utility.toPixel(5)));
 			UIManager.put("TabbedPane.selectHighlight", foreground);
 			UIManager.put("TabbedPane.focus", background);
-			UIManager.put("TabbedPane.flatHighlightBorder",
-					new MatteBorder(Utility.toPixel(0), Utility.toPixel(0),
-							Utility.toPixel(2), Utility.toPixel(0), selection));
-			UIManager.put("TabbedPane.flatBorder",
-					new MatteBorder(Utility.toPixel(0), Utility.toPixel(0),
-							Utility.toPixel(2), Utility.toPixel(0),
-							background));
+			UIManager.put("TabbedPane.flatHighlightBorder", new MatteBorder(Utility.toPixel(0), Utility.toPixel(0),
+					Utility.toPixel(2), Utility.toPixel(0), selection));
+			UIManager.put("TabbedPane.flatBorder", new MatteBorder(Utility.toPixel(0), Utility.toPixel(0),
+					Utility.toPixel(2), Utility.toPixel(0), background));
 			// UIManager.put("TabbedPane.tabsOverlapBorder", Boolean.TRUE);
 			UIManager.put("TabbedPane.contentAreaColor", background);
 			UIManager.put("TabbedPane.selectedLabelShift", 0);
 			UIManager.put("TabbedPane.labelShift", 0);
 			UIManager.put("TabbedPane.tabInsets", new Insets(0, 0, 0, 0));
-			UIManager.put("TabbedPane.selectedTabPadInsets",
-					new Insets(0, 0, 0, 0));
+			UIManager.put("TabbedPane.selectedTabPadInsets", new Insets(0, 0, 0, 0));
 			UIManager.put("TabbedPane.tabAreaInsets", new Insets(0, 0, 0, 0));
-			UIManager.put("TabbedPane.contentBorderInsets",
-					new Insets(0, 0, 0, 0));
+			UIManager.put("TabbedPane.contentBorderInsets", new Insets(0, 0, 0, 0));
 			UIManager.put("TabbedPane.tabsOverlapBorder", Boolean.FALSE);
 
-			UIManager.put("Component.border",
-					new LineBorder(border, Utility.toPixel(1)));
+			UIManager.put("Component.border", new LineBorder(border, Utility.toPixel(1)));
 
 			UIManager.put("RounderBorder.color", border);
 
-			UIManager.put("DefaultBorder.color", defBorder);
+			UIManager.put("DefaultBorder.color", border);//defBorder);
 			UIManager.put("Panel.secondary", c1);
 			UIManager.put("Panel.highlight", c2);
 			UIManager.put("Panel.shadow", c3);
@@ -1850,23 +1564,20 @@ public final class App {
 			UIManager.put("Desktop.selectedForeground", Color.GRAY);
 
 			UIManager.put("ToggleButton.background", background);
-			UIManager.put("ToggleButton.border",
-					new LineBorder(border, Utility.toPixel(1)));
+			UIManager.put("ToggleButton.border", new LineBorder(border, Utility.toPixel(1)));
 			UIManager.put("ToggleButton.foreground", Color.BLACK);
 			UIManager.put("ToggleButton.select", selection);
 
 			UIManager.put("Button.background", background);
 			UIManager.put("Button.border", new FlatButtonBorder(border));
-			UIManager.put("Button.rolloverBorder",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("Button.rolloverBorder", new LineBorder(selection, Utility.toPixel(1)));
 			UIManager.put("Button.rollover", Boolean.TRUE);
 			UIManager.put("Button.highlight", selection);
 			UIManager.put("Button.select", Color.BLUE);
 			UIManager.put("Button.font", normalFont);
 			UIManager.put("Button.foreground", foreground);
 			UIManager.put("Button.margin",
-					new Insets(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5)));
+					new Insets(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 			UIManager.put("Button.highlight", selection);
 			UIManager.put("Button.darkShadow", selection.darker());
 
@@ -1878,12 +1589,10 @@ public final class App {
 			UIManager.put("StartMenu.background", background);
 
 			UIManager.put("TaskBar.background", background);
-			UIManager.put("TaskBar.border",
-					new LineBorder(new Color(20, 20, 20), Utility.toPixel(1)));
+			UIManager.put("TaskBar.border", new LineBorder(new Color(20, 20, 20), Utility.toPixel(1)));
 			UIManager.put("TaskBar.buttonBackground", border);
 
-			UIManager.put("PopupMenu.border",
-					new LineBorder(new Color(30, 30, 30), Utility.toPixel(1)));
+			UIManager.put("PopupMenu.border", new LineBorder(new Color(30, 30, 30), Utility.toPixel(1)));
 			UIManager.put("PopupMenu.background", background);
 			UIManager.put("PopupMenu.foreground", foreground);
 			UIManager.put("PopupMenu.font", normalFont);
@@ -1894,36 +1603,31 @@ public final class App {
 			UIManager.put("Separator.foreground", defBorder);
 			UIManager.put("Separator.thickness", Utility.toPixel(1));
 			UIManager.put("Separator.insets",
-					new Insets(Utility.toPixel(1), Utility.toPixel(1),
-							Utility.toPixel(1), Utility.toPixel(1)));
+					new Insets(Utility.toPixel(1), Utility.toPixel(1), Utility.toPixel(1), Utility.toPixel(1)));
 			// UIManager.put("PopupMenu.font", normalFont);
 
 			UIManager.put("MenuItem.border",
-					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5)));
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 			UIManager.put("MenuItem.background", background);
 			UIManager.put("MenuItem.foreground", foreground);
 			UIManager.put("MenuItem.font", normalFont);
 			UIManager.put("MenuItem.selectionBackground", selection);
-			UIManager.put("MenuItem.selectionForeground", foreground);
+			UIManager.put("MenuItem.selectionForeground", selectionForeground);
 			UIManager.put("MenuItem.acceleratorForeground", border);
-			UIManager.put("MenuItem.acceleratorSelectionForeground",
-					foreground);
+			UIManager.put("MenuItem.acceleratorSelectionForeground", selectionForeground);
 
 			UIManager.put("Menu.border",
-					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5)));
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 			UIManager.put("Menu.background", border);
 			UIManager.put("Menu.foreground", foreground);
 			UIManager.put("Menu.font", normalFont);
 			UIManager.put("Menu.selectionBackground", selection);
-			UIManager.put("Menu.selectionForeground", foreground);
+			UIManager.put("Menu.selectionForeground", selectionForeground);
 			UIManager.put("Menu.acceleratorForeground", border);
-			UIManager.put("Menu.acceleratorSelectionForeground", foreground);
+			UIManager.put("Menu.acceleratorSelectionForeground", selectionForeground);
 
 			UIManager.put("MenuBar.border",
-					new EmptyBorder(Utility.toPixel(0), Utility.toPixel(0),
-							Utility.toPixel(0), Utility.toPixel(0)));
+					new EmptyBorder(Utility.toPixel(0), Utility.toPixel(0), Utility.toPixel(0), Utility.toPixel(0)));
 			UIManager.put("MenuBar.background", background);
 			UIManager.put("MenuBar.borderColor", background);
 			UIManager.put("MenuBar.foreground", foreground);
@@ -1938,11 +1642,10 @@ public final class App {
 			UIManager.put("TextField.inactiveForeground", foreground);
 			UIManager.put("TextField.font", normalFont);
 			UIManager.put("TextField.caretForeground", foreground);
-			UIManager.put("TextField.border",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("TextField.border", new LineBorder(selection, Utility.toPixel(1)));
 			UIManager.put("TextField.inactiveForeground", border);
-			UIManager.put("TextField.selectionBackground", prgBg);
-			UIManager.put("TextField.selectionForeground", foreground);
+			UIManager.put("TextField.selectionBackground", selection);
+			UIManager.put("TextField.selectionForeground", selectionForeground);
 
 			UIManager.put("FormattedTextField.background", background);
 			UIManager.put("FormattedTextField.foreground", foreground);
@@ -1951,19 +1654,18 @@ public final class App {
 //			UIManager.put("FormattedTextField.border",
 //					new LineBorder(selection, Utility.toPixel(1)));
 			UIManager.put("FormattedTextField.inactiveForeground", border);
-			UIManager.put("FormattedTextField.selectionBackground", prgBg);
-			UIManager.put("FormattedTextField.selectionForeground", foreground);
+			UIManager.put("FormattedTextField.selectionBackground", selection);
+			UIManager.put("FormattedTextField.selectionForeground", selectionForeground);
 
 			UIManager.put("TextArea.background", background);
 			UIManager.put("TextArea.foreground", foreground);
 			UIManager.put("TextArea.font", normalFont);
 			UIManager.put("TextArea.caretForeground", foreground);
-			UIManager.put("TextArea.border",
-					new LineBorder(background, Utility.toPixel(1)));
+			UIManager.put("TextArea.border", new LineBorder(background, Utility.toPixel(1)));
 			UIManager.put("TextArea.selectionBackground", prgBg);
-			UIManager.put("TextArea.selectionForeground", foreground);
-			UIManager.put("TextPane.selectionForeground", foreground);
-			UIManager.put("EditorPane.selectionBackground", prgBg);
+			UIManager.put("TextArea.selectionForeground", selectionForeground);
+			UIManager.put("TextPane.selectionForeground", selectionForeground);
+			UIManager.put("EditorPane.selectionBackground", selection);
 			UIManager.put("TextComponent.selectionBackground", prgBg);
 //			UIManager.put("nimbusSelectionBackground", selection);
 //			UIManager.put("nimbusSelectedText", selection);
@@ -1972,16 +1674,14 @@ public final class App {
 			UIManager.put("CheckBox.foreground", foreground);
 			UIManager.put("CheckBox.font", normalFont);
 			UIManager.put("Checkbox.select", selection);
-			UIManager.put("CheckBox.border",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("CheckBox.border", new LineBorder(selection, Utility.toPixel(1)));
 			UIManager.put("TextArea.selectionBackground", prgBg);
 
 			UIManager.put("RadioButton.background", background);
 			UIManager.put("RadioButton.foreground", foreground);
 			UIManager.put("RadioButton.font", normalFont);
 			UIManager.put("RadioButton.select", selection);
-			UIManager.put("RadioButton.border",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("RadioButton.border", new LineBorder(selection, Utility.toPixel(1)));
 
 			UIManager.put("TextArea.selectionBackground", prgBg);
 
@@ -1990,37 +1690,31 @@ public final class App {
 			UIManager.put("Spinner.arrowBackground", border);
 			UIManager.put("Spinner.font", normalFont);
 			UIManager.put("Spinner.select", selection);
-			UIManager.put("Spinner.border",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("Spinner.border", new LineBorder(selection, Utility.toPixel(1)));
 			UIManager.put("Spinner.editorBorderPainted", Boolean.FALSE);
 			UIManager.put("Spinner.arrowButtonInsets",
-					new Insets(Utility.toPixel(1), Utility.toPixel(1),
-							Utility.toPixel(1), Utility.toPixel(1)));
+					new Insets(Utility.toPixel(1), Utility.toPixel(1), Utility.toPixel(1), Utility.toPixel(1)));
 
 			UIManager.put("Spinner.selectionBackground", prgBg);
 
 			UIManager.put("Table.background", c1);
-			UIManager.put("Table.border",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("Table.border", new LineBorder(selection, Utility.toPixel(1)));
 			UIManager.put("Table.shadow", background);
 			UIManager.put("Table.darkShadow", background);
 			UIManager.put("Table.gridColor", background);
 			UIManager.put("Table.selectionBackground", selection);
-			UIManager.put("Table.selectionForeground", foreground);
+			UIManager.put("Table.selectionForeground", selectionForeground);
 			UIManager.put("Table.focusCellBackground", selection);
-			UIManager.put("Table.focusCellHighlightBorder",
-					new EmptyBorder(new Insets(0, 0, 0, 0)));
+			UIManager.put("Table.focusCellHighlightBorder", new EmptyBorder(new Insets(0, 0, 0, 0)));
 			// UIManager.put("Table.background", background);
 			UIManager.put("Table.foreground", foreground);
 			UIManager.put("Table.rendererUseTableColors", Boolean.TRUE);
-			UIManager.put("Table.scrollPaneBorder",
-					new LineBorder(background, Utility.toPixel(0)));
+			UIManager.put("Table.scrollPaneBorder", new LineBorder(background, Utility.toPixel(0)));
 
 			UIManager.put("TableHeader.background", background);
 			UIManager.put("TableHeader.foreground", foreground);
 
-			MatteBorder mb = new MatteBorder(0, 0, Utility.toPixel(1),
-					Utility.toPixel(1), border);
+			MatteBorder mb = new MatteBorder(0, 0, Utility.toPixel(1), Utility.toPixel(1), border);
 
 			UIManager.put("TableHeader.cellBorder", mb);
 
@@ -2029,11 +1723,9 @@ public final class App {
 //			UIManager.put("Tree.gridColor", background);
 //			UIManager.put("Tree.gridColor", background);
 
-			UIManager.put("SplitPane.border",
-					new LineBorder(background, Utility.toPixel(1)));
+			UIManager.put("SplitPane.border", new LineBorder(background, Utility.toPixel(1)));
 			UIManager.put("SplitPane.dividerSize", Utility.toPixel(1));
-			UIManager.put("SplitPaneDivider.border",
-					new LineBorder(background, Utility.toPixel(1)));
+			UIManager.put("SplitPaneDivider.border", new LineBorder(background, Utility.toPixel(1)));
 			UIManager.put("SplitPane.background", background);
 
 			UIManager.put("LineGraph.foreground", foreground);
@@ -2048,28 +1740,21 @@ public final class App {
 			UIManager.put("ScrollBar.highlight", selection);
 			UIManager.put("ScrollBar.thumbRollover", new Color(100, 100, 100));
 			UIManager.put("ScrollBar.gradient", null);
-			UIManager.put("ScrollBar.border",
-					new EmptyBorder(new Insets(0, 0, 0, 0)));
+			UIManager.put("ScrollBar.border", new EmptyBorder(new Insets(0, 0, 0, 0)));
 			UIManager.put("ScrollBar.width", Utility.toPixel(8));
 
-			UIManager.put("ScrollPane.viewportBorder",
-					new LineBorder(background, Utility.toPixel(1)));
-			UIManager.put("ScrollPane.viewportBorderInsets",
-					new Insets(0, 0, 0, 0));
-			UIManager.put("ScrollPane.border",
-					new LineBorder(border, Utility.toPixel(1)));
+			UIManager.put("ScrollPane.viewportBorder", new LineBorder(background, Utility.toPixel(1)));
+			UIManager.put("ScrollPane.viewportBorderInsets", new Insets(0, 0, 0, 0));
+			UIManager.put("ScrollPane.border", new LineBorder(border, Utility.toPixel(1)));
 			UIManager.put("ScrollPane.background", background);
-			UIManager.put("ScrollPane.border",
-					new EmptyBorder(new Insets(0, 0, 0, 0)));
+			UIManager.put("ScrollPane.border", new EmptyBorder(new Insets(0, 0, 0, 0)));
 
-			UIManager.put("Viewport.border",
-					new EmptyBorder(new Insets(0, 0, 0, 0)));
+			UIManager.put("Viewport.border", new EmptyBorder(new Insets(0, 0, 0, 0)));
 			UIManager.put("Viewport.background", background);
 
 			UIManager.put("ComboBox.background", background);
 			UIManager.put("ComboBox.foreground", foreground);
-			UIManager.put("ComboBox.border",
-					new LineBorder(border, Utility.toPixel(1)));
+			UIManager.put("ComboBox.border", new LineBorder(border, Utility.toPixel(1)));
 //			UIManager.put("ComboBox.buttonBackground", background);
 //			UIManager.put("ComboBox.buttonDarkShadow", background);
 //			UIManager.put("ComboBox.buttonHighlight", background);
@@ -2077,13 +1762,11 @@ public final class App {
 			UIManager.put("ComboBox.control", background);
 			UIManager.put("ComboBox.controlForeground", foreground);
 			UIManager.put("ComboBox.selectionBackground", selection);
-			UIManager.put("ComboBox.selectionForeground", foreground);
+			UIManager.put("ComboBox.selectionForeground", selectionForeground);
 			UIManager.put("ComboBox.font", normalFont);
 
-			UIManager.put("InternalFrame.border",
-					new LineBorder(background, Utility.toPixel(5)));
-			UIManager.put("InternalFrame.activeBorder",
-					new LineBorder(titleColor, Utility.toPixel(5)));
+			UIManager.put("InternalFrame.border", new LineBorder(background, Utility.toPixel(5)));
+			UIManager.put("InternalFrame.activeBorder", new LineBorder(titleColor, Utility.toPixel(5)));
 			UIManager.put("InternalFrame.activeBorderColor", titleColor);
 			UIManager.put("InternalFrame.borderColor", border);
 			UIManager.put("InternalFrame.activeTitleBackground", titleColor);
@@ -2092,16 +1775,11 @@ public final class App {
 			UIManager.put("InternalFrame.activeTitleForeground", foreground);
 			UIManager.put("InternalFrame.activeTitleBackground", titleColor);
 			UIManager.put("InternalFrame.titlePaneHeight", Utility.toPixel(24));
-			UIManager.put("InternalFrame.titleButtonHeight",
-					Utility.toPixel(24));
-			UIManager.put("InternalFrame.titleButtonWidth",
-					Utility.toPixel(24));
-			UIManager.put("InternalFrameTitlePane.maximizeButtonOpacity",
-					Boolean.TRUE);
-			UIManager.put("InternalFrameTitlePane.closeButtonOpacity",
-					Boolean.TRUE);
-			UIManager.put("InternalFrameTitlePane.iconifyButtonOpacity",
-					Boolean.TRUE);
+			UIManager.put("InternalFrame.titleButtonHeight", Utility.toPixel(24));
+			UIManager.put("InternalFrame.titleButtonWidth", Utility.toPixel(24));
+			UIManager.put("InternalFrameTitlePane.maximizeButtonOpacity", Boolean.TRUE);
+			UIManager.put("InternalFrameTitlePane.closeButtonOpacity", Boolean.TRUE);
+			UIManager.put("InternalFrameTitlePane.iconifyButtonOpacity", Boolean.TRUE);
 			UIManager.put("InternalFrame.minBackground", Color.DARK_GRAY);
 			UIManager.put("InternalFrame.maxBackground", Color.DARK_GRAY);
 			UIManager.put("InternalFrame.closeBackground", Color.DARK_GRAY);// Color.RED);
@@ -2115,24 +1793,23 @@ public final class App {
 //					App.class.getResource("/images/blue_folder.png"),
 //					Utility.toPixel(20), Utility.toPixel(20));
 
-			Icon smallFolder = new ScaledIcon(
-					App.class.getResource("/images/folder.png"),
-					Utility.toPixel(20), Utility.toPixel(20));
+			Icon smallFolder = new ScaledIcon(App.class.getResource("/images/folder.png"), Utility.toPixel(20),
+					Utility.toPixel(20));
 
-			Icon smallFile = new ScaledIcon(
-					App.class.getResource("/images/fileicon.png"),
-					Utility.toPixel(20), Utility.toPixel(20));
+			Icon smallFile = new ScaledIcon(App.class.getResource("/images/fileicon.png"), Utility.toPixel(20),
+					Utility.toPixel(20));
 
 			UIManager.put("ListView.smallFolder", smallFolder);
 			UIManager.put("ListView.smallFile", smallFile);
 			UIManager.put("ListView.smallFile", smallFile);
 
 			UIManager.put("Tree.background", background);
+			UIManager.put("Tree.foreground", foreground);
 			UIManager.put("Tree.font", normalFont);
 			UIManager.put("Tree.textBackground", background);
 			UIManager.put("Tree.textForeground", foreground);
 			UIManager.put("Tree.selectionBackground", selection);
-			UIManager.put("Tree.selectionForeground", foreground);
+			UIManager.put("Tree.selectionForeground", selectionForeground);
 			UIManager.put("Tree.closedIcon", smallFolder);
 			UIManager.put("Tree.openIcon", smallFolder);
 			UIManager.put("Tree.line", selection);
@@ -2149,21 +1826,18 @@ public final class App {
 			UIManager.put("Tree.iconBackground", selection);
 			UIManager.put("Tree.rendererUseTreeColors", Boolean.TRUE);
 			UIManager.put("Tree.background", background);
-			UIManager.put("Tree.padding", Integer.valueOf(20));
-			UIManager.put("Tree.leftChildIndent",
-					Integer.valueOf(Utility.toPixel(15)));
-			UIManager.put("Tree.rightChildIndent",
-					Integer.valueOf(Utility.toPixel(5)));
+			UIManager.put("Tree.padding", Integer.valueOf(0));
+			UIManager.put("Tree.leftChildIndent", Integer.valueOf(Utility.toPixel(5)));
+			UIManager.put("Tree.rightChildIndent", Integer.valueOf(Utility.toPixel(5)));
 			// UIManager.put("Tree.expanderSize", Integer.valueOf(30));
 
 			UIManager.put("List.background", background);
 			UIManager.put("List.foreground", foreground);
 			UIManager.put("List.selectionBackground", selection);
-			UIManager.put("List.selectionForeground", foreground);
+			UIManager.put("List.selectionForeground", selectionForeground);
 			UIManager.put("List.rendererUseUIBorder", Boolean.TRUE);
 			UIManager.put("List.rendererUseListColors", Boolean.TRUE);
-			UIManager.put("List.focusCellHighlightBorder",
-					new EmptyBorder(0, 0, 0, 0));
+			UIManager.put("List.focusCellHighlightBorder", new EmptyBorder(0, 0, 0, 0));
 			UIManager.put("List.border", new EmptyBorder(0, 0, 0, 0));
 
 			UIManager.put("Terminal.background", background);
@@ -2186,66 +1860,52 @@ public final class App {
 			UIManager.put("PasswordField.caretForeground", foreground);
 			UIManager.put("PasswordField.font", normalFont);
 			UIManager.put("PasswordField.selectionBackground", selection);
-			UIManager.put("PasswordField.border",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("PasswordField.border", new LineBorder(selection, Utility.toPixel(1)));
 
 			UIManager.put("ProgressBar.background", defBorder);
 			UIManager.put("ProgressBar.foreground", prgBg);
 			UIManager.put("ProgressBar.border", new EmptyBorder(0, 0, 0, 0));
-			UIManager.put("ProgressBar.horizontalSize",
-					new Dimension(Utility.toPixel(146), Utility.toPixel(8)));
-			UIManager.put("ProgressBar.verticalSize",
-					new Dimension(Utility.toPixel(8), Utility.toPixel(146)));
+			UIManager.put("ProgressBar.horizontalSize", new Dimension(Utility.toPixel(146), Utility.toPixel(8)));
+			UIManager.put("ProgressBar.verticalSize", new Dimension(Utility.toPixel(8), Utility.toPixel(146)));
 
 			UIManager.put("OptionPane.background", background);
 			UIManager.put("OptionPane.messageForeground", foreground);
 			UIManager.put("OptionPane.foreground", foreground);
 			UIManager.put("OptionPane.border",
-					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5)));
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 
 			UIManager.put("TableHeader.cellBorder", new CompoundBorder(
-					new MatteBorder(0, 0, 0, Utility.toPixel(1),
-							UIManager.getColor("DefaultBorder.color")),
-					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5))));
+					new MatteBorder(0, 0, 0, Utility.toPixel(1), UIManager.getColor("DefaultBorder.color")),
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5))));
 
-			UIManager.put("ToolTip.background",
-					UIManager.getColor("DefaultBorder.color"));
+			UIManager.put("ToolTip.background", UIManager.getColor("DefaultBorder.color"));
 			UIManager.put("ToolTip.backgroundInactive", background);
 			UIManager.put("ToolTip.border",
-					new LineBorder(UIManager.getColor("DefaultBorder.color"),
-							Utility.toPixel(1)));
+					new LineBorder(UIManager.getColor("DefaultBorder.color"), Utility.toPixel(1)));
 			UIManager.put("ToolTip.borderInactive",
-					new LineBorder(UIManager.getColor("DefaultBorder.color"),
-							Utility.toPixel(1)));
+					new LineBorder(UIManager.getColor("DefaultBorder.color"), Utility.toPixel(1)));
 			UIManager.put("ToolTip.foreground", foreground);
 			UIManager.put("ToolTip.foregroundInactive", foreground);
 
 			UIManager.put("CheckBoxMenuItem.border",
-					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5)));
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 			UIManager.put("CheckBoxMenuItem.background", background);
 			UIManager.put("CheckBoxMenuItem.foreground", foreground);
 			UIManager.put("CheckBoxMenuItem.font", normalFont);
 			UIManager.put("CheckBoxMenuItem.selectionBackground", selection);
 			UIManager.put("CheckBoxMenuItem.selectionForeground", foreground);
 			UIManager.put("CheckBoxMenuItem.acceleratorForeground", border);
-			UIManager.put("CheckBoxMenuItem.acceleratorSelectionForeground",
-					foreground);
+			UIManager.put("CheckBoxMenuItem.acceleratorSelectionForeground", foreground);
 
 			UIManager.put("RadioButtonMenuItem.border",
-					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5)));
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 			UIManager.put("RadioButtonMenuItem.background", background);
 			UIManager.put("RadioButtonMenuItem.foreground", foreground);
 			UIManager.put("RadioButtonMenuItem.font", normalFont);
 			UIManager.put("RadioButtonMenuItem.selectionBackground", selection);
-			UIManager.put("RadioButtonMenuItem.selectionForeground",
-					foreground);
+			UIManager.put("RadioButtonMenuItem.selectionForeground", foreground);
 			UIManager.put("RadioButtonMenuItem.acceleratorForeground", border);
-			UIManager.put("RadioButtonMenuItem.acceleratorSelectionForeground",
-					foreground);
+			UIManager.put("RadioButtonMenuItem.acceleratorSelectionForeground", foreground);
 
 			UIManager.put("Editor.theme", "dark");
 
@@ -2274,85 +1934,59 @@ public final class App {
 			Color c2 = new Color(220, 220, 220);
 			Color c3 = new Color(245, 245, 245);
 			Color brightFg = Color.WHITE;
-			Icon tabCloseIcon = new ScaledIcon(
-					App.class.getResource("/images/" + black + "_close.png"),
+			Icon tabCloseIcon = new ScaledIcon(App.class.getResource("/images/" + black + "_close.png"),
 					Utility.toPixel(14), Utility.toPixel(14));
 
-			Icon tabBlankIcon = new EmptyIcon(Utility.toPixel(14),
-					Utility.toPixel(14));
+			Icon tabBlankIcon = new EmptyIcon(Utility.toPixel(14), Utility.toPixel(14));
 			Font normalFont = Utility.getFont(Constants.SMALL);
 			Color titleColor = border;
 
 			// MetalCheckBoxIcon
 
-			UIManager.put("welcome.new",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_add_server.png"),
-							Utility.toPixel(32), Utility.toPixel(32)));
+			UIManager.put("welcome.new", new ScaledIcon(App.class.getResource("/images/" + black + "_add_server.png"),
+					Utility.toPixel(32), Utility.toPixel(32)));
 
 			UIManager.put("welcome.settings",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_open_settings.png"),
+					new ScaledIcon(App.class.getResource("/images/" + black + "_open_settings.png"),
 							Utility.toPixel(32), Utility.toPixel(32)));
 
-			UIManager.put("welcome.help",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_help.png"),
-							Utility.toPixel(32), Utility.toPixel(32)));
+			UIManager.put("welcome.help", new ScaledIcon(App.class.getResource("/images/" + black + "_help.png"),
+					Utility.toPixel(32), Utility.toPixel(32)));
 
 			UIManager.put("Tab.roundCloseIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_round_close.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_round_close.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("RadioButton.selectedIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_radio_checked.png"),
+					new ScaledIcon(App.class.getResource("/images/" + black + "_radio_checked.png"),
 							Utility.toPixel(20), Utility.toPixel(20)));
 
-			UIManager.put("RadioButton.icon", new ScaledIcon(
-					App.class.getResource(
-							"/images/" + black + "_radio_unchecked.png"),
-					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("RadioButton.icon",
+					new ScaledIcon(App.class.getResource("/images/" + black + "_radio_unchecked.png"),
+							Utility.toPixel(20), Utility.toPixel(20)));
 
 			UIManager.put("CheckBox.icon",
 					new StatefullIcon(
-							new ScaledIcon(
-									App.class.getResource("/images/" + black
-											+ "_unchecked.png"),
+							new ScaledIcon(App.class.getResource("/images/" + black + "_unchecked.png"),
 									Utility.toPixel(20), Utility.toPixel(20)),
-							new ScaledIcon(
-									App.class.getResource("/images/" + black
-											+ "_checked.png"),
+							new ScaledIcon(App.class.getResource("/images/" + black + "_checked.png"),
 									Utility.toPixel(20), Utility.toPixel(20))));
 
 			UIManager.put("CheckBox.selectedIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_checked.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_checked.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
-			UIManager.put("RadioButtonMenuItem.checkIcon",
-					UIManager.get("RadioButton.selectedIcon"));
+			UIManager.put("RadioButtonMenuItem.checkIcon", UIManager.get("RadioButton.selectedIcon"));
 
-			UIManager.put("CheckBoxMenuItem.checkIcon",
-					UIManager.get("CheckBox.icon"));
+			UIManager.put("CheckBoxMenuItem.checkIcon", UIManager.get("CheckBox.icon"));
 			// UIManager.put("CheckBoxMenuItem.selectedIcon",UIManager.get("CheckBox.selectedIcon"));
 
-			UIManager.put("RadioButtonMenuItem.checkIcon", new StatefullIcon(
-					new ScaledIcon(
-							App.class.getResource("/images/" + black
-									+ "_radio_unchecked.png"),
-							Utility.toPixel(20), Utility.toPixel(20)),
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_radio_checked.png"),
-							Utility.toPixel(20), Utility.toPixel(20))));
+			UIManager.put("RadioButtonMenuItem.checkIcon",
+					new StatefullIcon(
+							new ScaledIcon(App.class.getResource("/images/" + black + "_radio_unchecked.png"),
+									Utility.toPixel(20), Utility.toPixel(20)),
+							new ScaledIcon(App.class.getResource("/images/" + black + "_radio_checked.png"),
+									Utility.toPixel(20), Utility.toPixel(20))));
 			// UIManager.put("RadioButtonMenuItem.checkIcon",UIManager.get("CheckBox.icon"));
 			// UIManager.put("RadioButtonMenuItem.selectedIcon",UIManager.get("RadioButton.selectedIcon"));
 
@@ -2367,366 +2001,221 @@ public final class App {
 //							"/images/" + black + "_radio_unchecked.png"),
 //					Utility.toPixel(20), Utility.toPixel(20)));
 
-			UIManager.put("AddressBar.icon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_arrow.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("AddressBar.back",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_back.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
-			UIManager.put("AddressBar.up",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_up.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
-			UIManager.put("Table.ascendingSortIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_up.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("Table.descendingSortIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_down.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("AddressBar.icon", new ScaledIcon(App.class.getResource("/images/" + black + "_arrow.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("AddressBar.back", new ScaledIcon(App.class.getResource("/images/" + black + "_back.png"),
+					Utility.toPixel(24), Utility.toPixel(24)));
+			UIManager.put("AddressBar.up", new ScaledIcon(App.class.getResource("/images/" + black + "_up.png"),
+					Utility.toPixel(24), Utility.toPixel(24)));
+			UIManager.put("Table.ascendingSortIcon", new ScaledIcon(
+					App.class.getResource("/images/" + black + "_up.png"), Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("Table.descendingSortIcon", new ScaledIcon(
+					App.class.getResource("/images/" + black + "_down.png"), Utility.toPixel(20), Utility.toPixel(20)));
 			UIManager.put("AddressBar.forward",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_forward.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
-			UIManager.put("AddressBar.reload",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_reload.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_forward.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
+			UIManager.put("AddressBar.reload", new ScaledIcon(App.class.getResource("/images/" + black + "_reload.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
 			UIManager.put("AddressBar.moreMenu",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_more_menu.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("AddressBar.search",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_search.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("AddressBar.edit",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_edit.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("AddressBar.toggle",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_toggle.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("AddressBar.split1",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_split1.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("AddressBar.split2",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_split2.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
-			UIManager.put("Desktop.menu",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_menu.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_more_menu.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
+			UIManager.put("AddressBar.search", new ScaledIcon(App.class.getResource("/images/" + black + "_search.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("AddressBar.edit", new ScaledIcon(App.class.getResource("/images/" + black + "_edit.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("AddressBar.toggle", new ScaledIcon(App.class.getResource("/images/" + black + "_toggle.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("AddressBar.split1", new ScaledIcon(App.class.getResource("/images/" + black + "_split1.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("AddressBar.split2", new ScaledIcon(App.class.getResource("/images/" + black + "_split2.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("Desktop.menu", new ScaledIcon(App.class.getResource("/images/" + black + "_menu.png"),
+					Utility.toPixel(24), Utility.toPixel(24)));
 
 			UIManager.put("Tree.collapsedIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_tree_closed.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_tree_closed.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("Tree.expandedIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_tree_open.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_tree_open.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("InternalFrame.iconifyIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_minimize.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_minimize.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("InternalFrame.closeIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_close.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_close.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("FlatTabbedPanel.closeAllIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_close.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_close.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("InternalFrame.maximizeIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_maximize.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_maximize.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("InternalFrame.minimizeIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_restore.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_restore.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("InternalFrame.icon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_restore.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_restore.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ComboBox.dropIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_tree_open.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_tree_open.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("Spinner.downIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_down_arrow.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_down_arrow.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
-			UIManager.put("Spinner.upIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_up_arrow.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+			UIManager.put("Spinner.upIcon", new ScaledIcon(App.class.getResource("/images/" + black + "_up_arrow.png"),
+					Utility.toPixel(16), Utility.toPixel(16)));
 
 			UIManager.put("AddressBar.home",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_home_icon.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_home_icon.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
-			UIManager.put("SidePanel.addIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_add.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+			UIManager.put("SidePanel.addIcon", new ScaledIcon(App.class.getResource("/images/" + black + "_add.png"),
+					Utility.toPixel(20), Utility.toPixel(20)));
 
 			UIManager.put("SidePanel.collapseIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_left_arrow.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_left_arrow.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("SidePanel.expandIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_expand.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_expand.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("ServerList.offlineIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_offline.png"),
-							Utility.toPixel(32), Utility.toPixel(32)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_offline.png"), Utility.toPixel(32),
+							Utility.toPixel(32)));
 
 			UIManager.put("ServerList.searchIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_search_icon.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_search_icon.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("ServerList.editIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_edit_icon.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_edit_icon.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("ServerList.deleteIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_delete.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_delete.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("ServerTools.filesIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_files.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_files.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.terminalIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_terminal.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_terminal.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.editorIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_text_editor.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_text_editor.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.logViewIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_logview.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_logview.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.taskmgrIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_taskmgr.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_taskmgr.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.fileshareIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_fileshare.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_fileshare.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
-			UIManager.put("ServerTools.curlIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_curl.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+			UIManager.put("ServerTools.curlIcon", new ScaledIcon(
+					App.class.getResource("/images/" + black + "_curl.png"), Utility.toPixel(24), Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.findFilesIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_search_icon.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_search_icon.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
 			UIManager.put("ServerTools.settingsIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_settings.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_settings.png"), Utility.toPixel(24),
+							Utility.toPixel(24)));
 
-			UIManager.put("ExpandPanel.upIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_up.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+			UIManager.put("ExpandPanel.upIcon", new ScaledIcon(App.class.getResource("/images/" + black + "_up.png"),
+					Utility.toPixel(24), Utility.toPixel(24)));
 
-			UIManager.put("ExpandPanel.downIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_down.png"),
-							Utility.toPixel(24), Utility.toPixel(24)));
+			UIManager.put("ExpandPanel.downIcon", new ScaledIcon(
+					App.class.getResource("/images/" + black + "_down.png"), Utility.toPixel(24), Utility.toPixel(24)));
 
-			UIManager.put("TextEditor.saveIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_save.png"),
-							Utility.toPixel(18), Utility.toPixel(18)));
+			UIManager.put("TextEditor.saveIcon", new ScaledIcon(App.class.getResource("/images/" + black + "_save.png"),
+					Utility.toPixel(18), Utility.toPixel(18)));
 			UIManager.put("TextEditor.findIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_find_in_page.png"),
-							Utility.toPixel(18), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_find_in_page.png"), Utility.toPixel(18),
+							Utility.toPixel(16)));
 			UIManager.put("TextEditor.replaceIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_find_replace.png"),
-							Utility.toPixel(18), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_find_replace.png"), Utility.toPixel(18),
+							Utility.toPixel(16)));
 			UIManager.put("TextEditor.gotoLineIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_goto_line.png"),
-							Utility.toPixel(18), Utility.toPixel(18)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_goto_line.png"), Utility.toPixel(18),
+							Utility.toPixel(18)));
 			UIManager.put("TextEditor.reloadIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_page_reload.png"),
-							Utility.toPixel(18), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_page_reload.png"), Utility.toPixel(18),
+							Utility.toPixel(16)));
 
 			UIManager.put("TextEditor.cutTextIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_cut_text.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_cut_text.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("TextEditor.pasteTextIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_paste_text.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_paste_text.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("TextEditor.copyTextIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_copy_text.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_copy_text.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("FolderView.hideSideBarIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_hide_sidebar.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_hide_sidebar.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("FolderView.showSideBarIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_show_sidebar.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_show_sidebar.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("ServerTools.terminalIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_terminal.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_terminal.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("ServerTools.editorIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_text_editor.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_text_editor.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("ServerTools.filesIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_files.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_files.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
-			UIManager.put("ServerTools.curlIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_curl.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+			UIManager.put("ServerTools.curlIcon16", new ScaledIcon(
+					App.class.getResource("/images/" + black + "_curl.png"), Utility.toPixel(16), Utility.toPixel(16)));
 
 			UIManager.put("ServerTools.logViewIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_logview.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_logview.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("ServerTools.findFilesIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_search_icon.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_search_icon.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("ServerTools.taskmgrIcon16",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_taskmgr.png"),
-							Utility.toPixel(16), Utility.toPixel(16)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_taskmgr.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("ViewMode.listIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_list_view.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_list_view.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 			UIManager.put("ViewMode.detailsIcon",
-					new ScaledIcon(
-							App.class.getResource(
-									"/images/" + black + "_details_view.png"),
-							Utility.toPixel(20), Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_details_view.png"), Utility.toPixel(20),
+							Utility.toPixel(20)));
 
 //			UIManager.put("TextEditor.reloadIcon",
 //					new ScaledIcon(
@@ -2757,27 +2246,21 @@ public final class App {
 //							Utility.toPixel(5), Utility.toPixel(5)));
 			UIManager.put("TabbedPane.selectHighlight", foreground);
 			UIManager.put("TabbedPane.focus", background);
-			UIManager.put("TabbedPane.flatHighlightBorder",
-					new MatteBorder(Utility.toPixel(0), Utility.toPixel(0),
-							Utility.toPixel(2), Utility.toPixel(0), selection));
-			UIManager.put("TabbedPane.flatBorder",
-					new MatteBorder(Utility.toPixel(0), Utility.toPixel(0),
-							Utility.toPixel(2), Utility.toPixel(0),
-							background));
+			UIManager.put("TabbedPane.flatHighlightBorder", new MatteBorder(Utility.toPixel(0), Utility.toPixel(0),
+					Utility.toPixel(2), Utility.toPixel(0), selection));
+			UIManager.put("TabbedPane.flatBorder", new MatteBorder(Utility.toPixel(0), Utility.toPixel(0),
+					Utility.toPixel(2), Utility.toPixel(0), background));
 			// UIManager.put("TabbedPane.tabsOverlapBorder", Boolean.TRUE);
 			UIManager.put("TabbedPane.contentAreaColor", background);
 			UIManager.put("TabbedPane.selectedLabelShift", 0);
 			UIManager.put("TabbedPane.labelShift", 0);
 			UIManager.put("TabbedPane.tabInsets", new Insets(0, 0, 0, 0));
-			UIManager.put("TabbedPane.selectedTabPadInsets",
-					new Insets(0, 0, 0, 0));
+			UIManager.put("TabbedPane.selectedTabPadInsets", new Insets(0, 0, 0, 0));
 			UIManager.put("TabbedPane.tabAreaInsets", new Insets(0, 0, 0, 0));
-			UIManager.put("TabbedPane.contentBorderInsets",
-					new Insets(0, 0, 0, 0));
+			UIManager.put("TabbedPane.contentBorderInsets", new Insets(0, 0, 0, 0));
 			UIManager.put("TabbedPane.tabsOverlapBorder", Boolean.FALSE);
 
-			UIManager.put("Component.border",
-					new LineBorder(border, Utility.toPixel(1)));
+			UIManager.put("Component.border", new LineBorder(border, Utility.toPixel(1)));
 
 			UIManager.put("RounderBorder.color", border);
 
@@ -2803,23 +2286,20 @@ public final class App {
 			UIManager.put("Desktop.selectedForeground", Color.GRAY);
 
 			UIManager.put("ToggleButton.background", background);
-			UIManager.put("ToggleButton.border",
-					new LineBorder(border, Utility.toPixel(1)));
+			UIManager.put("ToggleButton.border", new LineBorder(border, Utility.toPixel(1)));
 			UIManager.put("ToggleButton.foreground", Color.BLACK);
 			UIManager.put("ToggleButton.select", selection);
 
 			UIManager.put("Button.background", background);
 			UIManager.put("Button.border", new FlatButtonBorder(border));
-			UIManager.put("Button.rolloverBorder",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("Button.rolloverBorder", new LineBorder(selection, Utility.toPixel(1)));
 			UIManager.put("Button.rollover", Boolean.TRUE);
 			UIManager.put("Button.highlight", selection);
 			UIManager.put("Button.select", Color.BLUE);
 			UIManager.put("Button.font", normalFont);
 			UIManager.put("Button.foreground", foreground);
 			UIManager.put("Button.margin",
-					new Insets(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5)));
+					new Insets(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 			UIManager.put("Button.highlight", selection);
 			UIManager.put("Button.darkShadow", selection.darker());
 
@@ -2831,12 +2311,10 @@ public final class App {
 			UIManager.put("StartMenu.background", background);
 
 			UIManager.put("TaskBar.background", background);
-			UIManager.put("TaskBar.border",
-					new LineBorder(new Color(20, 20, 20), Utility.toPixel(1)));
+			UIManager.put("TaskBar.border", new LineBorder(new Color(20, 20, 20), Utility.toPixel(1)));
 			UIManager.put("TaskBar.buttonBackground", border);
 
-			UIManager.put("PopupMenu.border",
-					new LineBorder(new Color(30, 30, 30), Utility.toPixel(1)));
+			UIManager.put("PopupMenu.border", new LineBorder(new Color(30, 30, 30), Utility.toPixel(1)));
 			UIManager.put("PopupMenu.background", background);
 			UIManager.put("PopupMenu.foreground", foreground);
 			UIManager.put("PopupMenu.font", normalFont);
@@ -2847,25 +2325,21 @@ public final class App {
 			UIManager.put("Separator.foreground", defBorder);
 			UIManager.put("Separator.thickness", Utility.toPixel(1));
 			UIManager.put("Separator.insets",
-					new Insets(Utility.toPixel(1), Utility.toPixel(1),
-							Utility.toPixel(1), Utility.toPixel(1)));
+					new Insets(Utility.toPixel(1), Utility.toPixel(1), Utility.toPixel(1), Utility.toPixel(1)));
 			// UIManager.put("PopupMenu.font", normalFont);
 
 			UIManager.put("MenuItem.border",
-					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5)));
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 			UIManager.put("MenuItem.background", background);
 			UIManager.put("MenuItem.foreground", foreground);
 			UIManager.put("MenuItem.font", normalFont);
 			UIManager.put("MenuItem.selectionBackground", selection);
 			UIManager.put("MenuItem.selectionForeground", foreground);
 			UIManager.put("MenuItem.acceleratorForeground", border);
-			UIManager.put("MenuItem.acceleratorSelectionForeground",
-					foreground);
+			UIManager.put("MenuItem.acceleratorSelectionForeground", foreground);
 
 			UIManager.put("Menu.border",
-					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5)));
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 			UIManager.put("Menu.background", border);
 			UIManager.put("Menu.foreground", foreground);
 			UIManager.put("Menu.font", normalFont);
@@ -2875,8 +2349,7 @@ public final class App {
 			UIManager.put("Menu.acceleratorSelectionForeground", foreground);
 
 			UIManager.put("MenuBar.border",
-					new EmptyBorder(Utility.toPixel(0), Utility.toPixel(0),
-							Utility.toPixel(0), Utility.toPixel(0)));
+					new EmptyBorder(Utility.toPixel(0), Utility.toPixel(0), Utility.toPixel(0), Utility.toPixel(0)));
 			UIManager.put("MenuBar.background", background);
 			UIManager.put("MenuBar.borderColor", background);
 			UIManager.put("MenuBar.foreground", foreground);
@@ -2891,8 +2364,7 @@ public final class App {
 			UIManager.put("TextField.inactiveForeground", foreground);
 			UIManager.put("TextField.font", normalFont);
 			UIManager.put("TextField.caretForeground", foreground);
-			UIManager.put("TextField.border",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("TextField.border", new LineBorder(selection, Utility.toPixel(1)));
 			UIManager.put("TextField.inactiveForeground", border);
 			UIManager.put("TextField.selectionBackground", prgBg);
 			UIManager.put("TextField.selectionForeground", foreground);
@@ -2911,8 +2383,7 @@ public final class App {
 			UIManager.put("TextArea.foreground", foreground);
 			UIManager.put("TextArea.font", normalFont);
 			UIManager.put("TextArea.caretForeground", foreground);
-			UIManager.put("TextArea.border",
-					new LineBorder(background, Utility.toPixel(1)));
+			UIManager.put("TextArea.border", new LineBorder(background, Utility.toPixel(1)));
 			UIManager.put("TextArea.selectionBackground", prgBg);
 			UIManager.put("TextArea.selectionForeground", foreground);
 			UIManager.put("TextPane.selectionForeground", foreground);
@@ -2925,16 +2396,14 @@ public final class App {
 			UIManager.put("CheckBox.foreground", foreground);
 			UIManager.put("CheckBox.font", normalFont);
 			UIManager.put("Checkbox.select", selection);
-			UIManager.put("CheckBox.border",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("CheckBox.border", new LineBorder(selection, Utility.toPixel(1)));
 			UIManager.put("TextArea.selectionBackground", prgBg);
 
 			UIManager.put("RadioButton.background", background);
 			UIManager.put("RadioButton.foreground", foreground);
 			UIManager.put("RadioButton.font", normalFont);
 			UIManager.put("RadioButton.select", selection);
-			UIManager.put("RadioButton.border",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("RadioButton.border", new LineBorder(selection, Utility.toPixel(1)));
 
 			UIManager.put("TextArea.selectionBackground", prgBg);
 
@@ -2943,37 +2412,31 @@ public final class App {
 			UIManager.put("Spinner.arrowBackground", border);
 			UIManager.put("Spinner.font", normalFont);
 			UIManager.put("Spinner.select", selection);
-			UIManager.put("Spinner.border",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("Spinner.border", new LineBorder(selection, Utility.toPixel(1)));
 			UIManager.put("Spinner.editorBorderPainted", Boolean.FALSE);
 			UIManager.put("Spinner.arrowButtonInsets",
-					new Insets(Utility.toPixel(1), Utility.toPixel(1),
-							Utility.toPixel(1), Utility.toPixel(1)));
+					new Insets(Utility.toPixel(1), Utility.toPixel(1), Utility.toPixel(1), Utility.toPixel(1)));
 
 			UIManager.put("Spinner.selectionBackground", prgBg);
 
 			UIManager.put("Table.background", c1);
-			UIManager.put("Table.border",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("Table.border", new LineBorder(selection, Utility.toPixel(1)));
 			UIManager.put("Table.shadow", background);
 			UIManager.put("Table.darkShadow", background);
 			UIManager.put("Table.gridColor", background);
 			UIManager.put("Table.selectionBackground", selection);
 			UIManager.put("Table.selectionForeground", foreground);
 			UIManager.put("Table.focusCellBackground", selection);
-			UIManager.put("Table.focusCellHighlightBorder",
-					new EmptyBorder(new Insets(0, 0, 0, 0)));
+			UIManager.put("Table.focusCellHighlightBorder", new EmptyBorder(new Insets(0, 0, 0, 0)));
 			// UIManager.put("Table.background", background);
 			UIManager.put("Table.foreground", foreground);
 			UIManager.put("Table.rendererUseTableColors", Boolean.TRUE);
-			UIManager.put("Table.scrollPaneBorder",
-					new LineBorder(background, Utility.toPixel(0)));
+			UIManager.put("Table.scrollPaneBorder", new LineBorder(background, Utility.toPixel(0)));
 
 			UIManager.put("TableHeader.background", background);
 			UIManager.put("TableHeader.foreground", foreground);
 
-			MatteBorder mb = new MatteBorder(0, 0, Utility.toPixel(1),
-					Utility.toPixel(1), border);
+			MatteBorder mb = new MatteBorder(0, 0, Utility.toPixel(1), Utility.toPixel(1), border);
 
 			UIManager.put("TableHeader.cellBorder", mb);
 
@@ -2982,11 +2445,9 @@ public final class App {
 //			UIManager.put("Tree.gridColor", background);
 //			UIManager.put("Tree.gridColor", background);
 
-			UIManager.put("SplitPane.border",
-					new LineBorder(background, Utility.toPixel(1)));
+			UIManager.put("SplitPane.border", new LineBorder(background, Utility.toPixel(1)));
 			UIManager.put("SplitPane.dividerSize", Utility.toPixel(1));
-			UIManager.put("SplitPaneDivider.border",
-					new LineBorder(background, Utility.toPixel(1)));
+			UIManager.put("SplitPaneDivider.border", new LineBorder(background, Utility.toPixel(1)));
 			UIManager.put("SplitPane.background", background);
 
 			UIManager.put("LineGraph.foreground", foreground);
@@ -3001,28 +2462,21 @@ public final class App {
 			UIManager.put("ScrollBar.highlight", selection);
 			UIManager.put("ScrollBar.thumbRollover", c2);
 			UIManager.put("ScrollBar.gradient", null);
-			UIManager.put("ScrollBar.border",
-					new EmptyBorder(new Insets(0, 0, 0, 0)));
+			UIManager.put("ScrollBar.border", new EmptyBorder(new Insets(0, 0, 0, 0)));
 			UIManager.put("ScrollBar.width", Utility.toPixel(8));
 
-			UIManager.put("ScrollPane.viewportBorder",
-					new LineBorder(background, Utility.toPixel(1)));
-			UIManager.put("ScrollPane.viewportBorderInsets",
-					new Insets(0, 0, 0, 0));
-			UIManager.put("ScrollPane.border",
-					new LineBorder(border, Utility.toPixel(1)));
+			UIManager.put("ScrollPane.viewportBorder", new LineBorder(background, Utility.toPixel(1)));
+			UIManager.put("ScrollPane.viewportBorderInsets", new Insets(0, 0, 0, 0));
+			UIManager.put("ScrollPane.border", new LineBorder(border, Utility.toPixel(1)));
 			UIManager.put("ScrollPane.background", background);
-			UIManager.put("ScrollPane.border",
-					new EmptyBorder(new Insets(0, 0, 0, 0)));
+			UIManager.put("ScrollPane.border", new EmptyBorder(new Insets(0, 0, 0, 0)));
 
-			UIManager.put("Viewport.border",
-					new EmptyBorder(new Insets(0, 0, 0, 0)));
+			UIManager.put("Viewport.border", new EmptyBorder(new Insets(0, 0, 0, 0)));
 			UIManager.put("Viewport.background", background);
 
 			UIManager.put("ComboBox.background", background);
 			UIManager.put("ComboBox.foreground", foreground);
-			UIManager.put("ComboBox.border",
-					new LineBorder(border, Utility.toPixel(1)));
+			UIManager.put("ComboBox.border", new LineBorder(border, Utility.toPixel(1)));
 //			UIManager.put("ComboBox.buttonBackground", background);
 //			UIManager.put("ComboBox.buttonDarkShadow", background);
 //			UIManager.put("ComboBox.buttonHighlight", background);
@@ -3033,10 +2487,8 @@ public final class App {
 			UIManager.put("ComboBox.selectionForeground", foreground);
 			UIManager.put("ComboBox.font", normalFont);
 
-			UIManager.put("InternalFrame.border",
-					new LineBorder(background, Utility.toPixel(5)));
-			UIManager.put("InternalFrame.activeBorder",
-					new LineBorder(titleColor, Utility.toPixel(5)));
+			UIManager.put("InternalFrame.border", new LineBorder(background, Utility.toPixel(5)));
+			UIManager.put("InternalFrame.activeBorder", new LineBorder(titleColor, Utility.toPixel(5)));
 			UIManager.put("InternalFrame.activeBorderColor", titleColor);
 			UIManager.put("InternalFrame.borderColor", border);
 			UIManager.put("InternalFrame.activeTitleBackground", titleColor);
@@ -3045,16 +2497,11 @@ public final class App {
 			UIManager.put("InternalFrame.activeTitleForeground", foreground);
 			UIManager.put("InternalFrame.activeTitleBackground", titleColor);
 			UIManager.put("InternalFrame.titlePaneHeight", Utility.toPixel(24));
-			UIManager.put("InternalFrame.titleButtonHeight",
-					Utility.toPixel(24));
-			UIManager.put("InternalFrame.titleButtonWidth",
-					Utility.toPixel(24));
-			UIManager.put("InternalFrameTitlePane.maximizeButtonOpacity",
-					Boolean.TRUE);
-			UIManager.put("InternalFrameTitlePane.closeButtonOpacity",
-					Boolean.TRUE);
-			UIManager.put("InternalFrameTitlePane.iconifyButtonOpacity",
-					Boolean.TRUE);
+			UIManager.put("InternalFrame.titleButtonHeight", Utility.toPixel(24));
+			UIManager.put("InternalFrame.titleButtonWidth", Utility.toPixel(24));
+			UIManager.put("InternalFrameTitlePane.maximizeButtonOpacity", Boolean.TRUE);
+			UIManager.put("InternalFrameTitlePane.closeButtonOpacity", Boolean.TRUE);
+			UIManager.put("InternalFrameTitlePane.iconifyButtonOpacity", Boolean.TRUE);
 			UIManager.put("InternalFrame.minBackground", Color.DARK_GRAY);
 			UIManager.put("InternalFrame.maxBackground", Color.DARK_GRAY);
 			UIManager.put("InternalFrame.closeBackground", Color.DARK_GRAY);// Color.RED);
@@ -3068,13 +2515,11 @@ public final class App {
 //					App.class.getResource("/images/blue_folder.png"),
 //					Utility.toPixel(20), Utility.toPixel(20));
 
-			Icon smallFolder = new ScaledIcon(
-					App.class.getResource("/images/folder.png"),
-					Utility.toPixel(20), Utility.toPixel(20));
+			Icon smallFolder = new ScaledIcon(App.class.getResource("/images/folder.png"), Utility.toPixel(20),
+					Utility.toPixel(20));
 
-			Icon smallFile = new ScaledIcon(
-					App.class.getResource("/images/fileicon.png"),
-					Utility.toPixel(20), Utility.toPixel(20));
+			Icon smallFile = new ScaledIcon(App.class.getResource("/images/fileicon.png"), Utility.toPixel(20),
+					Utility.toPixel(20));
 
 			UIManager.put("ListView.smallFolder", smallFolder);
 			UIManager.put("ListView.smallFile", smallFile);
@@ -3102,11 +2547,9 @@ public final class App {
 			UIManager.put("Tree.iconBackground", selection);
 			UIManager.put("Tree.rendererUseTreeColors", Boolean.TRUE);
 			UIManager.put("Tree.background", background);
-			UIManager.put("Tree.padding", Integer.valueOf(20));
-			UIManager.put("Tree.leftChildIndent",
-					Integer.valueOf(Utility.toPixel(15)));
-			UIManager.put("Tree.rightChildIndent",
-					Integer.valueOf(Utility.toPixel(5)));
+			UIManager.put("Tree.padding", Integer.valueOf(0));
+			UIManager.put("Tree.leftChildIndent", Integer.valueOf(Utility.toPixel(5)));
+			UIManager.put("Tree.rightChildIndent", Integer.valueOf(Utility.toPixel(5)));
 			// UIManager.put("Tree.expanderSize", Integer.valueOf(30));
 
 			UIManager.put("List.background", background);
@@ -3115,8 +2558,7 @@ public final class App {
 			UIManager.put("List.selectionForeground", foreground);
 			UIManager.put("List.rendererUseUIBorder", Boolean.TRUE);
 			UIManager.put("List.rendererUseListColors", Boolean.TRUE);
-			UIManager.put("List.focusCellHighlightBorder",
-					new EmptyBorder(0, 0, 0, 0));
+			UIManager.put("List.focusCellHighlightBorder", new EmptyBorder(0, 0, 0, 0));
 			UIManager.put("List.border", new EmptyBorder(0, 0, 0, 0));
 
 			UIManager.put("Terminal.background", background);
@@ -3139,66 +2581,52 @@ public final class App {
 			UIManager.put("PasswordField.caretForeground", foreground);
 			UIManager.put("PasswordField.font", normalFont);
 			UIManager.put("PasswordField.selectionBackground", selection);
-			UIManager.put("PasswordField.border",
-					new LineBorder(selection, Utility.toPixel(1)));
+			UIManager.put("PasswordField.border", new LineBorder(selection, Utility.toPixel(1)));
 
 			UIManager.put("ProgressBar.background", defBorder);
 			UIManager.put("ProgressBar.foreground", prgBg);
 			UIManager.put("ProgressBar.border", new EmptyBorder(0, 0, 0, 0));
-			UIManager.put("ProgressBar.horizontalSize",
-					new Dimension(Utility.toPixel(146), Utility.toPixel(8)));
-			UIManager.put("ProgressBar.verticalSize",
-					new Dimension(Utility.toPixel(8), Utility.toPixel(146)));
+			UIManager.put("ProgressBar.horizontalSize", new Dimension(Utility.toPixel(146), Utility.toPixel(8)));
+			UIManager.put("ProgressBar.verticalSize", new Dimension(Utility.toPixel(8), Utility.toPixel(146)));
 
 			UIManager.put("OptionPane.background", background);
 			UIManager.put("OptionPane.messageForeground", foreground);
 			UIManager.put("OptionPane.foreground", foreground);
 			UIManager.put("OptionPane.border",
-					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5)));
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 
 			UIManager.put("TableHeader.cellBorder", new CompoundBorder(
-					new MatteBorder(0, 0, 0, Utility.toPixel(1),
-							UIManager.getColor("DefaultBorder.color")),
-					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5))));
+					new MatteBorder(0, 0, 0, Utility.toPixel(1), UIManager.getColor("DefaultBorder.color")),
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5))));
 
-			UIManager.put("ToolTip.background",
-					UIManager.getColor("DefaultBorder.color"));
+			UIManager.put("ToolTip.background", UIManager.getColor("DefaultBorder.color"));
 			UIManager.put("ToolTip.backgroundInactive", background);
 			UIManager.put("ToolTip.border",
-					new LineBorder(UIManager.getColor("DefaultBorder.color"),
-							Utility.toPixel(1)));
+					new LineBorder(UIManager.getColor("DefaultBorder.color"), Utility.toPixel(1)));
 			UIManager.put("ToolTip.borderInactive",
-					new LineBorder(UIManager.getColor("DefaultBorder.color"),
-							Utility.toPixel(1)));
+					new LineBorder(UIManager.getColor("DefaultBorder.color"), Utility.toPixel(1)));
 			UIManager.put("ToolTip.foreground", foreground);
 			UIManager.put("ToolTip.foregroundInactive", foreground);
 
 			UIManager.put("CheckBoxMenuItem.border",
-					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5)));
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 			UIManager.put("CheckBoxMenuItem.background", background);
 			UIManager.put("CheckBoxMenuItem.foreground", foreground);
 			UIManager.put("CheckBoxMenuItem.font", normalFont);
 			UIManager.put("CheckBoxMenuItem.selectionBackground", selection);
 			UIManager.put("CheckBoxMenuItem.selectionForeground", foreground);
 			UIManager.put("CheckBoxMenuItem.acceleratorForeground", border);
-			UIManager.put("CheckBoxMenuItem.acceleratorSelectionForeground",
-					foreground);
+			UIManager.put("CheckBoxMenuItem.acceleratorSelectionForeground", foreground);
 
 			UIManager.put("RadioButtonMenuItem.border",
-					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-							Utility.toPixel(5), Utility.toPixel(5)));
+					new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 			UIManager.put("RadioButtonMenuItem.background", background);
 			UIManager.put("RadioButtonMenuItem.foreground", foreground);
 			UIManager.put("RadioButtonMenuItem.font", normalFont);
 			UIManager.put("RadioButtonMenuItem.selectionBackground", selection);
-			UIManager.put("RadioButtonMenuItem.selectionForeground",
-					background);
+			UIManager.put("RadioButtonMenuItem.selectionForeground", background);
 			UIManager.put("RadioButtonMenuItem.acceleratorForeground", border);
-			UIManager.put("RadioButtonMenuItem.acceleratorSelectionForeground",
-					foreground);
+			UIManager.put("RadioButtonMenuItem.acceleratorSelectionForeground", foreground);
 
 			UIManager.put("Editor.theme", "default");
 

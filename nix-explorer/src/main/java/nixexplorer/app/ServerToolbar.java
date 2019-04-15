@@ -42,7 +42,7 @@ public class ServerToolbar extends JPanel {
 		add(Box.createHorizontalGlue());
 		JButton btnSettings = new JButton(title);
 		btnSettings.addActionListener(action);
-		btnSettings.setFont(Utility.getFont(Constants.NORMAL));
+		btnSettings.setFont(Utility.getFont(Constants.SMALL));
 		btnSettings.setPreferredSize(new Dimension(
 				btnSettings.getPreferredSize().width + Utility.toPixel(10),
 				btnSettings.getPreferredSize().height + Utility.toPixel(10)));
@@ -57,7 +57,7 @@ public class ServerToolbar extends JPanel {
 		//add(Box.createHorizontalStrut(Utility.toPixel(10)));
 		JButton btnSettings = new JButton(title);
 		btnSettings.addActionListener(action);
-		btnSettings.setFont(Utility.getFont(Constants.NORMAL));
+		btnSettings.setFont(Utility.getFont(Constants.SMALL));
 		btnSettings.setPreferredSize(new Dimension(
 				btnSettings.getPreferredSize().width + Utility.toPixel(10),
 				btnSettings.getPreferredSize().height + Utility.toPixel(10)));

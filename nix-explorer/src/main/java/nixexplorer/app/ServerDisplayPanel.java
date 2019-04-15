@@ -109,7 +109,7 @@ public class ServerDisplayPanel extends JPanel {
 		lblDragSide.setPreferredSize(
 				new Dimension(Utility.toPixel(8), Utility.toPixel(8)));
 		lblDragSide.setCursor(new Cursor(Cursor.W_RESIZE_CURSOR));
-		add(lblDragSide, BorderLayout.WEST);
+		//add(lblDragSide, BorderLayout.WEST);
 
 	}
 
@@ -120,8 +120,8 @@ public class ServerDisplayPanel extends JPanel {
 	private JPanel createContentPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setOpaque(false);
-		int gap = Utility.toPixel(8);
-		panel.setBorder(new EmptyBorder(gap, 0, gap, gap));
+//		int gap = Utility.toPixel(8);
+//		panel.setBorder(new EmptyBorder(gap, 0, gap, gap));
 
 		tabs = new FlatTabbedPane(true, true, null);
 		tabs.setClosable(true);

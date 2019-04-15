@@ -49,8 +49,7 @@ public class FileBrowserWidget extends Widget {
 	 * @param appSession
 	 * @param window
 	 */
-	public FileBrowserWidget(SessionInfo info, String[] args,
-			AppSession appSession, Window window) {
+	public FileBrowserWidget(SessionInfo info, String[] args, AppSession appSession, Window window) {
 		super(info, args, appSession, window);
 
 		vertSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -70,16 +69,13 @@ public class FileBrowserWidget extends Widget {
 			}
 		});
 		vertSplit.setOpaque(false);
-		vertSplit.setDividerSize(Utility.toPixel(8));
+		vertSplit.setDividerSize(Utility.toPixel(3));
 		vertSplit.setContinuousLayout(true);
-		localFileView = new LocalFolderViewWidget(info, new String[] {},
-				appSession, window);
+		localFileView = new LocalFolderViewWidget(info, new String[] {}, appSession, window);
 
-		clpB = new MatteBorder(Utility.toPixel(1), Utility.toPixel(0),
-				Utility.toPixel(0), Utility.toPixel(0),
+		clpB = new MatteBorder(Utility.toPixel(1), Utility.toPixel(0), Utility.toPixel(0), Utility.toPixel(0),
 				UIManager.getColor("DefaultBorder.color"));
-		expB = new MatteBorder(Utility.toPixel(1), Utility.toPixel(0),
-				Utility.toPixel(0), Utility.toPixel(0),
+		expB = new MatteBorder(Utility.toPixel(1), Utility.toPixel(0), Utility.toPixel(0), Utility.toPixel(0),
 				UIManager.getColor("DefaultBorder.color"));
 
 		add(createContentPanel());
@@ -88,26 +84,21 @@ public class FileBrowserWidget extends Widget {
 	private JPanel createContentPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setOpaque(false);
-		int gap = Utility.toPixel(8);
-		panel.setBorder(new EmptyBorder(gap, 0, gap, gap));
 
-		remoteFileView = new RemoteFolderViewWidget(info, args, appSession,
-				this.getWindow());
+		remoteFileView = new RemoteFolderViewWidget(info, args, appSession, this.getWindow());
 
 		bottomBar = new JPanel(new BorderLayout());
 		bottomBar.setOpaque(true);
 		JLabel lblTitle = new JLabel(TextHolder.getString("app.local.title"));
-		lblTitle.setFont(
-				new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(14)));
-		JButton btnExpandCollapse = new JButton(
-				UIManager.getIcon("ExpandPanel.upIcon"));
+		lblTitle.setBorder(
+				new EmptyBorder(Utility.toPixel(0), Utility.toPixel(10), Utility.toPixel(0), Utility.toPixel(0)));
+		lblTitle.setFont(new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(14)));
+		JButton btnExpandCollapse = new JButton(UIManager.getIcon("ExpandPanel.upIcon"));
 		btnExpandCollapse.addActionListener(e -> {
-			if (btnExpandCollapse
-					.getClientProperty("button.expanded") == null) {
+			if (btnExpandCollapse.getClientProperty("button.expanded") == null) {
 				panel.removeAll();
 				vertSplit.setTopComponent(remoteFileView);
-				bottomPanel.putClientProperty("panel.size",
-						bottomPanel.getPreferredSize());
+				bottomPanel.putClientProperty("panel.size", bottomPanel.getPreferredSize());
 				bottomPanel.removeAll();
 				if (lastBottomDivider == 0) {
 					lastBottomDivider = panel.getHeight() / 2;
@@ -116,10 +107,8 @@ public class FileBrowserWidget extends Widget {
 //						Utility.toPixel(100), Utility.toPixel(300)));
 				bottomPanel.add(bottomBar, BorderLayout.NORTH);
 				bottomPanel.setBorder(expB);
-				btnExpandCollapse.putClientProperty("button.expanded",
-						Boolean.TRUE);
-				btnExpandCollapse
-						.setIcon(UIManager.getIcon("ExpandPanel.downIcon"));
+				btnExpandCollapse.putClientProperty("button.expanded", Boolean.TRUE);
+				btnExpandCollapse.setIcon(UIManager.getIcon("ExpandPanel.downIcon"));
 				bottomPanel.add(localFileView);
 				vertSplit.setBottomComponent(bottomPanel);
 				panel.add(vertSplit);
@@ -128,13 +117,11 @@ public class FileBrowserWidget extends Widget {
 				lastBottomDivider = vertSplit.getDividerLocation();
 				panel.removeAll();
 				bottomPanel.removeAll();
-				bottomPanel.setPreferredSize((Dimension) bottomPanel
-						.getClientProperty("panel.size"));
+				bottomPanel.setPreferredSize((Dimension) bottomPanel.getClientProperty("panel.size"));
 				bottomPanel.add(bottomBar);
 				bottomPanel.setBorder(clpB);
 				btnExpandCollapse.putClientProperty("button.expanded", null);
-				btnExpandCollapse
-						.setIcon(UIManager.getIcon("ExpandPanel.upIcon"));
+				btnExpandCollapse.setIcon(UIManager.getIcon("ExpandPanel.upIcon"));
 				panel.add(remoteFileView);
 				panel.add(bottomPanel, BorderLayout.SOUTH);
 			}
@@ -142,12 +129,13 @@ public class FileBrowserWidget extends Widget {
 			revalidate();
 			repaint();
 		});
+		btnExpandCollapse.setBorderPainted(false);
 		bottomBar.add(lblTitle, BorderLayout.WEST);
 		bottomBar.add(btnExpandCollapse, BorderLayout.EAST);
 //		tabs1.add(Box.createRigidArea(
 //				new Dimension(Utility.toPixel(10), Utility.toPixel(30))));
-		bottomBar.setBorder(new EmptyBorder(Utility.toPixel(5),
-				Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
+//		bottomBar.setBorder(
+//				new EmptyBorder(Utility.toPixel(2), Utility.toPixel(2), Utility.toPixel(2), Utility.toPixel(2)));
 
 		panel.add(remoteFileView);
 		bottomPanel = new JPanel(new BorderLayout());

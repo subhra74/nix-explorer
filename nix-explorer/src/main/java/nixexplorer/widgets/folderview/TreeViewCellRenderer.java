@@ -17,7 +17,7 @@ public class TreeViewCellRenderer implements TreeCellRenderer {
 		lblRenderer = new JLabel();
 		lblRenderer
 				.setBackground(UIManager.getColor("Tree.selectionBackground"));
-		lblRenderer.setIcon(UIManager.getIcon("Tree.openIcon"));
+		//lblRenderer.setIcon(UIManager.getIcon("Tree.openIcon"));
 		lblRenderer.setBorder(new EmptyBorder(Utility.toPixel(5),
 				Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 	}

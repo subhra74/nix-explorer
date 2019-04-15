@@ -24,8 +24,8 @@ import nixexplorer.widgets.logviewer.LogHighlightEntry;
  *
  */
 public class AppConfig {
-	public static final int OPEN_WITH_TEXT_EDITOR = 0, OPEN_IN_TERMINAL = 1,
-			OPEN_WITH_EXTERNAL_EDITOR = 2, OPEN_WITH_SYS_DEF_APP = 3;
+	public static final int OPEN_WITH_TEXT_EDITOR = 0, OPEN_IN_TERMINAL = 1, OPEN_WITH_EXTERNAL_EDITOR = 2,
+			OPEN_WITH_SYS_DEF_APP = 3;
 
 	private int windowWidth, windowHeight, windowState, x = -1, y = -1;
 
@@ -35,6 +35,7 @@ public class AppConfig {
 	private LogViewer logViewer;
 	private ProcessMonitor monitor;
 	private boolean showBanner = true;
+	private boolean useDarkTheme = true;
 
 	/**
 	 * 
@@ -48,11 +49,9 @@ public class AppConfig {
 	}
 
 	public synchronized static AppConfig load() {
-		File file = new File(App.getConfig("app.dir"),
-				Constants.CONFIG_DB_FILE);
+		File file = new File(App.getConfig("app.dir"), Constants.CONFIG_DB_FILE);
 		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.configure(
-				DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		try {
 			return objectMapper.readValue(file, new TypeReference<AppConfig>() {
 			});
@@ -63,8 +62,7 @@ public class AppConfig {
 	}
 
 	public void save() {
-		File file = new File(App.getConfig("app.dir"),
-				Constants.CONFIG_DB_FILE);
+		File file = new File(App.getConfig("app.dir"), Constants.CONFIG_DB_FILE);
 		System.out.println("saving config to: " + file);
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
@@ -111,8 +109,7 @@ public class AppConfig {
 	public static class Terminal {
 		private int fontSize = 14;
 		private boolean x11CopyPaste;
-		private int backGround = Color.BLACK.getRGB(),
-				foreGround = Color.WHITE.getRGB();
+		private int backGround = Color.BLACK.getRGB(), foreGround = Color.WHITE.getRGB();
 		private List<SnippetItem> snippets = new ArrayList<SnippetItem>();
 
 		/**
@@ -237,11 +234,9 @@ public class AppConfig {
 		}
 
 		/**
-		 * @param reloadFolderAfterOperation the reloadFolderAfterOperation to
-		 *                                   set
+		 * @param reloadFolderAfterOperation the reloadFolderAfterOperation to set
 		 */
-		public void setReloadFolderAfterOperation(
-				boolean reloadFolderAfterOperation) {
+		public void setReloadFolderAfterOperation(boolean reloadFolderAfterOperation) {
 			this.reloadFolderAfterOperation = reloadFolderAfterOperation;
 		}
 
@@ -541,5 +536,13 @@ public class AppConfig {
 	 */
 	public void setShowBanner(boolean showBanner) {
 		this.showBanner = showBanner;
+	}
+
+	public boolean isUseDarkTheme() {
+		return useDarkTheme;
+	}
+
+	public void setUseDarkTheme(boolean useDarkTheme) {
+		this.useDarkTheme = useDarkTheme;
 	}
 }

@@ -157,6 +157,7 @@ public class FolderViewWidget extends JPanel
 		splitPane.setBorder(
 				new MatteBorder(Utility.toPixel(1), 0, Utility.toPixel(1), 0,
 						UIManager.getColor("DefaultBorder.color")));
+		splitPane.setBackground(UIManager.getColor("DefaultBorder.color"));
 		splitPane.setContinuousLayout(true);
 		lblDetails = new JLabel();
 		// splitPane.setBorder(null);
@@ -465,7 +466,8 @@ public class FolderViewWidget extends JPanel
 		scrollTable = new JScrollPane(folderTable);
 		scrollTable.getVerticalScrollBar()
 				.setBackground(folderTable.getBackground());
-		scrollTable.setViewportBorder(null);
+		scrollTable.setViewportBorder(new EmptyBorder(0, 0, 0, 0));
+		scrollTable.setBorder(new EmptyBorder(0, 0, 0, 0));
 		scrollTable.addMouseListener(new MouseAdapter() {
 			/*
 			 * (non-Javadoc)
@@ -500,7 +502,7 @@ public class FolderViewWidget extends JPanel
 		JLabel lblCorner = new JLabel();
 		lblCorner.setBorder(UIManager.getBorder("TableHeader.cellBorder"));
 		scrollTable.setCorner(JScrollPane.UPPER_RIGHT_CORNER, lblCorner);
-		scrollTable.setBorder(null);
+		// scrollTable.setBorder(null);
 		scrollTable.getViewport().setBackground(folderTable.getBackground());
 		addressBox.add(btnBack);
 		addressBox.add(btnForward);
@@ -512,7 +514,7 @@ public class FolderViewWidget extends JPanel
 		// addressBox.add(btnSearch);
 		addressBox.add(btnMoreMenu);
 
-		contentHolder = new JPanel(new BorderLayout());
+		contentHolder = new JPanel(new BorderLayout(0, 0));
 
 		add(addressBox, BorderLayout.NORTH);
 		// contentHolder.add(scrollTable);
@@ -1258,6 +1260,7 @@ public class FolderViewWidget extends JPanel
 		FolderViewRenderer r = new FolderViewRenderer();
 
 		folderTable = new JTable(folderViewModel);
+		folderTable.setBorder(new EmptyBorder(0, 0, 0, 0));
 		folderTable.setIntercellSpacing(new Dimension(0, 0));
 		folderTable.setBorder(null);
 		if (!embedded) {
