@@ -27,18 +27,19 @@ public class TerminalDialog extends JDialog implements DisposableView {
 	private TabbedConsoleWidget terminal;
 	protected AtomicBoolean widgetClosed = new AtomicBoolean(Boolean.FALSE);
 
-	public TerminalDialog(SessionInfo info, String[] args,
-			AppSession appSession, Window window, String title) {
+	public TerminalDialog(SessionInfo info, String[] args, AppSession appSession, Window window, String title) {
 		super(window);
 		setTitle(title);
-		this.terminal = new TabbedConsoleWidget(info, args, appSession, window,
-				true);
+		this.terminal = new TabbedConsoleWidget(info, args, appSession, window, false);
 		this.add(terminal);
 		this.setSize(Utility.toPixel(640), Utility.toPixel(480));
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
+				System.out.println("Exit status: " + terminal.getTtyConnector() != null
+						? terminal.getTtyConnector().getExitStatus()
+						: "");
 				System.out.println("Closing terminal dialog");
 				terminal.close();
 				dispose();

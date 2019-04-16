@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JOptionPane;
 
 import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelShell;
 import com.jediterm.terminal.Questioner;
 import com.jediterm.terminal.TerminalStarter;
@@ -22,7 +23,7 @@ import nixexplorer.app.components.CredentialsDialog;
 import nixexplorer.app.components.CredentialsDialog.Credentials;
 import nixexplorer.app.session.SessionInfo;
 
-public class SshTtyConnector implements TtyConnector {
+public class SshTtyConnector implements DisposableTtyConnector {
 	private InputStreamReader myInputStreamReader;
 	private InputStream myInputStream = null;
 	private OutputStream myOutputStream = null;
@@ -32,6 +33,8 @@ public class SshTtyConnector implements TtyConnector {
 	private SshWrapper wr;
 	private AtomicBoolean isCancelled = new AtomicBoolean(false);
 	private AtomicBoolean stopFlag = new AtomicBoolean(false);
+	private Dimension myPendingTermSize;
+	private Dimension myPendingPixelSize;
 
 	public SshTtyConnector(SessionInfo info) {
 		this.info = info;
@@ -65,23 +68,21 @@ public class SshTtyConnector implements TtyConnector {
 			String lang = System.getenv().get("LANG");
 			channel.setEnv("LANG", lang != null ? lang : "en_US.UTF-8");
 			channel.setPtyType("xterm");
-			
-			PipedOutputStream pout1=new PipedOutputStream();
-			PipedInputStream pin1=new PipedInputStream(pout1);
+
+			PipedOutputStream pout1 = new PipedOutputStream();
+			PipedInputStream pin1 = new PipedInputStream(pout1);
 			channel.setOutputStream(pout1);
-			
-			PipedOutputStream pout2=new PipedOutputStream();
-			PipedInputStream pin2=new PipedInputStream(pout2);
+
+			PipedOutputStream pout2 = new PipedOutputStream();
+			PipedInputStream pin2 = new PipedInputStream(pout2);
 			channel.setInputStream(pin2);
-			
+
 			myInputStream = pin1;// channel.getInputStream();
-			myOutputStream = pout2;//channel.getOutputStream();
+			myOutputStream = pout2;// channel.getOutputStream();
 			myInputStreamReader = new InputStreamReader(myInputStream, "utf-8");
 			channel.connect();
 			System.out.println("Initiated");
-			
-			
-			
+
 			// resize(termSize, pixelSize);
 			isInitiated.set(true);
 			return true;
@@ -104,12 +105,17 @@ public class SshTtyConnector implements TtyConnector {
 
 	@Override
 	public void resize(Dimension termSize, Dimension pixelSize) {
-		if (channel == null) {
-			return;
+		myPendingTermSize = termSize;
+		myPendingPixelSize = pixelSize;
+		if (channel != null) {
+			resizeImmediately();
 		}
-		System.out.println("Terminal resized");
-		channel.setPtySize(termSize.width, termSize.height, pixelSize.width,
-				pixelSize.height);
+
+//		if (channel == null) {
+//			return;
+//		}
+//		System.out.println("Terminal resized");
+//		channel.setPtySize(termSize.width, termSize.height, pixelSize.width, pixelSize.height);
 	}
 
 	@Override
@@ -153,8 +159,7 @@ public class SshTtyConnector implements TtyConnector {
 	}
 
 	public boolean isRunning(Channel channel) {
-		return channel != null && channel.getExitStatus() < 0
-				&& channel.isConnected();
+		return channel != null && channel.getExitStatus() < 0 && channel.isConnected();
 	}
 
 	public boolean isBusy() {
@@ -168,6 +173,27 @@ public class SshTtyConnector implements TtyConnector {
 	public void stop() {
 		stopFlag.set(true);
 		close();
+	}
+
+	public int getExitStatus() {
+		if (channel != null) {
+			return channel.getExitStatus();
+		}
+		return -2;
+	}
+
+	private void resizeImmediately() {
+		if (myPendingTermSize != null && myPendingPixelSize != null) {
+			setPtySize(channel, myPendingTermSize.width, myPendingTermSize.height, myPendingPixelSize.width,
+					myPendingPixelSize.height);
+			myPendingTermSize = null;
+			myPendingPixelSize = null;
+		}
+	}
+
+	private void setPtySize(ChannelShell channel, int col, int row, int wp, int hp) {
+		System.out.println("Exec pty resized");
+		channel.setPtySize(col, row, wp, hp);
 	}
 
 }
