@@ -464,9 +464,9 @@ public final class App {
 		TextHolder.addString("uploader.title", "Upload");
 		TextHolder.addString("uploader.app", "Application");
 
-		TextHolder.addString("filetransfer.title", "Remote to remote SCP");
+		TextHolder.addString("filetransfer.title", "File transfer");
 		TextHolder.addString("filetransfer.back", "Back");
-		TextHolder.addString("filetransfer.sendto", "Send files with SCP");
+		TextHolder.addString("filetransfer.sendto", "Send files");
 
 		TextHolder.addString("appmenu.connect", "Connections");
 		TextHolder.addString("appmenu.settings", "Settings");
@@ -1232,8 +1232,8 @@ public final class App {
 					Utility.toPixel(32), Utility.toPixel(32)));
 
 			UIManager.put("Tab.roundCloseIcon",
-					new ScaledIcon(App.class.getResource("/images/" + black + "_round_close.png"), Utility.toPixel(20),
-							Utility.toPixel(20)));
+					new ScaledIcon(App.class.getResource("/images/" + black + "_round_close.png"), Utility.toPixel(16),
+							Utility.toPixel(16)));
 
 			UIManager.put("RadioButton.selectedIcon",
 					new ScaledIcon(App.class.getResource("/images/" + black + "_radio_checked.png"),

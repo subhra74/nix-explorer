@@ -8,7 +8,8 @@ package nixexplorer.widgets.scp;
  *
  */
 public class ScpServerInfo {
-	private String host, user, folder;
+	private String host, user, folder = ".", temp = "/tmp";
+	private int transferMode = 0;
 	private int port;
 
 	/**
@@ -65,5 +66,33 @@ public class ScpServerInfo {
 	 */
 	public void setPort(int port) {
 		this.port = port;
+	}
+
+	/**
+	 * @return the temp
+	 */
+	public synchronized String getTemp() {
+		return temp;
+	}
+
+	/**
+	 * @param temp the temp to set
+	 */
+	public synchronized void setTemp(String temp) {
+		this.temp = temp;
+	}
+
+	/**
+	 * @return the transferMode
+	 */
+	public synchronized int getTransferMode() {
+		return transferMode;
+	}
+
+	/**
+	 * @param transferMode the transferMode to set
+	 */
+	public synchronized void setTransferMode(int transferMode) {
+		this.transferMode = transferMode;
 	}
 }

@@ -5,6 +5,7 @@ package nixexplorer.widgets.scp;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.io.BufferedReader;
@@ -15,8 +16,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.Box;
@@ -27,6 +30,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
@@ -34,13 +38,21 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
+
+import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
 import nixexplorer.app.components.DisposableView;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.core.ForeignServerInfo;
+import nixexplorer.core.ssh.SshFileSystemProvider;
+import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.widgets.console.TabbedConsoleWidget;
 import nixexplorer.widgets.console.TerminalDialog;
@@ -70,6 +82,11 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 	private TabbedConsoleWidget console;
 	private Window window;
 	protected AtomicBoolean widgetClosed = new AtomicBoolean(Boolean.FALSE);
+	private JComboBox<String> cmbTransferMode;
+	private JTextField txtTempDir;
+	private String tmpFile;
+	private AtomicBoolean stopFlag = new AtomicBoolean(Boolean.FALSE);
+
 	// private List<ScpServerInfo> serverList = new ArrayList<>();
 
 	public ScpTransferWidget(SessionInfo info, List<String> files,
@@ -86,50 +103,176 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 	}
 
 	public void run() {
-		String scpCommand = genrateScpCmd();
-		System.out.println("Scp command: " + scpCommand);
-		TerminalDialog dlg = new TerminalDialog(info,
-				new String[] { "-c", scpCommand }, appSession, window,
-				"Command window");
-		this.dispose();
-		dlg.setLocationRelativeTo(window);
-		dlg.setVisible(true);
-//		this.getContentPane().removeAll();
-//		this.console = new TabbedConsoleWidget(info,
-//				new String[] { "-c", genrateScpCmd() }, appSession,
-//				this.window);
-//		this.add(console);
-//		this.getContentPane().revalidate();
-//		this.getContentPane().repaint();
-//		System.out.println("done");
+		setCursor(new Cursor(Cursor.WAIT_CURSOR));
+		contentPage.removeAll();
+		JLabel lbl = new JLabel("Creating file list");
+		lbl.setHorizontalAlignment(JLabel.CENTER);
+		lbl.setHorizontalTextPosition(JLabel.CENTER);
+		lbl.setVerticalAlignment(JLabel.CENTER);
+		lbl.setVerticalTextPosition(JLabel.CENTER);
+		contentPage.add(lbl);
+
+		this.tmpFile = PathUtils.combineUnix(serverInfo.getTemp(),
+				UUID.randomUUID().toString());
+
+		System.out.println("Temp file: " + this.tmpFile);
+
+		new Thread(() -> {
+			try {
+
+				createFileList();
+				SwingUtilities.invokeLater(() -> {
+					String transferCommand = genrateTransferCmd();
+					System.out.println("Transfer command: " + transferCommand);
+					TerminalDialog dlg = new TerminalDialog(info,
+							new String[] { "-c", transferCommand }, appSession,
+							window, "Command window");
+					this.dispose();
+					dlg.setLocationRelativeTo(window);
+					dlg.setVisible(true);
+					return;
+				});
+			} catch (AccessDeniedException e) {
+				e.printStackTrace();
+				if (!stopFlag.get()) {
+					JOptionPane.showMessageDialog(this,
+							"Temporary directory is not writable "
+									+ serverInfo.getTemp());
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			SwingUtilities.invokeLater(() -> {
+				this.dispose();
+			});
+		}).start();
 	}
 
-	private String genrateScpCmd() {
+	private void createFileList() throws IOException, AccessDeniedException {
+		while (true) {
+			try (SshWrapper wrapper = new SshWrapper(info)) {
+				wrapper.connect();
+				ChannelSftp sftp = wrapper.getSftpChannel();
+				OutputStream os = sftp.put(tmpFile);
+				String data = null;
+				switch (serverInfo.getTransferMode()) {
+				case 0:
+					data = createSftpFileList();
+					break;
+				case 1:
+					break;
+				case 2:
+					data = createSshFileList();
+				}
+				os.write(data.getBytes());
+				os.close();
+				sftp.disconnect();
+				wrapper.disconnect();
+				return;
+			} catch (SftpException e) {
+				e.printStackTrace();
+				if (e.id == ChannelSftp.SSH_FX_PERMISSION_DENIED) {
+					throw new AccessDeniedException(tmpFile);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if (stopFlag.get()) {
+				throw new IOException();
+			}
+			if (JOptionPane.showConfirmDialog(null,
+					"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
+				throw new IOException("User cancelled the operation");
+			}
+		}
+	}
+
+	private String createSftpFileList() {
 		StringBuilder sb = new StringBuilder();
+		sb.append("cd \"" + serverInfo.getFolder() + "\"\n");
+
 		if (folders.size() > 0) {
 			for (String folder : folders) {
-				if (sb.length() > 0) {
-					sb.append("; ");
-				}
-				sb.append("scp -pr \"" + folder + "\" "
-						+ (serverInfo.getUser() + "@" + serverInfo.getHost()
-								+ ":\"'" + serverInfo.getFolder() + "'\""));
+				String name = PathUtils.getFileName(folder);
+				sb.append("mkdir \"" + name + "\"\n");
+				sb.append("put -r \"" + name + "\"\n");
 			}
 		}
 
 		if (files.size() > 0) {
-			if (sb.length() > 0) {
-				sb.append("; ");
-			}
-			sb.append("scp ");
 			for (String file : files) {
-				sb.append(" \"" + file + "\" ");
+				sb.append("put -P \"" + file + "\"\n");
 			}
-			sb.append((serverInfo.getUser() + "@" + serverInfo.getHost()
-					+ ":\"'" + serverInfo.getFolder() + "'\""));
-			sb.append(";exit");
+			sb.append("bye\n");
 		}
 		return sb.toString();
+	}
+
+	private String createSshFileList() {
+		StringBuilder sb = new StringBuilder();
+		if (folders.size() > 0) {
+			for (String folder : folders) {
+				String name = PathUtils.getFileName(folder);
+				sb.append(" \"" + name + "\" ");
+			}
+		}
+
+		if (files.size() > 0) {
+			for (String file : files) {
+				String name = PathUtils.getFileName(file);
+				sb.append(" \"" + name + "\" ");
+			}
+		}
+		return sb.toString();
+	}
+
+	private String genrateTransferCmd() {
+//		StringBuilder sb = new StringBuilder();
+//		if (folders.size() > 0) {
+//			for (String folder : folders) {
+//				if (sb.length() > 0) {
+//					sb.append("; ");
+//				}
+//				sb.append("scp -pr \"" + folder + "\" "
+//						+ (serverInfo.getUser() + "@" + serverInfo.getHost()
+//								+ ":\"'" + serverInfo.getFolder() + "'\""));
+//			}
+//		}
+//
+//		if (files.size() > 0) {
+//			if (sb.length() > 0) {
+//				sb.append("; ");
+//			}
+//			sb.append("scp ");
+//			for (String file : files) {
+//				sb.append(" \"" + file + "\" ");
+//			}
+//			sb.append((serverInfo.getUser() + "@" + serverInfo.getHost()
+//					+ ":\"'" + serverInfo.getFolder() + "'\""));
+//			sb.append(";exit");
+//		}
+//		return sb.toString();
+		switch (serverInfo.getTransferMode()) {
+		case 0:
+			return createSftpCommand();
+		case 1:
+			return "";
+		case 2:
+			return createSshCommand();
+
+		}
+		return "";
+	}
+
+	private String createSftpCommand() {
+		return "sftp " + serverInfo.getUser() + "@" + serverInfo.getHost()
+				+ " < \"" + tmpFile + "\"";
+	}
+
+	private String createSshCommand() {
+		return "cat \"" + tmpFile + "\"|xargs tar -cf - |ssh "
+				+ serverInfo.getUser() + "@" + serverInfo.getHost()
+				+ "\" ( cd '" + serverInfo.getFolder() + "'; tar -xf - ) \"";
 	}
 
 	private void init() {
@@ -154,6 +297,8 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 				txtHost.setText(info.getHost());
 				txtFolder.setText(info.getFolder());
 				spPort.setValue(info.getPort());
+				txtTempDir.setText(info.getTemp());
+				cmbTransferMode.setSelectedIndex(info.getTransferMode());
 			}
 		});
 
@@ -197,17 +342,32 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 		txtFolder.setMaximumSize(txtFolder.getPreferredSize());
 		cb.add(txtFolder);
 
+		JLabel lblTransferMode = new JLabel("Transfer mode");
+		lblTransferMode.setAlignmentX(Box.LEFT_ALIGNMENT);
+		cb.add(lblTransferMode);
+
+		cmbTransferMode = new JComboBox<String>(
+				new String[] { "SFTP", "SCP (Batch mode)", "SSH" });
+		cmbTransferMode.setMaximumSize(txtFolder.getPreferredSize());
+		cmbTransferMode.setAlignmentX(Box.LEFT_ALIGNMENT);
+		cb.add(cmbTransferMode);
+
+		JLabel lblTempDir = new JLabel("Temporary directory");
+		lblTempDir.setAlignmentX(Box.LEFT_ALIGNMENT);
+		cb.add(lblTempDir);
+
+		txtTempDir = new JTextField(20);
+		txtTempDir.setAlignmentX(Box.LEFT_ALIGNMENT);
+		txtTempDir.setMaximumSize(txtTempDir.getPreferredSize());
+		cb.add(txtTempDir);
+
 		cb.add(Box.createVerticalGlue());
 
 		Box bb = Box.createHorizontalBox();
 
 		btnNew = new JButton("New");
 		btnNew.addActionListener(e -> {
-			connectionTable.clearSelection();
-			txtHost.setText("");
-			txtUser.setText("");
-			txtFolder.setText("");
-			spPort.setValue(22);
+			clearInput();
 		});
 		bb.add(btnNew);
 		bb.add(Box.createRigidArea(
@@ -228,17 +388,10 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 
 		btnConnect = new JButton("Send");
 		btnConnect.addActionListener(e -> {
-			updateAndSave();
-
-			ScpServerInfo scpItem = new ScpServerInfo();
-			scpItem.setFolder(txtFolder.getText());
-			scpItem.setHost(txtHost.getText());
-			scpItem.setUser(txtUser.getText());
-			scpItem.setPort((Integer) spPort.getValue());
-
-			serverInfo = scpItem;
-
-			run();
+			serverInfo = updateAndSave();
+			if (serverInfo != null) {
+				run();
+			}
 		});
 		bb.add(btnConnect);
 
@@ -258,6 +411,8 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 		contentPage.add(connectionPanel);
 
 		this.add(contentPage);
+
+		clearInput();
 
 //	panels = new JPanel[][] {
 //			{ createSftpUploadPanel(), createScpUploadPanel(),
@@ -347,15 +502,28 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 	/**
 	 * 
 	 */
-	private void updateAndSave() {
+	private void clearInput() {
+		connectionTable.clearSelection();
+		txtHost.setText("");
+		txtUser.setText("");
+		txtFolder.setText(".");
+		cmbTransferMode.setSelectedIndex(0);
+		txtTempDir.setText("/tmp");
+		spPort.setValue(22);
+	}
+
+	/**
+	 * 
+	 */
+	private ScpServerInfo updateAndSave() {
 		if (txtUser.getText().length() < 1) {
 			lblError.setText("User can not be blank");
-			return;
+			return null;
 		}
 
 		if (txtHost.getText().length() < 1) {
 			lblError.setText("Host can not be blank");
-			return;
+			return null;
 		}
 
 		int index = connectionTable.getSelectedRow();
@@ -365,12 +533,16 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 		scpItem.setHost(txtHost.getText());
 		scpItem.setUser(txtUser.getText());
 		scpItem.setPort((Integer) spPort.getValue());
+		scpItem.setTransferMode(cmbTransferMode.getSelectedIndex());
+		scpItem.setTemp(txtTempDir.getText());
 
 		if (index != -1) {
 			connectionTableModel.updateItem(index, scpItem);
 		} else {
 			connectionTableModel.addItem(scpItem);
 		}
+
+		return scpItem;
 	}
 
 	/*
@@ -380,6 +552,7 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 	 */
 	@Override
 	public boolean viewClosing() {
+		stopFlag.set(Boolean.TRUE);
 		return true;
 	}
 
