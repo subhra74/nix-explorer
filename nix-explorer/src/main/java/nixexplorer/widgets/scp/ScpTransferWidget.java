@@ -90,8 +90,9 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 
 	// private List<ScpServerInfo> serverList = new ArrayList<>();
 
-	public ScpTransferWidget(SessionInfo info, List<String> files, List<String> folders, String sourceDirectory,
-			AppSession appSession, Window window) {
+	public ScpTransferWidget(SessionInfo info, List<String> files,
+			List<String> folders, String sourceDirectory, AppSession appSession,
+			Window window) {
 		super(window);
 		this.info = info;
 		this.window = window;
@@ -114,7 +115,8 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 		lbl.setVerticalTextPosition(JLabel.CENTER);
 		contentPage.add(lbl);
 
-		this.tmpFile = PathUtils.combineUnix(serverInfo.getTemp(), UUID.randomUUID().toString());
+		this.tmpFile = PathUtils.combineUnix(serverInfo.getTemp(),
+				UUID.randomUUID().toString());
 
 		System.out.println("Temp file: " + this.tmpFile);
 
@@ -125,7 +127,8 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 				SwingUtilities.invokeLater(() -> {
 					String transferCommand = genrateTransferCmd();
 					System.out.println("Transfer command: " + transferCommand);
-					TerminalDialog dlg = new TerminalDialog(info, new String[] { "-c", transferCommand }, appSession,
+					TerminalDialog dlg = new TerminalDialog(info,
+							new String[] { "-c", transferCommand }, appSession,
 							window, "Command window");
 					this.dispose();
 					dlg.setLocationRelativeTo(window);
@@ -135,7 +138,9 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 			} catch (AccessDeniedException e) {
 				e.printStackTrace();
 				if (!stopFlag.get()) {
-					JOptionPane.showMessageDialog(this, "Temporary directory is not writable " + serverInfo.getTemp());
+					JOptionPane.showMessageDialog(this,
+							"Temporary directory is not writable "
+									+ serverInfo.getTemp());
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -158,6 +163,7 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 					data = createSftpFileList();
 					break;
 				case 1:
+					data = createScpFileList();
 					break;
 				case 2:
 					data = createSshFileList();
@@ -178,7 +184,8 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 			if (stopFlag.get()) {
 				throw new IOException();
 			}
-			if (JOptionPane.showConfirmDialog(null, "Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
+			if (JOptionPane.showConfirmDialog(null,
+					"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
 				throw new IOException("User cancelled the operation");
 			}
 		}
@@ -224,6 +231,34 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 		return sb.toString();
 	}
 
+	private String createScpFileList() {
+		StringBuilder sb = new StringBuilder();
+		if (folders.size() > 0) {
+			for (String folder : folders) {
+				if (sb.length() > 0) {
+					sb.append("; ");
+				}
+				sb.append("scp -pr \"" + folder + "\" "
+						+ (serverInfo.getUser() + "@" + serverInfo.getHost()
+								+ ":\"'" + serverInfo.getFolder() + "'\""));
+			}
+		}
+
+		if (files.size() > 0) {
+			if (sb.length() > 0) {
+				sb.append("; ");
+			}
+			sb.append("scp ");
+			for (String file : files) {
+				sb.append(" \"" + file + "\" ");
+			}
+			sb.append((serverInfo.getUser() + "@" + serverInfo.getHost()
+					+ ":\"'" + serverInfo.getFolder() + "'\""));
+			sb.append(";exit");
+		}
+		return sb.toString();
+	}
+
 	private String genrateTransferCmd() {
 //		StringBuilder sb = new StringBuilder();
 //		if (folders.size() > 0) {
@@ -254,7 +289,7 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 		case 0:
 			return createSftpCommand();
 		case 1:
-			return "";
+			return createScpCommand();
 		case 2:
 			return createSshCommand();
 
@@ -263,11 +298,19 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 	}
 
 	private String createSftpCommand() {
-		return "sftp \"" + serverInfo.getUser() + "@" + serverInfo.getHost() + "\" < \"" + tmpFile + "\"";
+		return "sftp \"" + serverInfo.getUser() + "@" + serverInfo.getHost()
+				+ "\" < \"" + tmpFile + "\"";
 	}
 
 	private String createSshCommand() {
-		return "cat \"" + tmpFile + "\"|xargs tar -cf - -C |ssh \"" + serverInfo.getUser() + "@" + serverInfo.getHost()
+		return "cat \"" + tmpFile + "\"|xargs tar -cf - -C |ssh \""
+				+ serverInfo.getUser() + "@" + serverInfo.getHost()
+				+ "\" \" ( cd '" + serverInfo.getFolder() + "'; tar -xf - ) \"";
+	}
+
+	private String createScpCommand() {
+		return "sh \"" + tmpFile + "\"|xargs tar -cf - -C |ssh \""
+				+ serverInfo.getUser() + "@" + serverInfo.getHost()
 				+ "\" \" ( cd '" + serverInfo.getFolder() + "'; tar -xf - ) \"";
 	}
 
@@ -315,7 +358,8 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 		lblPort.setAlignmentX(Box.LEFT_ALIGNMENT);
 		cb.add(lblPort);
 
-		spPort = new JSpinner(new SpinnerNumberModel(22, 1, Short.MAX_VALUE, 1));
+		spPort = new JSpinner(
+				new SpinnerNumberModel(22, 1, Short.MAX_VALUE, 1));
 		spPort.setAlignmentX(Box.LEFT_ALIGNMENT);
 		cb.add(spPort);
 
@@ -341,7 +385,8 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 		lblTransferMode.setAlignmentX(Box.LEFT_ALIGNMENT);
 		cb.add(lblTransferMode);
 
-		cmbTransferMode = new JComboBox<String>(new String[] { "SFTP", "SCP (Batch mode)", "SSH" });
+		cmbTransferMode = new JComboBox<String>(
+				new String[] { "SFTP", "SCP (Batch mode)", "SSH" });
 		cmbTransferMode.setMaximumSize(txtFolder.getPreferredSize());
 		cmbTransferMode.setAlignmentX(Box.LEFT_ALIGNMENT);
 		cb.add(cmbTransferMode);
@@ -364,13 +409,15 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 			clearInput();
 		});
 		bb.add(btnNew);
-		bb.add(Box.createRigidArea(new Dimension(Utility.toPixel(5), Utility.toPixel(5))));
+		bb.add(Box.createRigidArea(
+				new Dimension(Utility.toPixel(5), Utility.toPixel(5))));
 		btnSave = new JButton("Save");
 		btnSave.addActionListener(e -> {
 			updateAndSave();
 		});
 		bb.add(btnSave);
-		bb.add(Box.createRigidArea(new Dimension(Utility.toPixel(5), Utility.toPixel(5))));
+		bb.add(Box.createRigidArea(
+				new Dimension(Utility.toPixel(5), Utility.toPixel(5))));
 
 		btnDelete = new JButton("Delete");
 
@@ -391,12 +438,14 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 
 		cb.add(bb);
 
-		spPort.setMaximumSize(new Dimension(txtUser.getPreferredSize().width, spPort.getPreferredSize().height));
+		spPort.setMaximumSize(new Dimension(txtUser.getPreferredSize().width,
+				spPort.getPreferredSize().height));
 
 		contentPage.add(cb, BorderLayout.EAST);
 
 		((JComponent) getContentPane()).setBorder(
-				new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
+				new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+						Utility.toPixel(5), Utility.toPixel(5)));
 
 		contentPage.add(connectionPanel);
 
