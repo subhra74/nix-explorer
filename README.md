@@ -25,7 +25,7 @@ monitor CPU, Memory, Swap and networking in a single and friendly GUI.
 Search and find which application is running on which port without difficult commands</p>
 
 <h4>Browse huge log files easily and monitor logs at real time</h4>
-<p>Powerfull and easy to use log viewer can open huge logs upto seveal gigabytes due to its pagged view mode. 
+<p>Powerfull and easy to use log viewer can open huge logs upto seveal gigabytes due to its paged view mode. 
 You can also view logs in realtime, like tail -f and search.
 You can configure colors based on patterns to easily identify and find issues within the log.
 </p>
