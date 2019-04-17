@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,8 +52,7 @@ public class SshFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public synchronized String getHome()
-			throws FileNotFoundException, IOException {
+	public synchronized String getHome() throws FileNotFoundException, IOException {
 		try {
 //			if (this.sftp == null) {
 //				this.sftp = wrapper.getSftpChannel();
@@ -70,13 +70,12 @@ public class SshFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public synchronized List<FileInfo> ll(String path, boolean onlyDir)
-			throws FileNotFoundException, IOException {
+	public synchronized List<FileInfo> ll(String path, boolean onlyDir) throws FileNotFoundException, IOException {
 		return ll(path, onlyDir, true);
 	}
 
-	private synchronized List<FileInfo> ll(String path, boolean onlyDir,
-			boolean followSymlink) throws FileNotFoundException, IOException {
+	private synchronized List<FileInfo> ll(String path, boolean onlyDir, boolean followSymlink)
+			throws FileNotFoundException, IOException {
 		try {
 			System.out.println("Listing file: " + path);
 			List<FileInfo> childs = new ArrayList<>();
@@ -92,8 +91,7 @@ public class SshFileSystemProvider implements FileSystemProvider {
 					if (files.size() > 0) {
 						for (int i = 0; i < files.size(); i++) {
 							ChannelSftp.LsEntry ent = (LsEntry) files.get(i);
-							if (ent.getFilename().equals(".")
-									|| ent.getFilename().equals("..")) {
+							if (ent.getFilename().equals(".") || ent.getFilename().equals("..")) {
 								continue;
 							}
 							SftpATTRS attrs = ent.getAttrs();
@@ -101,80 +99,44 @@ public class SshFileSystemProvider implements FileSystemProvider {
 							if (attrs.isLink()) {
 								if (!followSymlink) {
 									FileInfo e = new FileInfo(ent.getFilename(),
-											PathUtils.combineUnix(path,
-													ent.getFilename()),
-											(attrs.isDir() ? -1
-													: attrs.getSize()),
-											attrs.isDir() ? FileType.Directory
-													: FileType.File,
-											(long) attrs.getMTime() * 1000,
-											ent.getAttrs().getPermissions(),
-											PROTO_SFTP,
-											ent.getAttrs()
-													.getPermissionsString(),
-											attrs.getATime(),
-											ent.getLongname());
+											PathUtils.combineUnix(path, ent.getFilename()),
+											(attrs.isDir() ? -1 : attrs.getSize()),
+											attrs.isDir() ? FileType.Directory : FileType.File,
+											(long) attrs.getMTime() * 1000, ent.getAttrs().getPermissions(), PROTO_SFTP,
+											ent.getAttrs().getPermissionsString(), attrs.getATime(), ent.getLongname());
 									childs.add(e);
 								} else {
 									try {
-										String pathToResolve = PathUtils
-												.combineUnix(path,
-														ent.getFilename());
-										System.out.println("Following symlink: "
-												+ pathToResolve);
+										String pathToResolve = PathUtils.combineUnix(path, ent.getFilename());
+										System.out.println("Following symlink: " + pathToResolve);
 
-										String str = sftp
-												.readlink(pathToResolve);
+										String str = sftp.readlink(pathToResolve);
 
-										System.out.println("Read symlink: "
-												+ pathToResolve + "=" + str);
+										System.out.println("Read symlink: " + pathToResolve + "=" + str);
 
-										str = str.startsWith("/") ? str
-												: PathUtils.combineUnix(path,
-														str);
-										System.out.println(
-												"Getting link attrs: " + str);
+										str = str.startsWith("/") ? str : PathUtils.combineUnix(path, str);
+										System.out.println("Getting link attrs: " + str);
 
 										try {
 											attrs = sftp.stat(str);
-											System.out.println(
-													"Adding link resolved: "
-															+ ent.getFilename());
+											System.out.println("Adding link resolved: " + ent.getFilename());
 
-											FileInfo e = new FileInfo(
-													ent.getFilename(), str,
-													(attrs.isDir() ? -1
-															: attrs.getSize()),
-													attrs.isDir()
-															? FileType.DirLink
-															: FileType.FileLink,
-													(long) attrs.getMTime()
-															* 1000,
-													ent.getAttrs()
-															.getPermissions(),
-													PROTO_SFTP,
-													ent.getAttrs()
-															.getPermissionsString(),
-													attrs.getATime(),
+											FileInfo e = new FileInfo(ent.getFilename(), str,
+													(attrs.isDir() ? -1 : attrs.getSize()),
+													attrs.isDir() ? FileType.DirLink : FileType.FileLink,
+													(long) attrs.getMTime() * 1000, ent.getAttrs().getPermissions(),
+													PROTO_SFTP, ent.getAttrs().getPermissionsString(), attrs.getATime(),
 													ent.getLongname());
 											childs.add(e);
 										} catch (SftpException e) {
 											if (!sftp.isConnected()) {
 												throw e;
 											}
-											childs.add(new FileInfo(
-													ent.getFilename(),
-													PathUtils.combineUnix(path,
-															ent.getFilename()),
-													0, FileType.FileLink,
-													(long) attrs.getMTime()
-															* 1000,
-													ent.getAttrs()
-															.getPermissions(),
-													PROTO_SFTP,
-													ent.getAttrs()
-															.getPermissionsString(),
-													attrs.getATime(),
+											childs.add(new FileInfo(ent.getFilename(),
+													PathUtils.combineUnix(path, ent.getFilename()), 0,
+													FileType.FileLink, (long) attrs.getMTime() * 1000,
+													ent.getAttrs().getPermissions(), PROTO_SFTP,
+													ent.getAttrs().getPermissionsString(), attrs.getATime(),
 													ent.getLongname()));
 										}
 									} catch (Exception e) {
@@ -190,16 +152,11 @@ public class SshFileSystemProvider implements FileSystemProvider {
 									continue;
 								}
 								FileInfo e = new FileInfo(ent.getFilename(),
-										PathUtils.combineUnix(path,
-												ent.getFilename()),
+										PathUtils.combineUnix(path, ent.getFilename()),
 										(attrs.isDir() ? -1 : attrs.getSize()),
-										attrs.isDir() ? FileType.Directory
-												: FileType.File,
-										(long) attrs.getMTime() * 1000,
-										ent.getAttrs().getPermissions(),
-										PROTO_SFTP,
-										ent.getAttrs().getPermissionsString(),
-										attrs.getATime(), ent.getLongname());
+										attrs.isDir() ? FileType.Directory : FileType.File,
+										(long) attrs.getMTime() * 1000, ent.getAttrs().getPermissions(), PROTO_SFTP,
+										ent.getAttrs().getPermissionsString(), attrs.getATime(), ent.getLongname());
 								childs.add(e);
 							}
 						}
@@ -224,20 +181,16 @@ public class SshFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public synchronized FileInfo getInfo(String path)
-			throws FileNotFoundException, IOException
+	public synchronized FileInfo getInfo(String path) throws FileNotFoundException, IOException
 
 	{
 		synchronized (sftp) {
 			try {
 				SftpATTRS attrs = sftp.stat(path);
-				FileInfo info = new FileInfo(PathUtils.getFileName(path), path,
-						(attrs.isDir() ? -1 : attrs.getSize()),
-						attrs.isDir() ? FileType.Directory
-								: (attrs.isLink() ? FileType.FileLink
-										: FileType.File),
-						attrs.getMTime(), attrs.getPermissions(), PROTO_SFTP,
-						attrs.getPermissionsString(), attrs.getATime(), "");
+				FileInfo info = new FileInfo(PathUtils.getFileName(path), path, (attrs.isDir() ? -1 : attrs.getSize()),
+						attrs.isDir() ? FileType.Directory : (attrs.isLink() ? FileType.FileLink : FileType.File),
+						attrs.getMTime(), attrs.getPermissions(), PROTO_SFTP, attrs.getPermissionsString(),
+						attrs.getATime(), "");
 				return info;
 			} catch (Exception e) {
 				if (!sftp.isConnected()) {
@@ -255,8 +208,7 @@ public class SshFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public InputStream getInputStream(String file, long offset)
-			throws FileNotFoundException, Exception {
+	public InputStream getInputStream(String file, long offset) throws FileNotFoundException, Exception {
 //		if (this.sftp == null) {
 //			this.sftp = wrapper.getSftpChannel();
 //		}
@@ -273,15 +225,13 @@ public class SshFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public OutputStream getOutputStream(String file)
-			throws FileNotFoundException, Exception {
+	public OutputStream getOutputStream(String file) throws FileNotFoundException, Exception {
 		synchronized (sftp) {
 			return sftp.put(file, null, ChannelSftp.APPEND, 0);
 		}
 	}
 
-	public void rename(String oldName, String newName)
-			throws FileNotFoundException, Exception {
+	public void rename(String oldName, String newName) throws FileNotFoundException, Exception {
 		try {
 			synchronized (sftp) {
 				sftp.rename(oldName, newName);
@@ -296,9 +246,13 @@ public class SshFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public void mkdir(String path) throws Exception {
+	public void mkdir(String path) throws AccessDeniedException, Exception {
 		try {
 			sftp.mkdir(path);
+		} catch (SftpException e) {
+			if (e.id == ChannelSftp.SSH_FX_PERMISSION_DENIED) {
+				throw new AccessDeniedException(path);
+			}
 		} catch (Exception e) {
 			if (sftp.isConnected()) {
 				throw new FileNotFoundException(e.getMessage());
@@ -308,9 +262,13 @@ public class SshFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public void createFile(String path) throws Exception {
+	public void createFile(String path) throws AccessDeniedException, Exception {
 		try {
 			sftp.put(path).close();
+		} catch (SftpException e) {
+			if (e.id == ChannelSftp.SSH_FX_PERMISSION_DENIED) {
+				throw new AccessDeniedException(path);
+			}
 		} catch (Exception e) {
 			if (sftp.isConnected()) {
 				throw new FileNotFoundException(e.getMessage());
@@ -361,26 +319,21 @@ public class SshFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public long getAllFiles(String dir, String baseDir,
-			Map<String, String> fileMap, Map<String, String> folderMap)
+	public long getAllFiles(String dir, String baseDir, Map<String, String> fileMap, Map<String, String> folderMap)
 			throws Exception {
 		long size = 0;
 		System.out.println("get files: " + dir);
-		String parentFolder = PathUtils.combine(baseDir,
-				PathUtils.getFileName(dir), File.separator);
+		String parentFolder = PathUtils.combine(baseDir, PathUtils.getFileName(dir), File.separator);
 
 		folderMap.put(dir, parentFolder);
 
 		List<FileInfo> list = ll(dir, false, false);
 		for (FileInfo f : list) {
 			if (f.getType() == FileType.Directory) {
-				folderMap.put(f.getPath(), PathUtils.combine(parentFolder,
-						f.getName(), File.separator));
-				size += getAllFiles(f.getPath(), parentFolder, fileMap,
-						folderMap);
+				folderMap.put(f.getPath(), PathUtils.combine(parentFolder, f.getName(), File.separator));
+				size += getAllFiles(f.getPath(), parentFolder, fileMap, folderMap);
 			} else {
-				fileMap.put(f.getPath(), PathUtils.combine(parentFolder,
-						f.getName(), File.separator));
+				fileMap.put(f.getPath(), PathUtils.combine(parentFolder, f.getName(), File.separator));
 				size += f.getSize();
 			}
 		}
@@ -413,8 +366,7 @@ public class SshFileSystemProvider implements FileSystemProvider {
 		return null;
 	}
 
-	public void createLink(String src, String dst, boolean hardLink)
-			throws Exception {
+	public void createLink(String src, String dst, boolean hardLink) throws Exception {
 		if (hardLink) {
 			this.sftp.hardlink(src, dst);
 		} else {

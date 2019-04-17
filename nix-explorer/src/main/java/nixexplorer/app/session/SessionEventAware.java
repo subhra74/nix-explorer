@@ -10,7 +10,5 @@ package nixexplorer.app.session;
 public interface SessionEventAware {
 	public void configChanged();
 
-	public void remoteFileSystemUpdated(String path);
-
-	public void localFileSystemUpdated(String path);
+	public void fileSystemUpdated(String path);
 }

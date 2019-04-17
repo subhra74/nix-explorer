@@ -250,8 +250,8 @@ public class ServerDisplayPanel extends JPanel {
 				try {
 					SystemMonitorWidget w = new SystemMonitorWidget(info,
 							new String[] {}, appSession, window);
-					appSession.addToSession(w);
 					addTab(w);
+					appSession.addToSession(w);
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}

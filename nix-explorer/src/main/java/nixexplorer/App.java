@@ -1569,7 +1569,7 @@ public final class App {
 			UIManager.put("ToggleButton.select", selection);
 
 			UIManager.put("Button.background", background);
-			UIManager.put("Button.border", new FlatButtonBorder(border));
+			UIManager.put("Button.border", new FlatButtonBorder(selection));
 			UIManager.put("Button.rolloverBorder", new LineBorder(selection, Utility.toPixel(1)));
 			UIManager.put("Button.rollover", Boolean.TRUE);
 			UIManager.put("Button.highlight", selection);
@@ -1687,7 +1687,7 @@ public final class App {
 
 			UIManager.put("Spinner.background", background);
 			UIManager.put("Spinner.foreground", foreground);
-			UIManager.put("Spinner.arrowBackground", border);
+			UIManager.put("Spinner.arrowBackground", selection);
 			UIManager.put("Spinner.font", normalFont);
 			UIManager.put("Spinner.select", selection);
 			UIManager.put("Spinner.border", new LineBorder(selection, Utility.toPixel(1)));
@@ -1754,7 +1754,7 @@ public final class App {
 
 			UIManager.put("ComboBox.background", background);
 			UIManager.put("ComboBox.foreground", foreground);
-			UIManager.put("ComboBox.border", new LineBorder(border, Utility.toPixel(1)));
+			UIManager.put("ComboBox.border", new LineBorder(selection, Utility.toPixel(1)));
 //			UIManager.put("ComboBox.buttonBackground", background);
 //			UIManager.put("ComboBox.buttonDarkShadow", background);
 //			UIManager.put("ComboBox.buttonHighlight", background);

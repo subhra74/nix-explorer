@@ -9,6 +9,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -158,7 +159,7 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		aRename = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				rename(folderView.getSelectedFiles()[0]);
+				rename(folderView.getSelectedFiles()[0], folderView.getCurrentPath());
 			}
 		};
 		ksRename = KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0);
@@ -173,7 +174,7 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		aDelete = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				delete(folderView.getSelectedFiles());
+				delete(folderView.getSelectedFiles(), folderView.getCurrentPath());
 			}
 		};
 		mDelete = new JMenuItem(TextHolder.getString("folderview.delete"));
@@ -270,7 +271,7 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		aChangePerm = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				changePermission(folderView.getSelectedFiles());
+				changePermission(folderView.getSelectedFiles(), folderView.getCurrentPath());
 			}
 		};
 		mChangePerm = new JMenuItem(TextHolder.getString("folderview.props"));
@@ -370,6 +371,7 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 				null, null, null) == JOptionPane.OK_OPTION) {
 			if (txtLinkName.getText().length() > 0 && txtFileName.getText().length() > 0) {
 				createLinkAsync(txtFileName.getText(), txtLinkName.getText(), chkHardLink.isSelected());
+				notifyReload(folderView.getCurrentPath());
 				break;
 			}
 		}
@@ -433,15 +435,15 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		}
 	}
 
-	private void rename(FileInfo info) {
+	private void rename(FileInfo info, String baseFolder) {
 		String text = JOptionPane
 				.showInputDialog(TextHolder.getString("folderview.renameTitle") + "\n" + info.getName());
 		if (text != null && text.length() > 0) {
-			renameAsync(info.getPath(), PathUtils.combineUnix(PathUtils.getParent(info.getPath()), text));
+			renameAsync(info.getPath(), PathUtils.combineUnix(PathUtils.getParent(info.getPath()), text), baseFolder);
 		}
 	}
 
-	private void renameAsync(String oldName, String newName) {
+	private void renameAsync(String oldName, String newName, String baseFolder) {
 		remoteFolderView.disableView();
 		new Thread(() -> {
 			try {
@@ -455,7 +457,7 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
 			} finally {
-				notifyReload(null);
+				notifyReload(baseFolder);
 				remoteFolderView.enableView();
 			}
 		}).start();
@@ -544,7 +546,7 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		});
 	}
 
-	private void delete(FileInfo[] targetList) {
+	private void delete(FileInfo[] targetList, String baseFolder) {
 		remoteFolderView.disableView();
 		new Thread(() -> {
 			try {
@@ -568,7 +570,7 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
 			} finally {
-				notifyReload(null);
+				notifyReload(baseFolder);
 				remoteFolderView.enableView();
 			}
 
@@ -619,25 +621,27 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 					if (text == null || text.length() < 1) {
 						return;
 					}
+					boolean alreadyExists = false;
 					for (FileInfo f : folderView.getCurrentFiles()) {
 						if (f.getName().equals(text)) {
-							JOptionPane.showMessageDialog(null, "File with same name already exists");
+							alreadyExists = true;
 							break;
-						} else {
-							remoteFolderView.getFs().createFile(PathUtils.combineUnix(folder, text));
-							return;
 						}
 					}
-
+					if (alreadyExists) {
+						JOptionPane.showMessageDialog(null, "File with same name already exists");
+					}
+					remoteFolderView.getFs().createFile(PathUtils.combineUnix(folder, text));
+					return;
 				}
-			} catch (FileNotFoundException e1) {
+			} catch (AccessDeniedException e1) {
 				e1.printStackTrace();
 				touchWithPriviledge(folder, text);
 			} catch (Exception e1) {
 				e1.printStackTrace();
 				JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
 			} finally {
-				notifyReload(null);
+				notifyReload(folder);
 				remoteFolderView.enableView();
 			}
 		}).start();
@@ -653,21 +657,21 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 					remoteFolderView.ensureConnected();
 					remoteFolderView.getFs().mkdir(PathUtils.combineUnix(folder, text));
 					folderView.render(folder);
-				} catch (FileNotFoundException e1) {
+				} catch (AccessDeniedException e1) {
 					e1.printStackTrace();
 					mkdirWithPriviledge(folder, text);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 					JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
 				} finally {
-					notifyReload(null);
+					notifyReload(folder);
 					remoteFolderView.enableView();
 				}
 			}).start();
 		}
 	}
 
-	private void changePermission(FileInfo[] files) {
+	private void changePermission(FileInfo[] files, String baseFolder) {
 		if (files == null || files.length == 0) {
 			return;
 		}
@@ -685,11 +689,11 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 			for (FileInfo r : files) {
 				paths[i++] = r.getPath();
 			}
-			chmodAsync(perm, paths);
+			chmodAsync(perm, paths, baseFolder);
 		}
 	}
 
-	private void chmodAsync(int perm, String paths[]) {
+	private void chmodAsync(int perm, String paths[], String baseFolder) {
 		remoteFolderView.disableView();
 		new Thread(() -> {
 			try {
@@ -702,7 +706,7 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 				JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
 			}
 
-			notifyReload(null);
+			notifyReload(baseFolder);
 			remoteFolderView.enableView();
 		}).start();
 	}
@@ -966,6 +970,9 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 	}
 
 	private void notifyReload(String path) {
+		if (path == null) {
+			return;
+		}
 		SwingUtilities.invokeLater(() -> {
 			remoteFolderView.getAppSession().remoteFileSystemWasChanged(path);
 		});

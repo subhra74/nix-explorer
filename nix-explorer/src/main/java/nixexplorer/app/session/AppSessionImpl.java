@@ -43,8 +43,7 @@ public final class AppSessionImpl implements AppSession {
 		System.out.println("AppSessionImpl - window: " + window);
 		editWatcher = new EditWatcher(session, this, new String[] {});
 		new Thread(editWatcher).start();
-		sessionFolder = new File((String) App.getConfig("temp.dir"),
-				session.getId());
+		sessionFolder = new File((String) App.getConfig("temp.dir"), session.getId());
 		if (!sessionFolder.exists()) {
 			sessionFolder.mkdirs();
 		}
@@ -85,13 +84,12 @@ public final class AppSessionImpl implements AppSession {
 	public synchronized void createWidget(String className, String[] args) {
 		try {
 			Class<?> clazz = Class.forName(className);
-			Constructor<?> ctor = clazz.getConstructor(SessionInfo.class,
-					String[].class, AppSession.class, Window.class);
+			Constructor<?> ctor = clazz.getConstructor(SessionInfo.class, String[].class, AppSession.class,
+					Window.class);
 //			if (window == null) {
 //				window = SwingUtilities.getWindowAncestor(getDisplay());
 //			}
-			Object obj = ctor
-					.newInstance(new Object[] { session, args, this, window });
+			Object obj = ctor.newInstance(new Object[] { session, args, this, window });
 
 			if (obj instanceof TabbedChild) {
 				display.addTab((TabbedChild) obj);
@@ -123,12 +121,10 @@ public final class AppSessionImpl implements AppSession {
 	public void registerEditWatchers(String file, ChangeUploader editWatcher) {
 		// this.editWatchers.put(file, editWatcher);
 		Path path = Paths.get(file);
-		FileEntry ent = new FileEntry(PathUtils.getFileName(file), path,
-				path.getParent(), editWatcher);
+		FileEntry ent = new FileEntry(PathUtils.getFileName(file), path, path.getParent(), editWatcher);
 		// Path path = Paths.get(file).getParent();
 		this.editWatcher.register(ent);
-		System.out.println("Registered for changes: " + file + " path: "
-				+ path.toString());
+		System.out.println("Registered for changes: " + file + " path: " + path.toString());
 	}
 
 	/*
@@ -144,16 +140,13 @@ public final class AppSessionImpl implements AppSession {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * nixexplorer.app.session.AppSession#closeTab(nixexplorer.app.components.
+	 * @see nixexplorer.app.session.AppSession#closeTab(nixexplorer.app.components.
 	 * TabbedChild)
 	 */
 	@Override
 	public boolean closeTab(TabbedChild c) {
 		return display.closeTab(c);
 	}
-
-	
 
 	/*
 	 * (non-Javadoc)
@@ -170,6 +163,7 @@ public final class AppSessionImpl implements AppSession {
 
 	@Override
 	public void addToSession(Object obj) {
+		System.out.println("About to add to watch list: " + obj);
 		if (obj instanceof SessionEventAware) {
 			if (obj instanceof JDialog) {
 				if (((JDialog) obj).isModal()) {
@@ -187,15 +181,15 @@ public final class AppSessionImpl implements AppSession {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * nixexplorer.app.session.AppSession#remoteFileSystemWasChanged(java.lang.
+	 * @see nixexplorer.app.session.AppSession#remoteFileSystemWasChanged(java.lang.
 	 * String)
 	 */
 	@Override
 	public void remoteFileSystemWasChanged(String path) {
 		System.out.println("remote file system was changed " + path);
+		System.out.println("Event aware components: " + eventAwareComponents.keySet());
 		for (SessionEventAware c : eventAwareComponents.keySet()) {
-			c.remoteFileSystemUpdated(path);
+			c.fileSystemUpdated(path);
 		}
 	}
 

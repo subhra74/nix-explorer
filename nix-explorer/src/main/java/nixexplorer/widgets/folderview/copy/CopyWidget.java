@@ -81,8 +81,7 @@ public class CopyWidget extends JDialog implements DisposableView {
 	 * @param args
 	 * @param parent
 	 */
-	public CopyWidget(SessionInfo info, String[] args, AppSession appSession,
-			Window window) {
+	public CopyWidget(SessionInfo info, String[] args, AppSession appSession, Window window) {
 		super(window);
 		this.info = info;
 		this.appSession = appSession;
@@ -134,8 +133,8 @@ public class CopyWidget extends JDialog implements DisposableView {
 
 		this.setLayout(new BorderLayout());
 		Box box1 = Box.createVerticalBox();
-		box1.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10),
-				Utility.toPixel(10), Utility.toPixel(10)));
+		box1.setBorder(
+				new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
 		lblTitle = new JLabel("Initializing...");
 		prg = new JProgressBar();
 		btnCancel = new JButton("Cancel");
@@ -251,8 +250,7 @@ public class CopyWidget extends JDialog implements DisposableView {
 				System.out.println("Total file size: " + totalSize);
 
 				for (int i = lastProcessed; i < keys.size(); i++) {
-					processedSize += copyFile(sourceFs, targetFs, keys.get(i),
-							fileMap.get(keys.get(i)));
+					processedSize += copyFile(sourceFs, targetFs, keys.get(i), fileMap.get(keys.get(i)));
 					lastProcessed = i;
 				}
 
@@ -268,22 +266,23 @@ public class CopyWidget extends JDialog implements DisposableView {
 			if (stopFlag.get()) {
 				break;
 			}
-			if (JOptionPane.showConfirmDialog(null,
-					TextHolder.getString("duplicate.failed"),
-					TextHolder.getString("duplicate.failed"),
-					JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+			if (JOptionPane.showConfirmDialog(null, TextHolder.getString("duplicate.failed"),
+					TextHolder.getString("duplicate.failed"), JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
 				stopFlag.set(true);
 			}
 		}
 
 		SwingUtilities.invokeLater(() -> {
-			appSession.remoteFileSystemWasChanged(null);
+			if (mode == CopyMode.Upload) {
+				appSession.remoteFileSystemWasChanged(targetFolder);
+			} else {
+				appSession.remoteFileSystemWasChanged(targetFolder);
+			}
 			dispose();
 		});
 	}
 
-	private long copyFile(FileSystemProvider sourceFs,
-			FileSystemProvider targetFs, String source, String target)
+	private long copyFile(FileSystemProvider sourceFs, FileSystemProvider targetFs, String source, String target)
 			throws Exception {
 		System.out.println("Copying: " + source + " to: " + target);
 		lblTitle.setText("Copying: " + source + " to: " + target);
@@ -294,8 +293,7 @@ public class CopyWidget extends JDialog implements DisposableView {
 		long modified = Utility.toEpochMilli(fileInfo.getLastModified());
 		String folder = PathUtils.getParent(target);
 		String tempFile = PathUtils.combine(folder,
-				PathUtils.getFileName(source) + "-" + modified + "-" + size
-						+ ".filepart",
+				PathUtils.getFileName(source) + "-" + modified + "-" + size + ".filepart",
 				mode == CopyMode.Download ? File.separator : "/");
 		System.out.println("Temp file: " + tempFile);
 		try {
@@ -320,8 +318,7 @@ public class CopyWidget extends JDialog implements DisposableView {
 					bytesCopied += x;
 					out.write(b, 0, x);
 					if (totalSize > 0) {
-						final int pc = (int) (((processedSize + bytesCopied)
-								* 100) / totalSize);
+						final int pc = (int) (((processedSize + bytesCopied) * 100) / totalSize);
 						long time = System.currentTimeMillis();
 						if (time - lastUpdated > 1000) {
 							System.out.println("Progress: " + pc);
@@ -356,8 +353,7 @@ public class CopyWidget extends JDialog implements DisposableView {
 		return size;
 	}
 
-	private long createFileList(FileSystemProvider sourceFs,
-			FileSystemProvider targetFs, Map<String, String> fileMap)
+	private long createFileList(FileSystemProvider sourceFs, FileSystemProvider targetFs, Map<String, String> fileMap)
 			throws Exception {
 
 		List<FileInfo> filesInTargetFolder = targetFs.ll(targetFolder, false);
@@ -365,13 +361,13 @@ public class CopyWidget extends JDialog implements DisposableView {
 //			Map<String, String> fileMap = new HashMap<>();
 		Map<String, String> folderMap = new HashMap<>();
 
-		if (!FolderViewUtility.prepareFileList(targetFolder, files, fileMap,
-				mode == CopyMode.Download, filesInTargetFolder)) {
+		if (!FolderViewUtility.prepareFileList(targetFolder, files, fileMap, mode == CopyMode.Download,
+				filesInTargetFolder)) {
 			System.out.println("Returing...");
 		}
 
-		if (!FolderViewUtility.prepareFileList(targetFolder, folders, folderMap,
-				mode == CopyMode.Download, filesInTargetFolder)) {
+		if (!FolderViewUtility.prepareFileList(targetFolder, folders, folderMap, mode == CopyMode.Download,
+				filesInTargetFolder)) {
 			System.out.println("Returing...");
 		}
 
@@ -380,8 +376,7 @@ public class CopyWidget extends JDialog implements DisposableView {
 		Map<String, String> childFolders = new HashMap<>();
 		long size = 0;
 		for (String key : folderMap.keySet()) {
-			size += sourceFs.getAllFiles(key, targetFolder, fileMap,
-					childFolders);
+			size += sourceFs.getAllFiles(key, targetFolder, fileMap, childFolders);
 			System.out.println("Size: " + size);
 		}
 

@@ -17,7 +17,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.event.ListSelectionListener;
 
@@ -62,10 +64,13 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 		b1.add(Box.createHorizontalStrut(Utility.toPixel(10)));
 		b1.add(Box.createHorizontalGlue());
 		JButton btnNew = new JButton(UIManager.getIcon("SidePanel.addIcon"));
+		btnNew.setBorder(new CompoundBorder(
+				new LineBorder(UIManager.getColor("DefaultBorder.color"), Utility.toPixel(1)),
+				new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5))));
 		btnNew.addActionListener(e -> {
 			makeNewSession();
 		});
-		//btnNew.setBackground(UIManager.getColor("Panel.secondary"));
+		// btnNew.setBackground(UIManager.getColor("Panel.secondary"));
 		// btnNew.setBorderPainted(false);
 		b1.add(btnNew);
 		b1.add(Box.createHorizontalStrut(Utility.toPixel(5)));
@@ -73,13 +78,19 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 		btnCollapse.addActionListener(e -> {
 			shrink();
 		});
-		//btnCollapse.setBackground(UIManager.getColor("Panel.secondary"));
+		btnCollapse.setBorder(new CompoundBorder(
+				new LineBorder(UIManager.getColor("DefaultBorder.color"), Utility.toPixel(1)),
+				new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5))));
+		// btnCollapse.setBackground(UIManager.getColor("Panel.secondary"));
 
 		btnExpand = new JButton(UIManager.getIcon("SidePanel.expandIcon"));
 		btnExpand.addActionListener(e -> {
 			expand();
 		});
-		//btnExpand.setBackground(UIManager.getColor("Panel.secondary"));
+		btnExpand.setBorder(new CompoundBorder(
+				new LineBorder(UIManager.getColor("DefaultBorder.color"), Utility.toPixel(1)),
+				new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5))));
+		// btnExpand.setBackground(UIManager.getColor("Panel.secondary"));
 		// btnCollapse.setBorderPainted(false);
 		b1.add(btnCollapse);
 

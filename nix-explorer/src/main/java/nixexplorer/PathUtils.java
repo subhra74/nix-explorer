@@ -48,4 +48,14 @@ public class PathUtils {
 		}
 		return file;
 	}
+
+	public static boolean isSamePath(String path1, String path2) {
+		if (path1 == null && path2 == null) {
+			return true;
+		}
+		if (path1 == null) {
+			return false;
+		}
+		return (path1.equals(path2) || (path1 + "/").equals(path2) || (path1 + "\\").equals(path2));
+	}
 }

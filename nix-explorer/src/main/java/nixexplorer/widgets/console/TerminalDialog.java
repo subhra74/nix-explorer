@@ -3,6 +3,8 @@
  */
 package nixexplorer.widgets.console;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -10,7 +12,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 
+import nixexplorer.Constants;
 import nixexplorer.app.components.DisposableView;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
@@ -26,10 +32,18 @@ public class TerminalDialog extends JDialog implements DisposableView {
 	 */
 	private TabbedConsoleWidget terminal;
 	protected AtomicBoolean widgetClosed = new AtomicBoolean(Boolean.FALSE);
+	private Thread t;
+	private JLabel lblResult;
 
 	public TerminalDialog(SessionInfo info, String[] args, AppSession appSession, Window window, String title) {
 		super(window);
 		setTitle(title);
+		lblResult = new JLabel();
+		lblResult.setForeground(Color.WHITE);
+		lblResult.setOpaque(true);
+		lblResult.setBorder(
+				new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
+		lblResult.setFont(Utility.getFont(Constants.NORMAL));
 		this.terminal = new TabbedConsoleWidget(info, args, appSession, window, false);
 		this.add(terminal);
 		this.setSize(Utility.toPixel(640), Utility.toPixel(480));
@@ -42,9 +56,36 @@ public class TerminalDialog extends JDialog implements DisposableView {
 						: "");
 				System.out.println("Closing terminal dialog");
 				terminal.close();
+				if (t != null) {
+					t.interrupt();
+				}
 				dispose();
 			}
 		});
+
+		t = new Thread(() -> {
+			while (!t.isInterrupted()) {
+				try {
+					if (this.terminal.getTtyConnector() != null) {
+						int res = this.terminal.getTtyConnector().getExitStatus();
+						if (res >= 0) {
+							SwingUtilities.invokeLater(() -> {
+								this.lblResult.setBackground(res == 0 ? new Color(1, 99, 26) : new Color(249, 40, 1));
+								this.lblResult.setText(
+										res == 0 ? "Command completed successfully" : "Command completed with error");
+								this.add(this.lblResult, BorderLayout.NORTH);
+								this.revalidate();
+								this.repaint();
+							});
+						}
+					}
+					Thread.sleep(1000);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		t.start();
 	}
 
 	/*

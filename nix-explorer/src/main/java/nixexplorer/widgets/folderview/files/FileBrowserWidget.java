@@ -23,6 +23,7 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 import nixexplorer.TextHolder;
 import nixexplorer.app.components.FlatTabbedPane;
 import nixexplorer.app.session.AppSession;
+import nixexplorer.app.session.SessionEventAware;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.widgets.Widget;
 import nixexplorer.widgets.folderview.local.LocalFolderViewWidget;
@@ -33,7 +34,7 @@ import nixexplorer.widgets.util.Utility;
  * @author subhro
  *
  */
-public class FileBrowserWidget extends Widget {
+public class FileBrowserWidget extends Widget implements SessionEventAware {
 
 	private JPanel bottomBar;
 	private JPanel bottomPanel;
@@ -214,6 +215,17 @@ public class FileBrowserWidget extends Widget {
 	@Override
 	public void close() {
 		remoteFileView.close();
+	}
+
+	@Override
+	public void configChanged() {
+		remoteFileView.configChanged();
+	}
+
+	@Override
+	public void fileSystemUpdated(String path) {
+		remoteFileView.fileSystemUpdated(path);
+		localFileView.fileSystemUpdated(path);
 	}
 
 }
