@@ -148,31 +148,31 @@ public class ArchivePreviewWidget extends JDialog
 	}
 
 	private void selectFolder() {
-		new Thread(() -> {
-			try {
-				if (wrapper == null || !wrapper.isConnected()) {
-					wrapper = new SshWrapper(info);
-					wrapper.connect();
-				}
-				ChannelSftp sftp = wrapper.getSftpChannel();
-				// sftp.connect();
-				SshFileSystemProvider sshfs = new SshFileSystemProvider(sftp);
-				FileSelectionDialog dlg = new FileSelectionDialog(
-						sftp.getHome(), sshfs, ArchivePreviewWidget.this);
-				dlg.setFolderOnly(true);
-				dlg.setVisible(true);
-				if (dlg.getResult() == JOptionPane.OK_OPTION) {
-					System.out.println(dlg.getSelectedPath());
-					String folder = dlg.getSelectedPath();
-					extractArchive(path, folder);
-				}
-
-				sftp.disconnect();
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-			}
-		}).start();
+//		new Thread(() -> {
+//			try {
+//				if (wrapper == null || !wrapper.isConnected()) {
+//					wrapper = new SshWrapper(info);
+//					wrapper.connect();
+//				}
+//				ChannelSftp sftp = wrapper.getSftpChannel();
+//				// sftp.connect();
+//				SshFileSystemProvider sshfs = new SshFileSystemProvider(sftp);
+//				FileSelectionDialog dlg = new FileSelectionDialog(
+//						sftp.getHome(), sshfs, ArchivePreviewWidget.this);
+//				dlg.setFolderOnly(true);
+//				dlg.setVisible(true);
+//				if (dlg.getResult() == JOptionPane.OK_OPTION) {
+//					System.out.println(dlg.getSelectedPath());
+//					String folder = dlg.getSelectedPath();
+//					extractArchive(path, folder);
+//				}
+//
+//				sftp.disconnect();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			} finally {
+//			}
+//		}).start();
 	}
 
 	private void extractArchive(String path2, String folder) {
@@ -188,31 +188,31 @@ public class ArchivePreviewWidget extends JDialog
 	}
 
 	private void selectFile() {
-		new Thread(() -> {
-			try {
-				if (wrapper == null || !wrapper.isConnected()) {
-					wrapper = new SshWrapper(info);
-					wrapper.connect();
-				}
-				ChannelSftp sftp = wrapper.getSftpChannel();
-				// sftp.connect();
-				SshFileSystemProvider sshfs = new SshFileSystemProvider(sftp);
-				FileSelectionDialog dlg = new FileSelectionDialog(
-						sftp.getHome(), sshfs, ArchivePreviewWidget.this);
-				dlg.setFolderOnly(false);
-				dlg.setVisible(true);
-				if (dlg.getResult() == JOptionPane.OK_OPTION) {
-					System.out.println(dlg.getSelectedPath());
-					path = dlg.getSelectedPath();
-					openArchive();
-				}
-
-				sftp.disconnect();
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-			}
-		}).start();
+//		new Thread(() -> {
+//			try {
+//				if (wrapper == null || !wrapper.isConnected()) {
+//					wrapper = new SshWrapper(info);
+//					wrapper.connect();
+//				}
+//				ChannelSftp sftp = wrapper.getSftpChannel();
+//				// sftp.connect();
+//				SshFileSystemProvider sshfs = new SshFileSystemProvider(sftp);
+//				FileSelectionDialog dlg = new FileSelectionDialog(
+//						sftp.getHome(), sshfs, ArchivePreviewWidget.this);
+//				dlg.setFolderOnly(false);
+//				dlg.setVisible(true);
+//				if (dlg.getResult() == JOptionPane.OK_OPTION) {
+//					System.out.println(dlg.getSelectedPath());
+//					path = dlg.getSelectedPath();
+//					openArchive();
+//				}
+//
+//				sftp.disconnect();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			} finally {
+//			}
+//		}).start();
 	}
 
 	private void extractAsync(String path) {

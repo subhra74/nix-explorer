@@ -41,30 +41,33 @@ public class ServerToolbar extends JPanel {
 			String title, Icon icon) {
 		add(Box.createHorizontalGlue());
 		JButton btnSettings = new JButton(title);
+		btnSettings.setVerticalAlignment(JButton.CENTER);
+		btnSettings.setHorizontalTextPosition(JButton.CENTER);
+		btnSettings.setVerticalTextPosition(JButton.BOTTOM);
+		btnSettings.setToolTipText(title);
 		btnSettings.addActionListener(action);
 		btnSettings.setFont(Utility.getFont(Constants.SMALL));
-		btnSettings.setPreferredSize(new Dimension(
-				btnSettings.getPreferredSize().width + Utility.toPixel(10),
-				btnSettings.getPreferredSize().height + Utility.toPixel(10)));
-		// btnSettings.setIcon(icon);
+		btnSettings.setIcon(icon);
+		btnSettings.setBorderPainted(false);
 		add(btnSettings);
-		add(Box.createHorizontalStrut(Utility.toPixel(10)));
-		// addButton(key, action, title, icon);
+		buttonMap.put(key, btnSettings);
+		adjustButtons();
 	}
 
 	public void createDisconnectButton(String key, ActionListener action,
 			String title, Icon icon) {
-		//add(Box.createHorizontalStrut(Utility.toPixel(10)));
-		JButton btnSettings = new JButton(title);
-		btnSettings.addActionListener(action);
-		btnSettings.setFont(Utility.getFont(Constants.SMALL));
-		btnSettings.setPreferredSize(new Dimension(
-				btnSettings.getPreferredSize().width + Utility.toPixel(10),
-				btnSettings.getPreferredSize().height + Utility.toPixel(10)));
-		// btnSettings.setIcon(icon);
-		add(btnSettings);
-		add(Box.createHorizontalStrut(Utility.toPixel(10)));
-		// addButton(key, action, title, icon);
+		JButton btn = new JButton(title);
+		btn.setVerticalAlignment(JButton.CENTER);
+		btn.setHorizontalTextPosition(JButton.CENTER);
+		btn.setVerticalTextPosition(JButton.BOTTOM);
+		btn.setToolTipText(title);
+		btn.addActionListener(action);
+		btn.setFont(Utility.getFont(Constants.SMALL));
+		btn.setIcon(icon);
+		btn.setBorderPainted(false);
+		add(btn);
+		buttonMap.put(key, btn);
+		adjustButtons();
 	}
 
 	public void addButton(String key, ActionListener action, String title,

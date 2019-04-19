@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,6 +38,7 @@ import nixexplorer.widgets.folderview.files.FileBrowserWidget;
 import nixexplorer.widgets.folderview.local.LocalFolderViewWidget;
 import nixexplorer.widgets.folderview.remote.RemoteFolderViewWidget;
 import nixexplorer.widgets.http.HttpClient;
+import nixexplorer.widgets.logviewer.LogViewerWidget;
 import nixexplorer.widgets.search.FileSearchWidget;
 import nixexplorer.widgets.sysmon.SystemMonitorWidget;
 import nixexplorer.widgets.util.Utility;
@@ -63,12 +65,13 @@ public class ServerDisplayPanel extends JPanel {
 	private Window window;
 	private SessionListCallback callback;
 //
-	//private LocalFolderViewWidget localFileView;
+	// private LocalFolderViewWidget localFileView;
 
 	public ServerDisplayPanel(SessionInfo info, Window window,
 			SessionListCallback callback, AppSession appSession) {
 		this.info = info;
-		setBackground(UIManager.getColor("Panel.secondary"));//"DefaultBorder.color"));// "Panel.secondary"));
+		setBackground(UIManager.getColor("Panel.secondary"));// "DefaultBorder.color"));//
+																// "Panel.secondary"));
 		this.window = window;
 		this.callback = callback;
 		this.appSession = appSession;
@@ -101,15 +104,15 @@ public class ServerDisplayPanel extends JPanel {
 		toolbar = createToolbar();
 		add(toolbar, BorderLayout.NORTH);
 		add(createContentPanel());
-		//localFileView = new LocalFolderViewWidget(info, new String[] {},
-		//		appSession, window);
+		// localFileView = new LocalFolderViewWidget(info, new String[] {},
+		// appSession, window);
 		lblDragSide = new JLabel();
 		lblDragSide.setMinimumSize(
 				new Dimension(Utility.toPixel(8), Utility.toPixel(8)));
 		lblDragSide.setPreferredSize(
 				new Dimension(Utility.toPixel(8), Utility.toPixel(8)));
 		lblDragSide.setCursor(new Cursor(Cursor.W_RESIZE_CURSOR));
-		//add(lblDragSide, BorderLayout.WEST);
+		// add(lblDragSide, BorderLayout.WEST);
 
 	}
 
@@ -259,20 +262,20 @@ public class ServerDisplayPanel extends JPanel {
 		}, TextHolder.getString("app.control.taskmgr"),
 				UIManager.getIcon("ServerTools.taskmgrIcon"));
 
-		toolbar.addButton("app.control.curl", new ActionListener() {
+		toolbar.addButton("logviewer.title", new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					HttpClient w = new HttpClient(info, new String[] {},
-							appSession, window);
+					LogViewerWidget w = new LogViewerWidget(info,
+							new String[] {}, appSession, window);
 					appSession.addToSession(w);
 					addTab(w);
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
 			}
-		}, TextHolder.getString("app.control.curl"),
-				UIManager.getIcon("ServerTools.curlIcon"));
+		}, TextHolder.getString("logviewer.title"),
+				UIManager.getIcon("ServerTools.taskmgrIcon"));
 
 		toolbar.addButton("app.control.search", new ActionListener() {
 			@Override
@@ -304,38 +307,53 @@ public class ServerDisplayPanel extends JPanel {
 		}, TextHolder.getString("diskUsageViewer.title"),
 				UIManager.getIcon("ServerTools.taskmgrIcon"));
 
+		toolbar.add(Box.createHorizontalGlue());
+
 		// at the end
-		toolbar.createSettingsButton("app.control.settings",
-				new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						try {
-							System.out.println("called");
-							new ConfigDialog(window,
-									AppContext.INSTANCE.getConfig())
-											.setVisible(true);
-							AppContext.INSTANCE.configChanged();
-						} catch (Exception e2) {
-							e2.printStackTrace();
-						}
-					}
-				}, TextHolder.getString("app.control.settings"),
+		toolbar.addButton("app.control.settings", new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					System.out.println("called");
+					new ConfigDialog(window, AppContext.INSTANCE.getConfig())
+							.setVisible(true);
+					AppContext.INSTANCE.configChanged();
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+		}, TextHolder.getString("app.control.settings"),
 				UIManager.getIcon("ServerTools.settingsIcon"));
 
 		// at the end
-		toolbar.createDisconnectButton("app.control.disconnect",
-				new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						try {
-							System.out.println("disconnect called");
-							appSession.close();
-						} catch (Exception e2) {
-							e2.printStackTrace();
-						}
-					}
-				}, TextHolder.getString("app.control.disconnect"),
-				UIManager.getIcon("ServerTools.settingsIcon"));
+		toolbar.addButton("app.control.notification", new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+//System.out.println("called");
+//					new ConfigDialog(window, AppContext.INSTANCE.getConfig())
+//							.setVisible(true);
+//					AppContext.INSTANCE.configChanged();
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+		}, TextHolder.getString("app.control.notification"),
+				UIManager.getIcon("ServerTools.notificationIcon"));
+
+		// at the end
+		toolbar.addButton("app.control.disconnect", new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					System.out.println("disconnect called");
+					appSession.close();
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+		}, TextHolder.getString("app.control.disconnect"),
+				UIManager.getIcon("ServerTools.disconnectIcon"));
 
 //		toolbar.addButton("app.control.settings", new ActionListener() {
 //			@Override

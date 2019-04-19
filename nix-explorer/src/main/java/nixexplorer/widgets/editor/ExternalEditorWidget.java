@@ -99,7 +99,7 @@ public class ExternalEditorWidget extends JDialog
 		this.info = info;
 		this.appSession = appSession;
 		setTitle("External edit...");
-		setSize(Utility.toPixel(500), Utility.toPixel(300));
+		setSize(Utility.toPixel(300), Utility.toPixel(150));
 		setLocationRelativeTo(null);
 		setPreferredSize(getSize());
 		setResizable(true);

@@ -4,11 +4,15 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import javax.swing.JOptionPane;
+
 import com.jcraft.jsch.ChannelExec;
 
+import nixexplorer.app.session.SessionInfo;
+
 public class SshUtility {
-	public static final int executeCommand(SshWrapper wrapper, String command,
-			boolean compressed, List<String> output) {
+	public static final int executeCommand(SshWrapper wrapper, String command, boolean compressed,
+			List<String> output) {
 		System.out.println("Executing: " + command);
 		ChannelExec exec = null;
 		try {
@@ -48,8 +52,23 @@ public class SshUtility {
 		}
 	}
 
-	public static final int executeCommand(SshWrapper wrapper, String command,
-			List<String> output) {
+	public static final int executeCommand(SshWrapper wrapper, String command, List<String> output) {
 		return executeCommand(wrapper, command, false, output);
+	}
+
+	public static final SshWrapper connect(SessionInfo info) throws Exception {
+		SshWrapper wrapper = new SshWrapper(info);
+		while (true) {
+			try {
+				wrapper.connect();
+				return wrapper;
+			} catch (Exception e) {
+				e.printStackTrace();
+				if (JOptionPane.showConfirmDialog(null,
+						"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
+					throw new Exception("User cancelled the operation");
+				}
+			}
+		}
 	}
 }

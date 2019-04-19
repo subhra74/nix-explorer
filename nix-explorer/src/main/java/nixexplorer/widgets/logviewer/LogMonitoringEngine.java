@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,21 +32,20 @@ import com.jcraft.jsch.SftpProgressMonitor;
 import nixexplorer.app.components.CredentialsDialog;
 import nixexplorer.app.components.CredentialsDialog.Credentials;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.DataTransferProgress;
+import nixexplorer.core.FileInfo;
+import nixexplorer.core.ssh.FileSystemWrapper;
 import nixexplorer.core.ssh.SshWrapper;
 
 /**
  * @author subhro
  *
  */
-public class LogMonitoringEngine implements Runnable, SftpProgressMonitor {
+public class LogMonitoringEngine implements Runnable, SftpProgressMonitor, DataTransferProgress {
 
-	private SshWrapper wrapper;
-	private ChannelSftp sftp;
-
+	private FileSystemWrapper fs;
 	private File tempFile;
 	private String remoteFile;
-
-	private SessionInfo info;
 
 	private LogNotificationListener logListener;
 
@@ -58,6 +58,8 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor {
 	private long remoteFileLength = 0L;
 	private long processed = 0L;
 
+	private AtomicBoolean stopFlag = new AtomicBoolean(false);
+
 	/**
 	 * @param tempFile
 	 * @param remoteFile
@@ -66,16 +68,19 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor {
 	 * @param follow
 	 * @throws IOException
 	 */
-	public LogMonitoringEngine(String remoteFile, SessionInfo info,
-			LogNotificationListener logListener) throws IOException {
+	public LogMonitoringEngine(String remoteFile, FileSystemWrapper fs, LogNotificationListener logListener)
+			throws IOException {
 		super();
-		this.tempFile = File.createTempFile(UUID.randomUUID().toString(),
-				"data");
+		this.tempFile = File.createTempFile(UUID.randomUUID().toString(), "data");
 		this.remoteFile = remoteFile;
-		this.info = info;
+		this.fs = fs;
 		this.logListener = logListener;
-		this.indexFile = File.createTempFile(UUID.randomUUID().toString(),
-				"index");
+		this.indexFile = File.createTempFile(UUID.randomUUID().toString(), "index");
+	}
+
+	public LogMonitoringEngine(String remoteFile, FileSystemWrapper fs, LogNotificationListener logListener,
+			SshWrapper wrapper, ChannelSftp sftp) throws IOException {
+		this(remoteFile, fs, logListener);
 	}
 
 	/*
@@ -85,19 +90,20 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor {
 	 */
 	@Override
 	public void run() {
-		while (true) {
+		while (!stopFlag.get()) {
 			try {
 				retrieveFile();
 				System.out.println("File retrieved");
 				break;
 			} catch (Exception e) {
+				e.printStackTrace();
 				if (!logListener.retry()) {
 					return;
 				}
 			}
 		}
 
-		while (true) {
+		while (!stopFlag.get()) {
 			if (logListener.shouldUpdate()) {
 				try {
 					updateFile();
@@ -117,43 +123,19 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor {
 	}
 
 	public void disconnect() {
-		if (sftp.isConnected()) {
-			sftp.disconnect();
-		}
-		if (wrapper != null && wrapper.isConnected()) {
-			wrapper.disconnect();
-		}
-	}
-
-	private void connect() throws Exception {
-		if (wrapper == null || !wrapper.isConnected()) {
-			while (true) {
-				try {
-					wrapper = new SshWrapper(info);
-					wrapper.connect();
-					this.sftp = wrapper.getSftpChannel();
-					break;
-				} catch (Exception e) {
-					e.printStackTrace();
-					if (JOptionPane.showConfirmDialog(null,
-							"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
-						throw new Exception("User cancelled the operation");
-					}
-				}
+		if (fs != null) {
+			try {
+				fs.close();
+			} catch (Exception e) {
 			}
 		}
 	}
 
 	private void retrieveFile() throws Exception {
-		System.out.println(
-				"Remote file: " + remoteFile + " tempFile: " + tempFile);
-		connect();
-
-		SftpATTRS attrs = sftp.stat(remoteFile);
-		this.remoteFileLength = attrs.getSize();
-
-		sftp.get(remoteFile, tempFile.getAbsolutePath(), this,
-				ChannelSftp.RESUME);
+		System.out.println("Remote file: " + remoteFile + " tempFile: " + tempFile);
+		FileInfo f = fs.get(remoteFile);
+		this.remoteFileLength = f.getSize();
+		fs.copyTo(remoteFile, tempFile.getAbsolutePath(), this, ChannelSftp.RESUME);
 
 		System.out.println("Size of file: " + tempFile.length());
 
@@ -170,14 +152,13 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor {
 	 * 
 	 */
 	private void updateFile() throws Exception {
-		connect();
-
 		long sz = tempFile.length();
-		SftpATTRS attrs = sftp.stat(remoteFile);
-		if (attrs.getSize() > sz) {
+		FileInfo f = fs.get(remoteFile);
+
+		if (f.getSize() > sz) {
 			logListener.setIndeterminate(true);
 			try (OutputStream out = new FileOutputStream(tempFile, true)) {
-				sftp.get(remoteFile, out, this, ChannelSftp.RESUME, sz);
+				fs.copyTo(remoteFile, out, this, ChannelSftp.RESUME, sz);
 				try {
 					out.close();
 				} catch (Exception e) {
@@ -212,8 +193,7 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor {
 	public boolean count(long count) {
 		processed += count;
 		if (remoteFileLength > 0) {
-			logListener.downloadProgress(
-					(int) ((processed * 100) / remoteFileLength));
+			logListener.downloadProgress((int) ((processed * 100) / remoteFileLength));
 		}
 		return true;
 	}
@@ -243,8 +223,7 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor {
 //		int lc = 0;
 		long pos = offset;
 		try (InputStream in = new FileInputStream(indexFile);
-				BufferedOutputStream bout = new BufferedOutputStream(
-						new FileOutputStream(indexFile, true))) {
+				BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(indexFile, true))) {
 			if (first) {
 				bout.write(toBytes(0));
 				first = false;
@@ -299,20 +278,18 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor {
 	}
 
 	private long toLong(byte[] b) {
-		return ((long) b[7] << 56) | ((long) b[6] & 0xff) << 48
-				| ((long) b[5] & 0xff) << 40 | ((long) b[4] & 0xff) << 32
-				| ((long) b[3] & 0xff) << 24 | ((long) b[2] & 0xff) << 16
+		return ((long) b[7] << 56) | ((long) b[6] & 0xff) << 48 | ((long) b[5] & 0xff) << 40
+				| ((long) b[4] & 0xff) << 32 | ((long) b[3] & 0xff) << 24 | ((long) b[2] & 0xff) << 16
 				| ((long) b[1] & 0xff) << 8 | ((long) b[0] & 0xff);
 	}
 
 	private byte[] toBytes(long lng) {
-		return new byte[] { (byte) lng, (byte) (lng >> 8), (byte) (lng >> 16),
-				(byte) (lng >> 24), (byte) (lng >> 32), (byte) (lng >> 40),
-				(byte) (lng >> 48), (byte) (lng >> 56) };
+		return new byte[] { (byte) lng, (byte) (lng >> 8), (byte) (lng >> 16), (byte) (lng >> 24), (byte) (lng >> 32),
+				(byte) (lng >> 40), (byte) (lng >> 48), (byte) (lng >> 56) };
 	}
 
-	public LineTextSearch getSearchView(String pattern, boolean fullWord,
-			boolean matchCase) throws FileNotFoundException {
+	public LineTextSearch getSearchView(String pattern, boolean fullWord, boolean matchCase)
+			throws FileNotFoundException {
 		return new LineTextSearch(pattern, fullWord, matchCase);
 	}
 
@@ -322,12 +299,10 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor {
 
 		private byte[] buf = new byte[1024];
 
-		public LineTextSearch(String pattern, boolean fullWord,
-				boolean matchCase) throws FileNotFoundException {
+		public LineTextSearch(String pattern, boolean fullWord, boolean matchCase) throws FileNotFoundException {
 			indexPointer = new RandomAccessFile(indexFile, "r");
 			dataPointer = new RandomAccessFile(tempFile, "r");
-			String text = (fullWord ? "\\b" : "") + Pattern.quote(pattern)
-					+ (fullWord ? "\\b" : "");
+			String text = (fullWord ? "\\b" : "") + Pattern.quote(pattern) + (fullWord ? "\\b" : "");
 			System.out.println("Search pattern: " + text);
 			if (matchCase) {
 				this.pattern = Pattern.compile(text);
@@ -381,17 +356,14 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor {
 				}
 				long offset = getOffsetForLine(lineNumber);
 				if (offset < 0) {
-					System.out
-							.println("Invalid offset for line: " + lineNumber);
+					System.out.println("Invalid offset for line: " + lineNumber);
 					return -1;
 				}
 
 				dataPointer.seek(offset);
 
-				try (RandomAccessInputStream rin = new RandomAccessInputStream(
-						dataPointer);
-						InputStreamReader r = new InputStreamReader(rin,
-								Charset.forName("utf-8"))) {
+				try (RandomAccessInputStream rin = new RandomAccessInputStream(dataPointer);
+						InputStreamReader r = new InputStreamReader(rin, Charset.forName("utf-8"))) {
 					StringBuilder sb = new StringBuilder();
 					while (true) {
 						int x = r.read();
@@ -414,5 +386,9 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor {
 			}
 		}
 
+	}
+
+	public void setStopFlag() {
+		stopFlag.set(true);
 	}
 }
