@@ -22,17 +22,17 @@ my_whereis lsof
 
 if [ "$?" -eq 0 ]
 then
-	"$CMD_PATH" -b -n -i tcp|gzip|cat
+	"$CMD_PATH" -b -n -i tcp
 else
 	my_whereis ss
 	if [ $? -eq 0 ]
 	then
-		"$CMD_PATH" -l -n -t -p|gzip|cat
+		"$CMD_PATH" -l -n -t -p
 	else
 		my_whereis netstat
 		if [ $? -eq 0 ]
 		then
-			"$CMD_PATH" -l -n -t|gzip|cat
+			"$CMD_PATH" -l -n -t
 		fi
 	fi
 fi

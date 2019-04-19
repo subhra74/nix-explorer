@@ -105,7 +105,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 	private LogTableRenderer renderer;
 	private FileSystemWrapper fs;
 
-	public LogViewerWidget(SessionInfo info, String[] args, AppSession appSession, Window window) {
+	public LogViewerWidget(SessionInfo info, String[] args,
+			AppSession appSession, Window window) {
 		super(info, args, appSession, window);
 		pageFormat = TextHolder.getString("logviewer.pageCount");
 		this.fs = new SshFileSystemWrapper(info);
@@ -115,10 +116,15 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 			System.out.println("Path log: " + args[0]);
 			this.path = args[0];
 		} else {
-			FileSelectionDialog dlg = new FileSelectionDialog(null, fs, getWindow(), false);
+			FileSelectionDialog dlg = new FileSelectionDialog(null, fs,
+					getWindow(), false);
 			dlg.setLocationRelativeTo(getWindow());
 			if (dlg.showDialog() == FileSelectionDialog.DialogResult.APPROVE) {
 				this.path = dlg.getSelectedPath();
+			} else {
+				System.out.println("No file selected closing tab");
+				this.viewClosing();
+				throw new RuntimeException("No file selected");
 			}
 		}
 		createUI();
@@ -286,18 +292,22 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 
 		btnSearch.setBorderPainted(false);
 
-		spFont = new JSpinner(
-				new SpinnerNumberModel(AppContext.INSTANCE.getConfig().getEditor().getFontSize(), 1, 100, 1));
+		spFont = new JSpinner(new SpinnerNumberModel(
+				AppContext.INSTANCE.getConfig().getEditor().getFontSize(), 1,
+				100, 1));
 		spFont.addChangeListener(e -> {
 			System.out.println("Setting font: " + (Integer) spFont.getValue());
-			Font font = this.list.getFont().deriveFont((float) Utility.toPixel((Integer) spFont.getValue()));
+			Font font = this.list.getFont().deriveFont(
+					(float) Utility.toPixel((Integer) spFont.getValue()));
 			this.list.setFont(font);
 			this.renderer.setFont(font);
-			AppContext.INSTANCE.getConfig().getLogViewer().setFontSize(font.getSize());
+			AppContext.INSTANCE.getConfig().getLogViewer()
+					.setFontSize(font.getSize());
 			AppContext.INSTANCE.getConfig().save();
 		});
-		spFont.setMaximumSize(
-				new Dimension(spFont.getPreferredSize().width + Utility.toPixel(30), spFont.getPreferredSize().height));
+		spFont.setMaximumSize(new Dimension(
+				spFont.getPreferredSize().width + Utility.toPixel(30),
+				spFont.getPreferredSize().height));
 
 		btnPrev = new JButton(UIManager.getIcon("ExpandPanel.upIcon"));
 		btnNext = new JButton(UIManager.getIcon("ExpandPanel.downIcon"));
@@ -308,7 +318,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 
 		btnCopyText.addActionListener(e -> {
 			String text = String.join("\n", list.getSelectedValuesList());
-			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
+			Toolkit.getDefaultToolkit().getSystemClipboard()
+					.setContents(new StringSelection(text), null);
 		});
 
 		btnPrev.addActionListener(e -> {
@@ -344,7 +355,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 				this.pageNumber = pg - 1;
 				loadPage();
 			} catch (Exception e1) {
-				JOptionPane.showMessageDialog(getWindow(), "Please enter a valid page number");
+				JOptionPane.showMessageDialog(getWindow(),
+						"Please enter a valid page number");
 			}
 		});
 		lblPages = new JLabel(String.format(pageFormat, 0L));
@@ -353,9 +365,11 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 
 		list = new JList<>(model);
 		list.setFixedCellHeight(Utility.toPixel(20));
-		list.setFont(new Font(Font.MONOSPACED, Font.PLAIN, Utility.toPixel((Integer) spFont.getValue())));
+		list.setFont(new Font(Font.MONOSPACED, Font.PLAIN,
+				Utility.toPixel((Integer) spFont.getValue())));
 
-		renderer = new LogTableRenderer(AppContext.INSTANCE.getConfig().getLogViewer());
+		renderer = new LogTableRenderer(
+				AppContext.INSTANCE.getConfig().getLogViewer());
 		renderer.setFont(this.list.getFont());
 
 //		logTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -378,7 +392,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 //		logTable.setTableHeader(null);
 
 		jsp = new JScrollPane(list);
-		jsp.setBorder(new LineBorder(UIManager.getColor("DefaultBorder.color"), Utility.toPixel(1)));
+		jsp.setBorder(new LineBorder(UIManager.getColor("DefaultBorder.color"),
+				Utility.toPixel(1)));
 
 		JPanel panCenter = new JPanel(new BorderLayout());
 		panCenter.add(jsp);
@@ -393,7 +408,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 //		radBytes.setSelected(true);
 
 //		JLabel lblBytes = new JLabel(TextHolder.getString("logviewer.kb"));
-		chkAutoUpdate = new JCheckBox(TextHolder.getString("logviewer.autoupdate"));
+		chkAutoUpdate = new JCheckBox(
+				TextHolder.getString("logviewer.autoupdate"));
 		chkAutoUpdate.setSelected(true);
 		chkAutoUpdate.addActionListener(e -> {
 			if (t != null) {
@@ -437,7 +453,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 		b1.add(lblPages);
 		b1.add(Box.createHorizontalStrut(Utility.toPixel(5)));
 
-		b1.setBorder(new EmptyBorder(Utility.toPixel(0), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
+		b1.setBorder(new EmptyBorder(Utility.toPixel(0), Utility.toPixel(5),
+				Utility.toPixel(5), Utility.toPixel(5)));
 		// b1.add(Box.createHorizontalGlue());
 
 //		b1.add(radFull);
@@ -477,11 +494,13 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 		btnSearchPrev = new JButton(UIManager.getIcon("ExpandPanel.upIcon"));
 		btnSearchPrev.setBorderPainted(false);
 
-		chkMatchCase = new JCheckBox(TextHolder.getString("logviewer.matchCase"));
+		chkMatchCase = new JCheckBox(
+				TextHolder.getString("logviewer.matchCase"));
 		chkMatchCase.addActionListener(e -> {
 			clearSearch();
 		});
-		chkWholeWord = new JCheckBox(TextHolder.getString("logviewer.wholeWord"));
+		chkWholeWord = new JCheckBox(
+				TextHolder.getString("logviewer.wholeWord"));
 		chkWholeWord.addActionListener(e -> {
 			clearSearch();
 		});
@@ -517,11 +536,13 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 //		});
 
 		prgProgress = new JProgressBar();
-		prgProgress.setPreferredSize(new Dimension(prgProgress.getPreferredSize().width, Utility.toPixel(2)));
+		prgProgress.setPreferredSize(new Dimension(
+				prgProgress.getPreferredSize().width, Utility.toPixel(2)));
 		prgProgress.setBackground(UIManager.getColor("Panel.background"));
 		panCenter.add(prgProgress, BorderLayout.NORTH);
 
-		JButton btnCloseSeach = new JButton(UIManager.getIcon("FlatTabbedPane.closeIcon"));
+		JButton btnCloseSeach = new JButton(
+				UIManager.getIcon("FlatTabbedPane.closeIcon"));
 		btnCloseSeach.setBorderPainted(false);
 		btnCloseSeach.addActionListener(e -> {
 			panHolder.remove(b2);
@@ -545,15 +566,17 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 //		b2.add(btnClearSearch);
 		b2.add(Box.createHorizontalGlue());
 		b2.add(btnCloseSeach);
-		b2.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
+		b2.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+				Utility.toPixel(5), Utility.toPixel(5)));
 		// b2.add(prgProgress);
 
 		JTextField txtFilePath = new JTextField(30);
-		txtFilePath.setFont(new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(14)));
+		txtFilePath.setFont(
+				new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(14)));
 		txtFilePath.setEditable(false);
 		txtFilePath.setText(path);
-		txtFilePath.setBorder(
-				new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
+		txtFilePath.setBorder(new EmptyBorder(Utility.toPixel(5),
+				Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 		add(txtFilePath, BorderLayout.NORTH);
 		add(panHolder);
 
@@ -626,7 +649,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 		int lc = 0;
 		try (InputStream in = new FileInputStream(logEngine.getTempFile())) {
 			in.skip(offset);
-			try (BufferedReader r = new BufferedReader(new InputStreamReader(in, Charset.forName("utf-8")))) {
+			try (BufferedReader r = new BufferedReader(
+					new InputStreamReader(in, Charset.forName("utf-8")))) {
 				for (int i = 0; i < LINE_PER_PAGE; i++) {
 					String line = readLine(r);
 					if (line == null) {
@@ -710,8 +734,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 		long lineNumber = pageNumber * LINE_PER_PAGE + li;
 
 		if (lineSearch == null) {
-			lineSearch = logEngine.getSearchView(txtSearch.getText(), chkWholeWord.isSelected(),
-					chkMatchCase.isSelected());
+			lineSearch = logEngine.getSearchView(txtSearch.getText(),
+					chkWholeWord.isSelected(), chkMatchCase.isSelected());
 		}
 
 		disableUI();
@@ -767,7 +791,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 		long lineNumber = pageNumber * LINE_PER_PAGE + li;
 
 		if (lineSearch == null) {
-			lineSearch = logEngine.getSearchView(txtSearch.getText(), false, false);
+			lineSearch = logEngine.getSearchView(txtSearch.getText(), false,
+					false);
 		}
 
 		disableUI();
@@ -800,12 +825,23 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 	@Override
 	public boolean viewClosing() {
 		closing = true;
-		logEngine.setStopFlag();
+		if (logEngine != null) {
+			logEngine.setStopFlag();
+		}
 		if (t != null) {
 			t.interrupt();
 		}
 		new Thread(() -> {
-			logEngine.disconnect();
+			if (this.fs != null) {
+				try {
+					this.fs.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			if (this.logEngine != null) {
+				logEngine.disconnect();
+			}
 		}).start();
 		return true;
 	}
@@ -855,7 +891,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see nixexplorer.widgets.logviewer.LogNotificationListener#logChanged(long)
+	 * @see
+	 * nixexplorer.widgets.logviewer.LogNotificationListener#logChanged(long)
 	 */
 	@Override
 	public void logChanged() {
@@ -921,7 +958,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 		if (closing) {
 			return false;
 		}
-		return JOptionPane.showConfirmDialog(getWindow(), "Retry?") == JOptionPane.YES_OPTION;
+		return JOptionPane.showConfirmDialog(getWindow(),
+				"Retry?") == JOptionPane.YES_OPTION;
 	}
 
 	private void disableUI() {
@@ -953,7 +991,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see nixexplorer.widgets.logviewer.LogNotificationListener#downloadProgress(
+	 * @see
+	 * nixexplorer.widgets.logviewer.LogNotificationListener#downloadProgress(
 	 * int)
 	 */
 	@Override
@@ -968,7 +1007,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see nixexplorer.widgets.logviewer.LogNotificationListener#setIndeterminate(
+	 * @see
+	 * nixexplorer.widgets.logviewer.LogNotificationListener#setIndeterminate(
 	 * boolean)
 	 */
 	@Override

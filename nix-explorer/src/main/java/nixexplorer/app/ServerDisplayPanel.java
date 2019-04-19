@@ -326,20 +326,20 @@ public class ServerDisplayPanel extends JPanel {
 				UIManager.getIcon("ServerTools.settingsIcon"));
 
 		// at the end
-		toolbar.addButton("app.control.notification", new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-//System.out.println("called");
-//					new ConfigDialog(window, AppContext.INSTANCE.getConfig())
-//							.setVisible(true);
-//					AppContext.INSTANCE.configChanged();
-				} catch (Exception e2) {
-					e2.printStackTrace();
-				}
-			}
-		}, TextHolder.getString("app.control.notification"),
-				UIManager.getIcon("ServerTools.notificationIcon"));
+//		toolbar.addButton("app.control.notification", new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				try {
+////System.out.println("called");
+////					new ConfigDialog(window, AppContext.INSTANCE.getConfig())
+////							.setVisible(true);
+////					AppContext.INSTANCE.configChanged();
+//				} catch (Exception e2) {
+//					e2.printStackTrace();
+//				}
+//			}
+//		}, TextHolder.getString("app.control.notification"),
+//				UIManager.getIcon("ServerTools.notificationIcon"));
 
 		// at the end
 		toolbar.addButton("app.control.disconnect", new ActionListener() {

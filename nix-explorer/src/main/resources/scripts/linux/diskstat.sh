@@ -1,2 +1,2 @@
 #!/bin/sh
-df -hP|gzip|cat
+df -hP

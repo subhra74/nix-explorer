@@ -14,4 +14,4 @@ get_process_table(){
 	ps $ps_options
 }
 
-get_process_table|gzip|cat
+get_process_table

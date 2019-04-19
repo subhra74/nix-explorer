@@ -209,6 +209,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 			System.out.println("Applying filter: " + processFilter);
 			sorter.setRowFilter(null);
 			processTableModel.updateData(procList);
+			txtProcessSearch.setText("");
 		});
 
 		JButton btnKill = new JButton(TextHolder.getString("sysmon.killText"));
@@ -428,12 +429,12 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		executeCommand(script, false, statMap);
 
 		if (readNetworkStatus) {
-			List<String> list = executeCommand(sockScript, true);
+			List<String> list = executeCommand(sockScript, false);
 			sockText = list;
 		}
 
 		if (readDiskStatus) {
-			List<String> list = executeCommand(diskScript, true);
+			List<String> list = executeCommand(diskScript, false);
 			diskText = String.join("\n", list);
 		}
 
@@ -442,7 +443,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 			sysInfoText = String.join("\n", list);
 		}
 
-		procList = executeCommand(applyEnv(procScript, psMap), true);
+		procList = executeCommand(applyEnv(procScript, psMap), false);
 
 		System.out.println("Process count:" + procList.size());
 
