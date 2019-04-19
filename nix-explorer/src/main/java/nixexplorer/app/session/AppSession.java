@@ -4,6 +4,7 @@
 package nixexplorer.app.session;
 
 import java.io.File;
+import java.nio.file.WatchKey;
 import java.util.Map;
 
 import nixexplorer.app.AppContext;
@@ -22,7 +23,10 @@ public interface AppSession {
 //
 //	public void setEditWatchers(Map<String, ChangeUploader> editWatchers);
 
-	public void registerEditWatchers(String file, ChangeUploader editWatcher);
+	public WatchKey registerEditWatchers(String file,
+			ChangeUploader editWatcher);
+
+	public void unregisterWatcher(WatchKey key);
 
 	public File getDirectory();
 
@@ -33,6 +37,8 @@ public interface AppSession {
 	public void addToSession(Object obj);
 
 	public void remoteFileSystemWasChanged(String path);
-	
+
+	public void createFolderView(String path);
+
 	public void close();
 }

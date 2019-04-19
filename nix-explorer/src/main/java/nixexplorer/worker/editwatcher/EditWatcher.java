@@ -44,33 +44,47 @@ public class EditWatcher extends WorkerBase {
 			} catch (InterruptedException x) {
 				return;
 			}
-			FileEntry path = null;
-			for (WatchEvent<?> event : key.pollEvents()) {
-				System.out.println("Event kind:" + event.kind()
-						+ ". File affected: " + event.context() + ".");
-				String changedFile = event.context() + "";
-				FileEntry ent = keyPath.get(key);
-				if (ent.getFileName().equals(changedFile) && event
-						.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
-					path = keyPath.get(key);
-				}
+			outer: {
+				FileEntry path = null;
+				for (WatchEvent<?> event : key.pollEvents()) {
+					System.out.println("Event kind:" + event.kind()
+							+ ". File affected: " + event.context() + ".");
+					String changedFile = event.context() + "";
+					FileEntry ent = keyPath.get(key);
+					if (ent == null) {
+						key.cancel();
+						break outer;
+					}
+					if (ent.getFileName().equals(changedFile) && event
+							.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
+						path = keyPath.get(key);
+					}
 
+				}
+				if (path != null) {
+					uploadChangedFile(path);
+				}
+				key.reset();
 			}
-			if (path != null) {
-				uploadChangedFile(path);
-			}
-			key.reset();
 		}
 	}
 
-	public void register(FileEntry ent) {
+	public WatchKey register(FileEntry ent) {
 		try {
 			WatchKey key = ent.getFolder().register(watchService,
 					StandardWatchEventKinds.ENTRY_MODIFY);
 			keyPath.put(key, ent);
+			return key;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return null;
+	}
+
+	public synchronized void unregister(WatchKey key) {
+		keyPath.remove(key);
+		key.cancel();
+		System.out.println("Unregistering watcher for: "+key.watchable());
 	}
 
 //	public void run1() {

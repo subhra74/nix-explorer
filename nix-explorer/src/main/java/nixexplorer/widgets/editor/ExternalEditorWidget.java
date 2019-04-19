@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.WatchKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +86,7 @@ public class ExternalEditorWidget extends JDialog
 	private AppSession appSession;
 	private AtomicBoolean stopFlag = new AtomicBoolean(false);
 	protected AtomicBoolean widgetClosed = new AtomicBoolean(Boolean.FALSE);
+	private WatchKey watchKey;
 
 	enum Mode {
 		OpenWithEditor, OpenWithDefApp
@@ -131,6 +133,9 @@ public class ExternalEditorWidget extends JDialog
 	 */
 	protected void closeWindow() {
 		stopFlag.set(true);
+		if (this.watchKey != null) {
+			appSession.unregisterWatcher(watchKey);
+		}
 		dispose();
 		new Thread(() -> {
 			try {
@@ -313,7 +318,7 @@ public class ExternalEditorWidget extends JDialog
 					});
 			this.lastModified = Files.getLastModifiedTime(Paths.get(file))
 					.toMillis();
-			appSession.registerEditWatchers(file, this);
+			this.watchKey = appSession.registerEditWatchers(file, this);
 			openDefaultApp(file);
 			SwingUtilities.invokeLater(() -> {
 				ExternalEditorWidget.this.getContentPane().removeAll();
@@ -469,6 +474,11 @@ public class ExternalEditorWidget extends JDialog
 	public boolean closeView() {
 		closeWindow();
 		return true;
+	}
+
+	@Override
+	public String getPathHost() {
+		return this.info.getHost() + ":" + this.remoteFile;
 	}
 }
 

@@ -5,6 +5,7 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.WatchKey;
 import java.util.Iterator;
 import java.util.WeakHashMap;
 
@@ -43,7 +44,8 @@ public final class AppSessionImpl implements AppSession {
 		System.out.println("AppSessionImpl - window: " + window);
 		editWatcher = new EditWatcher(session, this, new String[] {});
 		new Thread(editWatcher).start();
-		sessionFolder = new File((String) App.getConfig("temp.dir"), session.getId());
+		sessionFolder = new File((String) App.getConfig("temp.dir"),
+				session.getId());
 		if (!sessionFolder.exists()) {
 			sessionFolder.mkdirs();
 		}
@@ -84,12 +86,13 @@ public final class AppSessionImpl implements AppSession {
 	public synchronized void createWidget(String className, String[] args) {
 		try {
 			Class<?> clazz = Class.forName(className);
-			Constructor<?> ctor = clazz.getConstructor(SessionInfo.class, String[].class, AppSession.class,
-					Window.class);
+			Constructor<?> ctor = clazz.getConstructor(SessionInfo.class,
+					String[].class, AppSession.class, Window.class);
 //			if (window == null) {
 //				window = SwingUtilities.getWindowAncestor(getDisplay());
 //			}
-			Object obj = ctor.newInstance(new Object[] { session, args, this, window });
+			Object obj = ctor
+					.newInstance(new Object[] { session, args, this, window });
 
 			if (obj instanceof TabbedChild) {
 				display.addTab((TabbedChild) obj);
@@ -118,13 +121,22 @@ public final class AppSessionImpl implements AppSession {
 //		this.editWatchers = editWatchers;
 //	}
 
-	public void registerEditWatchers(String file, ChangeUploader editWatcher) {
+	@Override
+	public WatchKey registerEditWatchers(String file,
+			ChangeUploader editWatcher) {
 		// this.editWatchers.put(file, editWatcher);
 		Path path = Paths.get(file);
-		FileEntry ent = new FileEntry(PathUtils.getFileName(file), path, path.getParent(), editWatcher);
+		FileEntry ent = new FileEntry(PathUtils.getFileName(file), path,
+				path.getParent(), editWatcher);
+		System.out.println("Registered for changes: " + file + " path: "
+				+ path.toString());
 		// Path path = Paths.get(file).getParent();
-		this.editWatcher.register(ent);
-		System.out.println("Registered for changes: " + file + " path: " + path.toString());
+		return this.editWatcher.register(ent);
+	}
+
+	@Override
+	public void unregisterWatcher(WatchKey key) {
+		this.editWatcher.unregister(key);
 	}
 
 	/*
@@ -140,7 +152,8 @@ public final class AppSessionImpl implements AppSession {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see nixexplorer.app.session.AppSession#closeTab(nixexplorer.app.components.
+	 * @see
+	 * nixexplorer.app.session.AppSession#closeTab(nixexplorer.app.components.
 	 * TabbedChild)
 	 */
 	@Override
@@ -181,13 +194,15 @@ public final class AppSessionImpl implements AppSession {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see nixexplorer.app.session.AppSession#remoteFileSystemWasChanged(java.lang.
+	 * @see
+	 * nixexplorer.app.session.AppSession#remoteFileSystemWasChanged(java.lang.
 	 * String)
 	 */
 	@Override
 	public void remoteFileSystemWasChanged(String path) {
 		System.out.println("remote file system was changed " + path);
-		System.out.println("Event aware components: " + eventAwareComponents.keySet());
+		System.out.println(
+				"Event aware components: " + eventAwareComponents.keySet());
 		for (SessionEventAware c : eventAwareComponents.keySet()) {
 			c.fileSystemUpdated(path);
 		}
@@ -216,5 +231,9 @@ public final class AppSessionImpl implements AppSession {
 			window.repaint();
 		}
 
+	}
+
+	public void createFolderView(String path) {
+		display.createFolderView(path);
 	}
 }

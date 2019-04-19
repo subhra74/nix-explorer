@@ -217,7 +217,7 @@ public class ServerDisplayPanel extends JPanel {
 		toolbar.addButton("app.control.files", new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				createFolderView();
+				createFolderView(null);
 			}
 		}, TextHolder.getString("app.control.files"),
 				UIManager.getIcon("ServerTools.filesIcon"));
@@ -385,9 +385,10 @@ public class ServerDisplayPanel extends JPanel {
 //		}
 	}
 
-	public void createFolderView() {
+	public void createFolderView(String folder) {
 		try {
-			FileBrowserWidget w = new FileBrowserWidget(info, new String[] {},
+			FileBrowserWidget w = new FileBrowserWidget(info,
+					folder == null ? new String[] {} : new String[] { folder },
 					appSession, window);
 //			RemoteFolderViewWidget w = new RemoteFolderViewWidget(info,
 //					new String[] {}, appSession, window);

@@ -396,9 +396,7 @@ public class FileSearchWidget extends Widget {
 				String path = res.getPath();
 				path = PathUtils.getParent(path);
 				if (path.length() > 0) {
-					appSession.createWidget(
-							"nixexplorer.widgets.folderview.remote.RemoteFolderViewWidget",
-							new String[] { path });
+					appSession.createFolderView(path);
 				}
 			}
 		});
