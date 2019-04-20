@@ -17,9 +17,9 @@ public class LineGraph extends JComponent {
 	private static final long serialVersionUID = -8887995348037288952L;
 	private float[] values = new float[0];
 
-	private Stroke lineStroke = new BasicStroke(2.0f, BasicStroke.CAP_ROUND,
+	private Stroke lineStroke = new BasicStroke(1.0f, BasicStroke.CAP_ROUND,
 			BasicStroke.JOIN_ROUND);
-	private Stroke gridStroke = new BasicStroke(1.0f, BasicStroke.CAP_ROUND,
+	private Stroke gridStroke = new BasicStroke(3.0f, BasicStroke.CAP_ROUND,
 			BasicStroke.JOIN_ROUND);
 	private boolean dynamic = false;
 	private String suffix = "%";
@@ -198,25 +198,38 @@ public class LineGraph extends JComponent {
 		for (int i = 0; i < count + 1; i++) {
 			g2.setColor(gridColor);
 			g2.setStroke(gridStroke);
-			int y = (int) Math.floor(i * stepy);
-			int x = (int) Math.floor(i * stepx);
+//			int y = (int) Math.floor(i * stepy);
+//			int x = (int) Math.floor(i * stepx);
 			int y1 = (int) Math.floor((values[i] * height) / den);
 			// int y2 = (int) Math.floor((values[i + 1] * height) / den);
 			int x1 = (int) Math.floor(i * stepx);
 			// int x2 = (int) Math.floor((i + 1) * stepx);
-			g2.drawLine(0, y, width, y);
-			g2.drawLine(x, 0, x, height);
-			g2.setColor(lineColor);
-			g2.setStroke(lineStroke);
+
+//			g2.setColor(lineColor);
+//			g2.drawLine(0, y, width, y);
+//			g2.drawLine(x, 0, x, height);
 			// g2.drawLine(x1, height - y1, x2, height - y2);
 			shape.lineTo(x1, height - y1);
 		}
 
 		g2.setColor(gridColor);
 		g2.setStroke(gridStroke);
-		g2.draw(shape);
 		g2.fill(shape);
-		g2.drawLine(width, 0, width, height);
+
+		g2.setColor(lineColor);
+		g2.setStroke(gridStroke);
+		// g2.draw(shape);
+
+		g2.setStroke(lineStroke);
+
+		for (int i = 0; i < count + 1; i++) {
+			int y = (int) Math.floor(i * stepy);
+			int x = (int) Math.floor(i * stepx);
+			g2.drawLine(0, y, width, y);
+			g2.drawLine(x, 0, x, height);
+		}
+
+		// g2.drawLine(width, 0, width, height);
 	}
 
 	public float[] getValues() {

@@ -18,6 +18,7 @@ public class SystemLoadPanel extends JPanel {
 	private float cpuStats[] = new float[60];
 	private float memStats[] = new float[60];
 	private float swpStats[] = new float[60];
+	private float loavAvgs[] = new float[60];
 
 	public SystemLoadPanel() {
 		setLayout(new BorderLayout());

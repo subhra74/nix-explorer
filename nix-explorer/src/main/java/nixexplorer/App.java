@@ -1337,6 +1337,9 @@ public final class App {
 			Color c2 = new Color(150, 150, 150);
 			Color c3 = new Color(45, 45, 45);
 			Color brightFg = Color.WHITE;
+
+			Color graphColor = background;//foreground;//new Color(17, 111, 139);
+
 			Icon tabCloseIcon = new ScaledIcon(
 					App.class.getResource("/images/" + black + "_close.png"),
 					Utility.toPixel(14), Utility.toPixel(14));
@@ -1970,6 +1973,11 @@ public final class App {
 			UIManager.put("MenuBar.highlight", background);
 			UIManager.put("MenuBar.darkShadow", background);
 
+			UIManager.put("LineGraph.foreground", foreground);
+			UIManager.put("LineGraph.background", background);
+			UIManager.put("LineGraph.gridColor", selection);
+			UIManager.put("LineGraph.lineColor", selection);
+
 			UIManager.put("textHighlight", selection);
 			UIManager.put("textHighlightText", selection);
 			UIManager.put("TextField.background", background);
@@ -2075,11 +2083,6 @@ public final class App {
 			UIManager.put("SplitPaneDivider.border",
 					new LineBorder(background, Utility.toPixel(1)));
 			UIManager.put("SplitPane.background", background);
-
-			UIManager.put("LineGraph.foreground", foreground);
-			UIManager.put("LineGraph.background", background);
-			UIManager.put("LineGraph.gridColor", border);
-			UIManager.put("LineGraph.lineColor", selection);
 
 			UIManager.put("ScrollBar.background", background);
 			UIManager.put("ScrollBar.squareButtons", false);
@@ -3049,7 +3052,7 @@ public final class App {
 
 			UIManager.put("LineGraph.foreground", foreground);
 			UIManager.put("LineGraph.background", background);
-			UIManager.put("LineGraph.gridColor", border);
+			UIManager.put("LineGraph.gridColor", background);
 			UIManager.put("LineGraph.lineColor", selection);
 
 			UIManager.put("ScrollBar.background", background);
