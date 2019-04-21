@@ -47,7 +47,8 @@ import nixexplorer.core.ssh.SshTtyConnector;
 import nixexplorer.widgets.Widget;
 import nixexplorer.widgets.util.Utility;
 
-public final class TabbedConsoleWidget extends Widget implements SessionEventAware {
+public final class TabbedConsoleWidget extends Widget
+		implements SessionEventAware {
 	private static final long serialVersionUID = 628110766420603243L;
 	private JediTermWidget term;
 	private Icon icon;
@@ -58,11 +59,13 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 	private DisposableTtyConnector tty;
 	private boolean shell;
 
-	public TabbedConsoleWidget(SessionInfo info, String[] args, AppSession appSession, Window window) {
+	public TabbedConsoleWidget(SessionInfo info, String[] args,
+			AppSession appSession, Window window) {
 		this(info, args, appSession, window, true);
 	}
 
-	public TabbedConsoleWidget(SessionInfo info, String[] args, AppSession appSession, Window window, boolean shell) {
+	public TabbedConsoleWidget(SessionInfo info, String[] args,
+			AppSession appSession, Window window, boolean shell) {
 
 		super(info, args, appSession, window);
 
@@ -71,7 +74,8 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 		this.shell = shell;
 
 		model = new DefaultComboBoxModel<>();
-		model.addAll(AppContext.INSTANCE.getConfig().getTerminal().getSnippets());
+		model.addAll(
+				AppContext.INSTANCE.getConfig().getTerminal().getSnippets());
 		cmbSnippets = new JComboBox<>(model);
 		cmbSnippets.addActionListener(e -> {
 			try {
@@ -79,7 +83,8 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 				if (item == null) {
 					return;
 				}
-				System.out.println("Insert snippet: " + item.getName() + " " + item.getCommand());
+				System.out.println("Insert snippet: " + item.getName() + " "
+						+ item.getCommand());
 				term.getTerminalStarter().sendString(item.getCommand());
 			} finally {
 				if (term != null) {
@@ -100,7 +105,8 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 			}
 		});
 
-		JButton btnReconnect = new JButton(TextHolder.getString("terminal.reconnect"));
+		JButton btnReconnect = new JButton(
+				TextHolder.getString("terminal.reconnect"));
 		btnReconnect.addActionListener(e -> {
 			reconnect();
 		});
@@ -111,9 +117,11 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 		hb.add(cmbSnippets);
 		hb.add(Box.createHorizontalStrut(Utility.toPixel(10)));
 
-		JButton btnManageSnippets = new JButton(TextHolder.getString("terminal.manageSnippets"));
+		JButton btnManageSnippets = new JButton(
+				TextHolder.getString("terminal.manageSnippets"));
 		btnManageSnippets.addActionListener(e -> {
-			ConfigDialog dlg = new ConfigDialog(getWindow(), AppContext.INSTANCE.getConfig());
+			ConfigDialog dlg = new ConfigDialog(getWindow(),
+					AppContext.INSTANCE.getConfig());
 			dlg.selectPage(1);
 			dlg.setLocationRelativeTo(getWindow());
 			dlg.setVisible(true);
@@ -125,8 +133,8 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 		hb.add(Box.createHorizontalStrut(Utility.toPixel(10)));
 		hb.add(btnReconnect);
 
-		hb.setBorder(
-				new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
+		hb.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10),
+				Utility.toPixel(10), Utility.toPixel(10)));
 
 		if (shell) {
 			add(hb, BorderLayout.NORTH);
@@ -184,8 +192,11 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 			@Override
 			public TextStyle getDefaultStyle() {
 				System.out.println("Default style called");
-				return new TextStyle(TerminalColor.awt(new Color(config.getTerminal().getForeGround())),
-						TerminalColor.awt(new Color(config.getTerminal().getBackGround())));
+				return new TextStyle(
+						TerminalColor.awt(new Color(
+								config.getTerminal().getForeGround())),
+						TerminalColor.awt(new Color(
+								config.getTerminal().getBackGround())));
 				// return new TextStyle(foreground, background)
 			}
 
@@ -201,14 +212,20 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 
 			@Override
 			public TextStyle getFoundPatternColor() {
-				return new TextStyle(TerminalColor.awt(UIManager.getColor("Terminal.foreground")),
-						TerminalColor.awt(UIManager.getColor("Terminal.selectionBackground")));
+				return new TextStyle(
+						TerminalColor
+								.awt(UIManager.getColor("Terminal.foreground")),
+						TerminalColor.awt(UIManager
+								.getColor("Terminal.selectionBackground")));
 			}
 
 			@Override
 			public TextStyle getSelectionColor() {
-				return new TextStyle(TerminalColor.awt(UIManager.getColor("Terminal.foreground")),
-						TerminalColor.awt(UIManager.getColor("Terminal.selectionBackground")));
+				return new TextStyle(
+						TerminalColor
+								.awt(UIManager.getColor("Terminal.foreground")),
+						TerminalColor.awt(UIManager
+								.getColor("Terminal.selectionBackground")));
 			}
 
 //			@Override
@@ -218,8 +235,11 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 
 			@Override
 			public TextStyle getHyperlinkColor() {
-				return new TextStyle(TerminalColor.awt(UIManager.getColor("Terminal.foreground")),
-						TerminalColor.awt(UIManager.getColor("Terminal.background")));
+				return new TextStyle(
+						TerminalColor
+								.awt(UIManager.getColor("Terminal.foreground")),
+						TerminalColor.awt(
+								UIManager.getColor("Terminal.background")));
 			}
 		};
 
@@ -237,7 +257,8 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 
 		if (shell) {
 			snippetProvider = new SnippetActionProvider();
-			snippetProvider.setList(AppContext.INSTANCE.getConfig().getTerminal().getSnippets());
+			snippetProvider.setList(AppContext.INSTANCE.getConfig()
+					.getTerminal().getSnippets());
 			term.setNextProvider(snippetProvider);
 		}
 
@@ -276,7 +297,8 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 					if (scriptPath.indexOf(' ') != -1) {
 						scriptPath = "\"" + scriptPath + "\"";
 					}
-					cmd = "cd \"" + folder + "\"; nohup " + scriptPath + " " + args[2];
+					cmd = "cd \"" + folder + "\"; nohup " + scriptPath + " "
+							+ args[2];
 				} else {
 					cmd = "nohup " + args[1] + " ";
 					// + (args.length > 3 ? args[3] : "");
@@ -289,7 +311,8 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 					if (file.indexOf(' ') != -1) {
 						file = "\"" + file + "\"";
 					}
-					cmd = "cd \"" + folder + "\"; ./" + file + " " + args[2] + " &";
+					cmd = "cd \"" + folder + "\"; ./" + file + " " + args[2]
+							+ " &";
 				} else {
 					cmd = args[1] + " " + args[2];
 				}
@@ -302,7 +325,8 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 
 		System.out.println("Commnd: " + cmd);
 
-		tty = shell ? new SshTtyConnector(info) : new SshExecTtyConnector(info, command);
+		tty = shell ? new SshTtyConnector(info)
+				: new SshExecTtyConnector(info, command);
 
 		// tty = new SshTtyConnector(info); // shell ? new SshTtyConnector(info)
 		// : new ExecTtyConnector(info, command);
@@ -318,11 +342,13 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 					if (tty.isConnected()) {
 						TerminalPanel panel = term.getTerminalPanel();
 						Dimension d = panel.getTerminalSizeFromComponent();
-						term.getTerminalStarter().postResize(d, RequestOrigin.User);
+						term.getTerminalStarter().postResize(d,
+								RequestOrigin.User);
 
 						if (command != null && command.length() > 0) {
 							System.out.println("Command sent");
-							term.getTerminalStarter().sendString(command + "\n");
+							term.getTerminalStarter()
+									.sendString(command + "\n");
 						}
 						break;
 					} else {
@@ -412,6 +438,7 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 
 	@Override
 	public boolean viewClosing() {
+		this.closeInitiated = true;
 		System.out.println("Closing");
 		close();
 		return true;
@@ -454,10 +481,12 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 	public void configChanged() {
 		System.out.println("Config changed on console");
 		if (shell) {
-			snippetProvider.setList(AppContext.INSTANCE.getConfig().getTerminal().getSnippets());
+			snippetProvider.setList(AppContext.INSTANCE.getConfig()
+					.getTerminal().getSnippets());
 
 			model.removeAllElements();
-			model.addAll(AppContext.INSTANCE.getConfig().getTerminal().getSnippets());
+			model.addAll(AppContext.INSTANCE.getConfig().getTerminal()
+					.getSnippets());
 		}
 //term.setNextProvider(snippetProvider);
 //		model.removeAllElements();
@@ -499,12 +528,16 @@ public final class TabbedConsoleWidget extends Widget implements SessionEventAwa
 
 		public void setList(List<SnippetItem> snippets) {
 			list.clear();
-			for (SnippetItem item : AppContext.INSTANCE.getConfig().getTerminal().getSnippets()) {
-				TerminalAction ta = new TerminalAction(item.getName(), new KeyStroke[] { getKeystroke(item) }, e -> {
-					System.out.println("Insert snippet: " + item.getName() + " " + item.getCommand());
-					term.getTerminalStarter().sendString(item.getCommand());
-					return true;
-				});
+			for (SnippetItem item : AppContext.INSTANCE.getConfig()
+					.getTerminal().getSnippets()) {
+				TerminalAction ta = new TerminalAction(item.getName(),
+						new KeyStroke[] { getKeystroke(item) }, e -> {
+							System.out.println("Insert snippet: "
+									+ item.getName() + " " + item.getCommand());
+							term.getTerminalStarter()
+									.sendString(item.getCommand());
+							return true;
+						});
 				list.add(ta);
 			}
 		}

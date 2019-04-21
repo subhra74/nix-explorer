@@ -106,6 +106,7 @@ public class TerminalDialog extends JDialog implements DisposableView {
 	 */
 	@Override
 	public void viewClosed() {
+		
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package nixexplorer.widgets.sysmon;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Window;
@@ -166,6 +167,9 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 			AppContext.INSTANCE.getConfig().getMonitor().setInterval(interval);
 			AppContext.INSTANCE.getConfig().save();
 		});
+
+		this.sleepInterval = AppContext.INSTANCE.getConfig().getMonitor()
+				.getInterval();
 
 		JLabel lblInterval = new JLabel(
 				TextHolder.getString("sysmon.pollInterval"));
@@ -412,6 +416,16 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 				return;
 			}
 			os = list.get(0);
+
+			final String strOs = os;
+
+			if (!"Linux".equals(strOs)) {
+				this.stopFlag.set(true);
+				SwingUtilities.invokeLater(() -> {
+					showUnsupportedOS(strOs);
+				});
+			}
+
 			statScript = ShellScriptLoader.loadShellScript("sysmon.sh",
 					os.toLowerCase());
 			sockScript = ShellScriptLoader.loadShellScript("sockstat.sh",
@@ -697,6 +711,9 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			if (stopFlag.get()) {
+				break;
+			}
 			try {
 				Thread.sleep(sleepInterval * 1000);
 			} catch (InterruptedException e) {
@@ -869,6 +886,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	@Override
 	public void viewClosed() {
 		stopFlag.set(true);
+		closeInitiated = true;
 		if (wrapper != null && wrapper.isConnected()) {
 			new Thread(() -> {
 				try {
@@ -963,6 +981,21 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 
 		exec.disconnect();
 		return list;
+	}
+
+	private void showUnsupportedOS(String os) {
+		JLabel lbl = new JLabel(
+				String.format(TextHolder.getString("sysmon.unsupported"), os));
+		lbl.setFont(new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(15)));
+		lbl.setForeground(Color.WHITE);
+		lbl.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10),
+				Utility.toPixel(10), Utility.toPixel(10)));
+		lbl.setOpaque(true);
+		lbl.setBackground(Color.RED);
+		this.removeAll();
+		this.add(lbl, BorderLayout.NORTH);
+		this.revalidate();
+		this.repaint();
 	}
 
 }

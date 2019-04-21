@@ -255,6 +255,8 @@ public final class App {
 				"Unselect similar file types");
 		TextHolder.addString("folderview.filter", "Filter files");
 
+		TextHolder.addString("sysmon.unsupported",
+				"This os is not supported yet: %s");
 		TextHolder.addString("sysmon.processTitle", "Processes");
 		TextHolder.addString("sysmon.pollInterval", "Refresh interval");
 		TextHolder.addString("sysmon.refresh", "Refresh");
@@ -1338,7 +1340,8 @@ public final class App {
 			Color c3 = new Color(45, 45, 45);
 			Color brightFg = Color.WHITE;
 
-			Color graphColor = background;//foreground;//new Color(17, 111, 139);
+			Color graphColor = background;// foreground;//new Color(17, 111,
+											// 139);
 
 			Icon tabCloseIcon = new ScaledIcon(
 					App.class.getResource("/images/" + black + "_close.png"),

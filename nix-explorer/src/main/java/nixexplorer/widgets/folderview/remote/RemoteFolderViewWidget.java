@@ -323,7 +323,7 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 
 	@Override
 	public void reconnectFs() throws Exception {
-		while (true) {
+		while (!closePending) {
 			wrapper = super.connect();
 			try {
 				fs = new SshFileSystemProvider(wrapper.getSftpChannel());
@@ -335,9 +335,11 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 				} catch (Exception e1) {
 				}
 			}
-			if (JOptionPane.showConfirmDialog(null,
-					"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
-				throw new Exception("User cancelled the operation");
+			if (!closePending) {
+				if (JOptionPane.showConfirmDialog(null,
+						"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
+					throw new Exception("User cancelled the operation");
+				}
 			}
 		}
 	}
@@ -626,6 +628,8 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 	 */
 	@Override
 	public boolean viewClosing() {
+		closePending = true;
+		closeInitiated = true;
 		return true;
 	}
 

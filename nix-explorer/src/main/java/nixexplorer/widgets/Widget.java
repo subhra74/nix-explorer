@@ -86,6 +86,9 @@ public abstract class Widget extends JPanel implements TabbedChild {
 				return wrapper;
 			} catch (Exception e) {
 				e.printStackTrace();
+				if (closeInitiated) {
+					throw new Exception("User cancelled the operation");
+				}
 				if (JOptionPane.showConfirmDialog(null,
 						"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
 					throw new Exception("User cancelled the operation");

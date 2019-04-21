@@ -824,6 +824,7 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 	 */
 	@Override
 	public boolean viewClosing() {
+		System.out.println("Viewclosing called");
 		closing = true;
 		if (logEngine != null) {
 			logEngine.setStopFlag();
@@ -831,9 +832,12 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 		if (t != null) {
 			t.interrupt();
 		}
+		System.out.println("Viewclosing called1");
 		new Thread(() -> {
+			System.out.println("Viewclosing called3");
 			if (this.fs != null) {
 				try {
+					System.out.println("Closing filesystem wrapper");
 					this.fs.close();
 				} catch (Exception e) {
 					e.printStackTrace();

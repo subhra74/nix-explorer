@@ -7,6 +7,7 @@ import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
@@ -24,6 +25,7 @@ public class SshFileSystemWrapper implements FileSystemWrapper {
 	private SessionInfo info;
 	private SshWrapper wrapper;
 	private ChannelSftp sftp;
+	private AtomicBoolean stopFlag = new AtomicBoolean(false);
 
 	public SshFileSystemWrapper(SessionInfo info) {
 		this.info = info;
@@ -39,7 +41,7 @@ public class SshFileSystemWrapper implements FileSystemWrapper {
 	@Override
 	public synchronized void connect() throws Exception {
 		System.out.println("Connecting to: " + info);
-		wrapper = SshUtility.connect(info);
+		wrapper = SshUtility.connect(info, stopFlag);
 		this.sftp = wrapper.getSftpChannel();
 	}
 
@@ -49,30 +51,40 @@ public class SshFileSystemWrapper implements FileSystemWrapper {
 		return listFiles(path);
 	}
 
-	private FileInfo resolveSymlink(String name, String pathToResolve, SftpATTRS attrs, String longName)
-			throws Exception {
+	private FileInfo resolveSymlink(String name, String pathToResolve,
+			SftpATTRS attrs, String longName) throws Exception {
 		try {
 			System.out.println("Following symlink: " + pathToResolve);
 			while (true) {
 				String str = sftp.readlink(pathToResolve);
-				System.out.println("Read symlink: " + pathToResolve + "=" + str);
-				pathToResolve = str.startsWith("/") ? str : PathUtils.combineUnix(pathToResolve, str);
+				System.out
+						.println("Read symlink: " + pathToResolve + "=" + str);
+				pathToResolve = str.startsWith("/") ? str
+						: PathUtils.combineUnix(pathToResolve, str);
 				System.out.println("Getting link attrs: " + pathToResolve);
 				attrs = sftp.stat(pathToResolve);
 
 				if (!attrs.isLink()) {
-					FileInfo e = new FileInfo(name, pathToResolve, (attrs.isDir() ? -1 : attrs.getSize()),
-							attrs.isDir() ? FileType.DirLink : FileType.FileLink, (long) attrs.getMTime() * 1000,
-							attrs.getPermissions(), SshFileSystemProvider.PROTO_SFTP, attrs.getPermissionsString(),
-							attrs.getATime(), longName);
+					FileInfo e = new FileInfo(name, pathToResolve,
+							(attrs.isDir() ? -1 : attrs.getSize()),
+							attrs.isDir() ? FileType.DirLink
+									: FileType.FileLink,
+							(long) attrs.getMTime() * 1000,
+							attrs.getPermissions(),
+							SshFileSystemProvider.PROTO_SFTP,
+							attrs.getPermissionsString(), attrs.getATime(),
+							longName);
 					return e;
 				}
 			}
 		} catch (SftpException e) {
-			if (e.id == ChannelSftp.SSH_FX_NO_SUCH_FILE || e.id == ChannelSftp.SSH_FX_PERMISSION_DENIED) {
-				return new FileInfo(name, pathToResolve, 0, FileType.FileLink, (long) attrs.getMTime() * 1000,
-						attrs.getPermissions(), SshFileSystemProvider.PROTO_SFTP, attrs.getPermissionsString(),
-						attrs.getATime(), longName);
+			if (e.id == ChannelSftp.SSH_FX_NO_SUCH_FILE
+					|| e.id == ChannelSftp.SSH_FX_PERMISSION_DENIED) {
+				return new FileInfo(name, pathToResolve, 0, FileType.FileLink,
+						(long) attrs.getMTime() * 1000, attrs.getPermissions(),
+						SshFileSystemProvider.PROTO_SFTP,
+						attrs.getPermissionsString(), attrs.getATime(),
+						longName);
 			}
 			throw e;
 		} catch (Exception e) {
@@ -94,19 +106,28 @@ public class SshFileSystemWrapper implements FileSystemWrapper {
 				if (files.size() > 0) {
 					for (int i = 0; i < files.size(); i++) {
 						ChannelSftp.LsEntry ent = (LsEntry) files.get(i);
-						if (ent.getFilename().equals(".") || ent.getFilename().equals("..")) {
+						if (ent.getFilename().equals(".")
+								|| ent.getFilename().equals("..")) {
 							continue;
 						}
 						SftpATTRS attrs = ent.getAttrs();
 						if (attrs.isLink()) {
-							childs.add(resolveSymlink(ent.getFilename(), PathUtils.combineUnix(path, ent.getFilename()),
+							childs.add(resolveSymlink(ent.getFilename(),
+									PathUtils.combineUnix(path,
+											ent.getFilename()),
 									attrs, ent.getLongname()));
 						} else {
-							FileInfo e = new FileInfo(ent.getFilename(), PathUtils.combineUnix(path, ent.getFilename()),
+							FileInfo e = new FileInfo(ent.getFilename(),
+									PathUtils.combineUnix(path,
+											ent.getFilename()),
 									(attrs.isDir() ? -1 : attrs.getSize()),
-									attrs.isDir() ? FileType.Directory : FileType.File, (long) attrs.getMTime() * 1000,
-									ent.getAttrs().getPermissions(), SshFileSystemProvider.PROTO_SFTP,
-									ent.getAttrs().getPermissionsString(), attrs.getATime(), ent.getLongname());
+									attrs.isDir() ? FileType.Directory
+											: FileType.File,
+									(long) attrs.getMTime() * 1000,
+									ent.getAttrs().getPermissions(),
+									SshFileSystemProvider.PROTO_SFTP,
+									ent.getAttrs().getPermissionsString(),
+									attrs.getATime(), ent.getLongname());
 							childs.add(e);
 						}
 					}
@@ -128,7 +149,9 @@ public class SshFileSystemWrapper implements FileSystemWrapper {
 	}
 
 	@Override
-	public synchronized void close() throws Exception {
+	public void close() throws Exception {
+		stopFlag.set(true);
+		System.out.println("Inside fs wrapper: " + stopFlag.get());
 		if (wrapper != null) {
 			System.out.println("Closing wrapper");
 			wrapper.close();
@@ -156,25 +179,29 @@ public class SshFileSystemWrapper implements FileSystemWrapper {
 		ensureConnected();
 		SftpATTRS attrs = sftp.stat(path);
 		if (attrs.isLink()) {
-			return resolveSymlink(PathUtils.getFileName(path), path, attrs, null);
+			return resolveSymlink(PathUtils.getFileName(path), path, attrs,
+					null);
 		} else {
-			FileInfo e = new FileInfo(PathUtils.getFileName(path), path, (attrs.isDir() ? -1 : attrs.getSize()),
-					attrs.isDir() ? FileType.Directory : FileType.File, (long) attrs.getMTime() * 1000,
-					attrs.getPermissions(), SshFileSystemProvider.PROTO_SFTP, attrs.getPermissionsString(),
-					attrs.getATime(), null);
+			FileInfo e = new FileInfo(PathUtils.getFileName(path), path,
+					(attrs.isDir() ? -1 : attrs.getSize()),
+					attrs.isDir() ? FileType.Directory : FileType.File,
+					(long) attrs.getMTime() * 1000, attrs.getPermissions(),
+					SshFileSystemProvider.PROTO_SFTP,
+					attrs.getPermissionsString(), attrs.getATime(), null);
 			return e;
 		}
 	}
 
 	@Override
-	public synchronized void copyTo(String source, String dest, DataTransferProgress prg, int mode) throws Exception {
+	public synchronized void copyTo(String source, String dest,
+			DataTransferProgress prg, int mode) throws Exception {
 		ensureConnected();
 		this.sftp.get(source, dest, prg, mode);
 	}
 
 	@Override
-	public synchronized void copyTo(String source, OutputStream dest, DataTransferProgress prg, int mode, long offset)
-			throws Exception {
+	public synchronized void copyTo(String source, OutputStream dest,
+			DataTransferProgress prg, int mode, long offset) throws Exception {
 		ensureConnected();
 		this.sftp.get(source, dest, prg, mode, offset);
 	}

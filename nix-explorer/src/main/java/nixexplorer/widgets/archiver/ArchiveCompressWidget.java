@@ -37,6 +37,7 @@ import nixexplorer.TextHolder;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.core.FileSystemProvider;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.util.Utility;
 
@@ -279,8 +280,9 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 			setTitle(TextHolder.getString("archiver.compressing"));
 		});
 		try {
-			wrapper = new SshWrapper(info);
-			wrapper.connect();
+			wrapper=SshUtility.connect(info, stopFlag);
+//			wrapper = new SshWrapper(info);
+//			wrapper.connect();
 
 			StringBuilder sb = new StringBuilder();
 			for (String s : files) {

@@ -32,6 +32,7 @@ import com.jcraft.jsch.ChannelExec;
 import nixexplorer.TextHolder;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.util.Utility;
 
@@ -226,8 +227,9 @@ public class ArchiveExtractWidget extends JDialog implements Runnable {
 	private void extractAsync(String path) {
 		System.out.println("Extracting.. " + path);
 		try {
-			wrapper = new SshWrapper(info);
-			wrapper.connect();
+			wrapper = SshUtility.connect(info, stopFlag);// new
+															// SshWrapper(info);
+			// wrapper.connect();
 			String extractCmd = ArchiveExtractWidget
 					.getExtractCmd(path.toLowerCase());
 			if (extractCmd == null) {

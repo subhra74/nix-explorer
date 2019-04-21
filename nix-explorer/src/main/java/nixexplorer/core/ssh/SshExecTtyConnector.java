@@ -95,6 +95,7 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 
 	@Override
 	public void close() {
+		stopFlag.set(true);
 		try {
 			System.out.println("Terminal wrapper disconnecting");
 			wr.disconnect();
@@ -158,7 +159,8 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 	}
 
 	public boolean isRunning(Channel channel) {
-		return channel != null && channel.getExitStatus() < 0 && channel.isConnected();
+		return channel != null && channel.getExitStatus() < 0
+				&& channel.isConnected();
 	}
 
 	public boolean isBusy() {
@@ -183,14 +185,16 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 
 	private void resizeImmediately() {
 		if (myPendingTermSize != null && myPendingPixelSize != null) {
-			setPtySize(channel, myPendingTermSize.width, myPendingTermSize.height, myPendingPixelSize.width,
+			setPtySize(channel, myPendingTermSize.width,
+					myPendingTermSize.height, myPendingPixelSize.width,
 					myPendingPixelSize.height);
 			myPendingTermSize = null;
 			myPendingPixelSize = null;
 		}
 	}
 
-	private void setPtySize(ChannelExec channel, int col, int row, int wp, int hp) {
+	private void setPtySize(ChannelExec channel, int col, int row, int wp,
+			int hp) {
 		System.out.println("Exec pty resized");
 		channel.setPtySize(col, row, wp, hp);
 	}
