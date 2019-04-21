@@ -829,25 +829,27 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 	 */
 	@Override
 	public boolean viewClosing() {
-
-		if (closing.get()) {
-			return true;
-		}
-		if (saving.get()) {
-			return true;
-		}
-
-		if (changed) {
-			if (JOptionPane.showConfirmDialog(getWindow(),
-					"Save changes?") != JOptionPane.YES_OPTION) {
-				return true;
-			} else {
-				saveChanges();
+		try {
+			if (closing.get()) {
 				return true;
 			}
-		}
-		return true;
+			if (saving.get()) {
+				return true;
+			}
 
+			if (changed) {
+				if (JOptionPane.showConfirmDialog(getWindow(),
+						"Save changes?") != JOptionPane.YES_OPTION) {
+					return true;
+				} else {
+					saveChanges();
+					return true;
+				}
+			}
+			return true;
+		} finally {
+			widgetClosed.set(true);
+		}
 	}
 
 	/*
@@ -857,6 +859,7 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 	 */
 	@Override
 	public void viewClosed() {
+		super.viewClosed();
 		if (closing.get()) {
 			return;
 		}

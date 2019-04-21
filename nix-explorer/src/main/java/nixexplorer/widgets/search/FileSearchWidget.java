@@ -745,6 +745,7 @@ public class FileSearchWidget extends Widget {
 	 */
 	@Override
 	public void viewClosed() {
+		super.viewClosed();
 		stopFlag.set(true);
 		if (wrapper != null && wrapper.isConnected()) {
 			new Thread(() -> {

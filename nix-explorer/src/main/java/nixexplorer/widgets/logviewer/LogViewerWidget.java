@@ -853,17 +853,6 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see nixexplorer.app.components.TabbedChild#tabClosed()
-	 */
-	@Override
-	public void viewClosed() {
-		// TODO Auto-generated method stub
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see nixexplorer.app.components.TabbedChild#tabSelected()
 	 */
 	@Override

@@ -206,6 +206,7 @@ public class FileBrowserWidget extends Widget implements SessionEventAware {
 	 */
 	@Override
 	public void viewClosed() {
+		super.viewClosed();
 		remoteFileView.viewClosed();
 	}
 

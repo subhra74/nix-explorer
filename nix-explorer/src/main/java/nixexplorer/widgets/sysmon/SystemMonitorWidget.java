@@ -885,6 +885,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	 */
 	@Override
 	public void viewClosed() {
+		super.viewClosed();
 		stopFlag.set(true);
 		closeInitiated = true;
 		if (wrapper != null && wrapper.isConnected()) {

@@ -26,6 +26,7 @@ import nixexplorer.app.components.CredentialsDialog.Credentials;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.ssh.SshFileSystemProvider;
+import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
 
 public abstract class Widget extends JPanel implements TabbedChild {
@@ -40,6 +41,7 @@ public abstract class Widget extends JPanel implements TabbedChild {
 	protected JLabel lblTitleTab;
 	private Window window;
 	protected AtomicBoolean widgetClosed = new AtomicBoolean(Boolean.FALSE);
+	protected AtomicBoolean stopRequested = new AtomicBoolean(Boolean.FALSE);
 
 	public Widget(SessionInfo info, String args[], AppSession appSession,
 			Window window) {
@@ -48,6 +50,11 @@ public abstract class Widget extends JPanel implements TabbedChild {
 		this.appSession = appSession;
 		this.window = window;
 		setLayout(new BorderLayout());
+	}
+
+	@Override
+	public void viewClosed() {
+		stopRequested.set(true);
 	}
 
 	public abstract void reconnect();
@@ -79,22 +86,7 @@ public abstract class Widget extends JPanel implements TabbedChild {
 	}
 
 	protected SshWrapper connect() throws Exception {
-		SshWrapper wrapper = new SshWrapper(info);
-		while (true) {
-			try {
-				wrapper.connect();
-				return wrapper;
-			} catch (Exception e) {
-				e.printStackTrace();
-				if (closeInitiated) {
-					throw new Exception("User cancelled the operation");
-				}
-				if (JOptionPane.showConfirmDialog(null,
-						"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
-					throw new Exception("User cancelled the operation");
-				}
-			}
-		}
+		return SshUtility.connect(info, stopRequested);
 	}
 
 //	public synchronized void stopModal() {

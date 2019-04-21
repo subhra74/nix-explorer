@@ -640,6 +640,7 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 	 */
 	@Override
 	public void viewClosed() {
+		super.viewClosed();
 		close();
 	}
 

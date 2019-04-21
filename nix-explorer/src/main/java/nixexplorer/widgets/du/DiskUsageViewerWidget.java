@@ -56,7 +56,9 @@ public class DiskUsageViewerWidget extends Widget implements Runnable {
 	}
 
 	private void dialogClosed() {
-		stopRequested.set(true);
+		if (waitDialog != null) {
+			waitDialog.dispose();
+		}
 		new Thread(() -> {
 			try {
 				if (this.wrapper != null) {
@@ -162,11 +164,6 @@ public class DiskUsageViewerWidget extends Widget implements Runnable {
 	}
 
 	@Override
-	public void viewClosed() {
-
-	}
-
-	@Override
 	public void reconnect() {
 
 	}
@@ -210,7 +207,7 @@ public class DiskUsageViewerWidget extends Widget implements Runnable {
 			});
 		} catch (Exception e) {
 			e.printStackTrace();
-			if (!stopRequested.get()) {
+			if (!(stopRequested.get() || widgetClosed.get())) {
 				JOptionPane.showMessageDialog(this,
 						TextHolder.getString("folderview.genericError"));
 			}

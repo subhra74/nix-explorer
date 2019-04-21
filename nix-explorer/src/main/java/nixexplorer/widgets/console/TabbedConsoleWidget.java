@@ -445,12 +445,6 @@ public final class TabbedConsoleWidget extends Widget
 	}
 
 	@Override
-	public void viewClosed() {
-		// TODO Auto-generated method stub
-		System.out.println("Closed");
-	}
-
-	@Override
 	public void tabSelected() {
 		if (term != null) {
 			term.requestFocusInWindow();
