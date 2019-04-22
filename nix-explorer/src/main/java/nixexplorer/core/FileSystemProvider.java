@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 public interface FileSystemProvider {
-	public FileInfo getInfo(String path)
-			throws FileNotFoundException, IOException;
+	public void connect() throws Exception;
 
-	public List<FileInfo> ll(String path, boolean dirOnly)
-			throws FileNotFoundException, IOException;
+	public FileInfo getInfo(String path) throws Exception;
 
-	public String getHome() throws FileNotFoundException, IOException;
+	public List<FileInfo> list(String path) throws Exception;
+
+	public String getHome() throws Exception;
 
 	public boolean isLocal();
 
@@ -33,9 +33,15 @@ public interface FileSystemProvider {
 
 	public void mkdir(String path) throws Exception;
 
-	public void close();
+	public void close() throws Exception;
 
 	public boolean isConnected();
+
+	public void copyTo(String source, String dest, DataTransferProgress prg,
+			int mode) throws Exception;
+	
+	public void copyTo(String source, OutputStream dest,
+			DataTransferProgress prg, int mode, long offset) throws Exception;
 
 	public void chmod(int perm, String path) throws Exception;
 
@@ -49,7 +55,7 @@ public interface FileSystemProvider {
 
 	public void createFile(String path) throws Exception;
 
-	public String[] getFsRoots() throws Exception;
+	public String[] getRoots() throws Exception;
 
 	public void createLink(String src, String dst, boolean hardLink)
 			throws Exception;

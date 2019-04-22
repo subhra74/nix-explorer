@@ -28,6 +28,8 @@ import nixexplorer.TextHolder;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.ssh.SshUtility;
+import nixexplorer.core.ssh.SshUtility.ExecContext;
+import nixexplorer.core.ssh.SshUtility.SftpContext;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.Widget;
 import nixexplorer.widgets.component.WaitDialog;
@@ -93,6 +95,8 @@ public class DiskUsageViewerWidget extends Widget implements Runnable {
 		btnGo.addActionListener(e -> {
 			System.out.println("calling action listener");
 			String item = (String) cmbFolderHistory.getSelectedItem();
+			if (item == null || item.length() < 1)
+				return;
 			boolean found = false;
 			for (int i = 0; i < folderModel.getSize(); i++) {
 				if (folderModel.getElementAt(i).equals(item)) {
@@ -183,7 +187,7 @@ public class DiskUsageViewerWidget extends Widget implements Runnable {
 		try {
 			String text = (String) cmbFolderHistory.getSelectedItem();
 			if (wrapper == null || !wrapper.isConnected()) {
-				wrapper = connect();
+				wrapper = SshUtility.connectWrapper(info, widgetClosed);
 			}
 			List<String> output = new LinkedList<>();
 

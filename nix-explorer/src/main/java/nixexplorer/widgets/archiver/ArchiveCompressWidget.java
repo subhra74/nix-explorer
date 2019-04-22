@@ -280,7 +280,7 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 			setTitle(TextHolder.getString("archiver.compressing"));
 		});
 		try {
-			wrapper=SshUtility.connect(info, stopFlag);
+			wrapper = SshUtility.connectWrapper(info, stopFlag);
 //			wrapper = new SshWrapper(info);
 //			wrapper.connect();
 

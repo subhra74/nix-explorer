@@ -34,6 +34,7 @@ import nixexplorer.app.components.CredentialsDialog.Credentials;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.DataTransferProgress;
 import nixexplorer.core.FileInfo;
+import nixexplorer.core.FileSystemProvider;
 import nixexplorer.core.ssh.FileSystemWrapper;
 import nixexplorer.core.ssh.SshWrapper;
 
@@ -41,9 +42,10 @@ import nixexplorer.core.ssh.SshWrapper;
  * @author subhro
  *
  */
-public class LogMonitoringEngine implements Runnable, SftpProgressMonitor, DataTransferProgress {
+public class LogMonitoringEngine
+		implements Runnable, SftpProgressMonitor, DataTransferProgress {
 
-	private FileSystemWrapper fs;
+	private FileSystemProvider fs;
 	private File tempFile;
 	private String remoteFile;
 
@@ -68,18 +70,21 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor, DataT
 	 * @param follow
 	 * @throws IOException
 	 */
-	public LogMonitoringEngine(String remoteFile, FileSystemWrapper fs, LogNotificationListener logListener)
-			throws IOException {
+	public LogMonitoringEngine(String remoteFile, FileSystemProvider fs,
+			LogNotificationListener logListener) throws IOException {
 		super();
-		this.tempFile = File.createTempFile(UUID.randomUUID().toString(), "data");
+		this.tempFile = File.createTempFile(UUID.randomUUID().toString(),
+				"data");
 		this.remoteFile = remoteFile;
 		this.fs = fs;
 		this.logListener = logListener;
-		this.indexFile = File.createTempFile(UUID.randomUUID().toString(), "index");
+		this.indexFile = File.createTempFile(UUID.randomUUID().toString(),
+				"index");
 	}
 
-	public LogMonitoringEngine(String remoteFile, FileSystemWrapper fs, LogNotificationListener logListener,
-			SshWrapper wrapper, ChannelSftp sftp) throws IOException {
+	public LogMonitoringEngine(String remoteFile, FileSystemProvider fs,
+			LogNotificationListener logListener, SshWrapper wrapper,
+			ChannelSftp sftp) throws IOException {
 		this(remoteFile, fs, logListener);
 	}
 
@@ -132,10 +137,12 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor, DataT
 	}
 
 	private void retrieveFile() throws Exception {
-		System.out.println("Remote file: " + remoteFile + " tempFile: " + tempFile);
-		FileInfo f = fs.get(remoteFile);
+		System.out.println(
+				"Remote file: " + remoteFile + " tempFile: " + tempFile);
+		FileInfo f = fs.getInfo(remoteFile);
 		this.remoteFileLength = f.getSize();
-		fs.copyTo(remoteFile, tempFile.getAbsolutePath(), this, ChannelSftp.RESUME);
+		fs.copyTo(remoteFile, tempFile.getAbsolutePath(), this,
+				ChannelSftp.RESUME);
 
 		System.out.println("Size of file: " + tempFile.length());
 
@@ -153,7 +160,7 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor, DataT
 	 */
 	private void updateFile() throws Exception {
 		long sz = tempFile.length();
-		FileInfo f = fs.get(remoteFile);
+		FileInfo f = fs.getInfo(remoteFile);
 
 		if (f.getSize() > sz) {
 			logListener.setIndeterminate(true);
@@ -193,7 +200,8 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor, DataT
 	public boolean count(long count) {
 		processed += count;
 		if (remoteFileLength > 0) {
-			logListener.downloadProgress((int) ((processed * 100) / remoteFileLength));
+			logListener.downloadProgress(
+					(int) ((processed * 100) / remoteFileLength));
 		}
 		return true;
 	}
@@ -223,7 +231,8 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor, DataT
 //		int lc = 0;
 		long pos = offset;
 		try (InputStream in = new FileInputStream(indexFile);
-				BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(indexFile, true))) {
+				BufferedOutputStream bout = new BufferedOutputStream(
+						new FileOutputStream(indexFile, true))) {
 			if (first) {
 				bout.write(toBytes(0));
 				first = false;
@@ -278,18 +287,20 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor, DataT
 	}
 
 	private long toLong(byte[] b) {
-		return ((long) b[7] << 56) | ((long) b[6] & 0xff) << 48 | ((long) b[5] & 0xff) << 40
-				| ((long) b[4] & 0xff) << 32 | ((long) b[3] & 0xff) << 24 | ((long) b[2] & 0xff) << 16
+		return ((long) b[7] << 56) | ((long) b[6] & 0xff) << 48
+				| ((long) b[5] & 0xff) << 40 | ((long) b[4] & 0xff) << 32
+				| ((long) b[3] & 0xff) << 24 | ((long) b[2] & 0xff) << 16
 				| ((long) b[1] & 0xff) << 8 | ((long) b[0] & 0xff);
 	}
 
 	private byte[] toBytes(long lng) {
-		return new byte[] { (byte) lng, (byte) (lng >> 8), (byte) (lng >> 16), (byte) (lng >> 24), (byte) (lng >> 32),
-				(byte) (lng >> 40), (byte) (lng >> 48), (byte) (lng >> 56) };
+		return new byte[] { (byte) lng, (byte) (lng >> 8), (byte) (lng >> 16),
+				(byte) (lng >> 24), (byte) (lng >> 32), (byte) (lng >> 40),
+				(byte) (lng >> 48), (byte) (lng >> 56) };
 	}
 
-	public LineTextSearch getSearchView(String pattern, boolean fullWord, boolean matchCase)
-			throws FileNotFoundException {
+	public LineTextSearch getSearchView(String pattern, boolean fullWord,
+			boolean matchCase) throws FileNotFoundException {
 		return new LineTextSearch(pattern, fullWord, matchCase);
 	}
 
@@ -299,10 +310,12 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor, DataT
 
 		private byte[] buf = new byte[1024];
 
-		public LineTextSearch(String pattern, boolean fullWord, boolean matchCase) throws FileNotFoundException {
+		public LineTextSearch(String pattern, boolean fullWord,
+				boolean matchCase) throws FileNotFoundException {
 			indexPointer = new RandomAccessFile(indexFile, "r");
 			dataPointer = new RandomAccessFile(tempFile, "r");
-			String text = (fullWord ? "\\b" : "") + Pattern.quote(pattern) + (fullWord ? "\\b" : "");
+			String text = (fullWord ? "\\b" : "") + Pattern.quote(pattern)
+					+ (fullWord ? "\\b" : "");
 			System.out.println("Search pattern: " + text);
 			if (matchCase) {
 				this.pattern = Pattern.compile(text);
@@ -356,14 +369,17 @@ public class LogMonitoringEngine implements Runnable, SftpProgressMonitor, DataT
 				}
 				long offset = getOffsetForLine(lineNumber);
 				if (offset < 0) {
-					System.out.println("Invalid offset for line: " + lineNumber);
+					System.out
+							.println("Invalid offset for line: " + lineNumber);
 					return -1;
 				}
 
 				dataPointer.seek(offset);
 
-				try (RandomAccessInputStream rin = new RandomAccessInputStream(dataPointer);
-						InputStreamReader r = new InputStreamReader(rin, Charset.forName("utf-8"))) {
+				try (RandomAccessInputStream rin = new RandomAccessInputStream(
+						dataPointer);
+						InputStreamReader r = new InputStreamReader(rin,
+								Charset.forName("utf-8"))) {
 					StringBuilder sb = new StringBuilder();
 					while (true) {
 						int x = r.read();

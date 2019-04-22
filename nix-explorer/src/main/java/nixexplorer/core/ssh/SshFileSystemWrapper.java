@@ -1,11 +1,14 @@
 package nixexplorer.core.ssh;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -18,14 +21,18 @@ import nixexplorer.PathUtils;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.DataTransferProgress;
 import nixexplorer.core.FileInfo;
+import nixexplorer.core.FileSystemProvider;
 import nixexplorer.core.FileType;
+import nixexplorer.core.ssh.SshUtility.SftpContext;
 
-public class SshFileSystemWrapper implements FileSystemWrapper {
+public class SshFileSystemWrapper implements FileSystemProvider {
 
 	private SessionInfo info;
 	private SshWrapper wrapper;
 	private ChannelSftp sftp;
 	private AtomicBoolean stopFlag = new AtomicBoolean(false);
+
+	public static final String PROTO_SFTP = "sftp";
 
 	public SshFileSystemWrapper(SessionInfo info) {
 		this.info = info;
@@ -39,10 +46,33 @@ public class SshFileSystemWrapper implements FileSystemWrapper {
 	}
 
 	@Override
+	public synchronized void delete(FileInfo f) throws Exception {
+		ensureConnected();
+		if (f.getType() == FileType.Directory) {
+			List<FileInfo> list = list(f.getPath());
+			if (list != null && list.size() > 0) {
+				for (FileInfo fc : list) {
+					delete(fc);
+				}
+			}
+			this.sftp.rmdir(f.getPath());
+		} else {
+			this.sftp.rm(f.getPath());
+		}
+	}
+
+	@Override
+	public void chmod(int perm, String path) throws Exception {
+		ensureConnected();
+		this.sftp.chmod(perm, path);
+	}
+
+	@Override
 	public synchronized void connect() throws Exception {
 		System.out.println("Connecting to: " + info);
-		wrapper = SshUtility.connect(info, stopFlag);
-		this.sftp = wrapper.getSftpChannel();
+		SftpContext res = SshUtility.connectSftp(info, stopFlag);
+		wrapper = res.getWrapper();
+		this.sftp = res.getSftp();
 	}
 
 	@Override
@@ -70,8 +100,7 @@ public class SshFileSystemWrapper implements FileSystemWrapper {
 							attrs.isDir() ? FileType.DirLink
 									: FileType.FileLink,
 							(long) attrs.getMTime() * 1000,
-							attrs.getPermissions(),
-							SshFileSystemProvider.PROTO_SFTP,
+							attrs.getPermissions(), PROTO_SFTP,
 							attrs.getPermissionsString(), attrs.getATime(),
 							longName);
 					return e;
@@ -82,9 +111,8 @@ public class SshFileSystemWrapper implements FileSystemWrapper {
 					|| e.id == ChannelSftp.SSH_FX_PERMISSION_DENIED) {
 				return new FileInfo(name, pathToResolve, 0, FileType.FileLink,
 						(long) attrs.getMTime() * 1000, attrs.getPermissions(),
-						SshFileSystemProvider.PROTO_SFTP,
-						attrs.getPermissionsString(), attrs.getATime(),
-						longName);
+						PROTO_SFTP, attrs.getPermissionsString(),
+						attrs.getATime(), longName);
 			}
 			throw e;
 		} catch (Exception e) {
@@ -124,8 +152,7 @@ public class SshFileSystemWrapper implements FileSystemWrapper {
 									attrs.isDir() ? FileType.Directory
 											: FileType.File,
 									(long) attrs.getMTime() * 1000,
-									ent.getAttrs().getPermissions(),
-									SshFileSystemProvider.PROTO_SFTP,
+									ent.getAttrs().getPermissions(), PROTO_SFTP,
 									ent.getAttrs().getPermissionsString(),
 									attrs.getATime(), ent.getLongname());
 							childs.add(e);
@@ -175,7 +202,7 @@ public class SshFileSystemWrapper implements FileSystemWrapper {
 	}
 
 	@Override
-	public synchronized FileInfo get(String path) throws Exception {
+	public synchronized FileInfo getInfo(String path) throws Exception {
 		ensureConnected();
 		SftpATTRS attrs = sftp.stat(path);
 		if (attrs.isLink()) {
@@ -186,8 +213,8 @@ public class SshFileSystemWrapper implements FileSystemWrapper {
 					(attrs.isDir() ? -1 : attrs.getSize()),
 					attrs.isDir() ? FileType.Directory : FileType.File,
 					(long) attrs.getMTime() * 1000, attrs.getPermissions(),
-					SshFileSystemProvider.PROTO_SFTP,
-					attrs.getPermissionsString(), attrs.getATime(), null);
+					PROTO_SFTP, attrs.getPermissionsString(), attrs.getATime(),
+					null);
 			return e;
 		}
 	}
@@ -205,4 +232,171 @@ public class SshFileSystemWrapper implements FileSystemWrapper {
 		ensureConnected();
 		this.sftp.get(source, dest, prg, mode, offset);
 	}
+
+	@Override
+	public void createLink(String src, String dst, boolean hardLink)
+			throws Exception {
+		ensureConnected();
+		if (hardLink) {
+			this.sftp.hardlink(src, dst);
+		} else {
+			this.sftp.symlink(src, dst);
+		}
+	}
+
+	@Override
+	public void deleteFile(String f) throws Exception {
+		ensureConnected();
+		this.sftp.rm(f);
+	}
+
+	@Override
+	public void createFile(String path)
+			throws AccessDeniedException, Exception {
+		ensureConnected();
+		try {
+			sftp.put(path).close();
+		} catch (SftpException e) {
+			if (e.id == ChannelSftp.SSH_FX_PERMISSION_DENIED) {
+				throw new AccessDeniedException(path);
+			}
+		} catch (Exception e) {
+			if (sftp.isConnected()) {
+				throw new FileNotFoundException(e.getMessage());
+			}
+			throw new Exception(e);
+		}
+	}
+
+	@Override
+	public OutputStream getOutputStream(String file)
+			throws FileNotFoundException, Exception {
+		ensureConnected();
+		synchronized (sftp) {
+			return sftp.put(file, null, ChannelSftp.APPEND, 0);
+		}
+	}
+
+	@Override
+	public InputStream getInputStream(String file, long offset)
+			throws FileNotFoundException, Exception {
+		ensureConnected();
+		synchronized (sftp) {
+			try {
+				return sftp.get(file, null, offset);
+			} catch (Exception e) {
+				if (sftp.isConnected()) {
+					throw new FileNotFoundException();
+				}
+				throw new Exception();
+			}
+		}
+	}
+
+	@Override
+	public void rename(String oldName, String newName)
+			throws FileNotFoundException, Exception {
+		ensureConnected();
+		try {
+			synchronized (sftp) {
+				sftp.rename(oldName, newName);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			if (sftp.isConnected()) {
+				throw new FileNotFoundException();
+			}
+			throw new Exception();
+		}
+	}
+
+	@Override
+	public void mkdir(String path) throws AccessDeniedException, Exception {
+		ensureConnected();
+		try {
+			sftp.mkdir(path);
+		} catch (SftpException e) {
+			if (e.id == ChannelSftp.SSH_FX_PERMISSION_DENIED) {
+				throw new AccessDeniedException(path);
+			}
+		} catch (Exception e) {
+			if (sftp.isConnected()) {
+				throw new FileNotFoundException(e.getMessage());
+			}
+			throw new Exception(e);
+		}
+	}
+
+	@Override
+	public boolean mkdirs(String absPath) throws Exception {
+		ensureConnected();
+		System.out.println("mkdirs: " + absPath);
+		if (absPath.equals("/")) {
+			return true;
+		}
+
+		try {
+			sftp.stat(absPath);
+			return false;
+		} catch (Exception e) {
+			if (!sftp.isConnected()) {
+				throw e;
+			}
+		}
+
+		System.out.println("Folder does not exists: " + absPath);
+
+		String parent = PathUtils.getParent(absPath);
+
+		mkdirs(parent);
+		sftp.mkdir(absPath);
+
+		return true;
+	}
+
+	@Override
+	public long getAllFiles(String dir, String baseDir,
+			Map<String, String> fileMap, Map<String, String> folderMap)
+			throws Exception {
+		ensureConnected();
+		long size = 0;
+		System.out.println("get files: " + dir);
+		String parentFolder = PathUtils.combine(baseDir,
+				PathUtils.getFileName(dir), File.separator);
+
+		folderMap.put(dir, parentFolder);
+
+		List<FileInfo> list = list(dir);
+		for (FileInfo f : list) {
+			if (f.getType() == FileType.Directory) {
+				folderMap.put(f.getPath(), PathUtils.combine(parentFolder,
+						f.getName(), File.separator));
+				size += getAllFiles(f.getPath(), parentFolder, fileMap,
+						folderMap);
+			} else {
+				fileMap.put(f.getPath(), PathUtils.combine(parentFolder,
+						f.getName(), File.separator));
+				size += f.getSize();
+			}
+		}
+		return size;
+	}
+
+	@Override
+	public boolean isConnected() {
+		return this.wrapper != null && this.wrapper.isConnected();
+	}
+
+	@Override
+	public String getProtocol() {
+		return PROTO_SFTP;
+	}
+
+	/**
+	 * @return the wrapper
+	 */
+	public SshWrapper getWrapper() {
+		return wrapper;
+	}
+
 }

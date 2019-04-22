@@ -52,6 +52,7 @@ import nixexplorer.app.components.CustomTabbedPane;
 import nixexplorer.app.components.FlatTabbedPane;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.Widget;
 import nixexplorer.widgets.util.Utility;
@@ -725,7 +726,7 @@ public class HttpClient extends Widget {
 	public void runCurl() {
 		try {
 			if (this.wrapper == null || !this.wrapper.isConnected()) {
-				this.wrapper = connect();
+				this.wrapper = SshUtility.connectWrapper(info, stopFlag);
 			}
 			ChannelShell shell = this.wrapper.getShellChannel();
 			shell.setPty(true);

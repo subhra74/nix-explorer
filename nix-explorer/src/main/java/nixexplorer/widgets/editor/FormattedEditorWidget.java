@@ -74,6 +74,7 @@ import nixexplorer.TextHolder;
 import nixexplorer.app.AppContext;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.Widget;
 import nixexplorer.widgets.folderview.ContentChangeListener;
@@ -702,7 +703,7 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 		if (info != null) {
 			if (wrapper == null || !wrapper.isConnected()) {
 				while (true) {
-					wrapper = super.connect();
+					wrapper = SshUtility.connectWrapper(info, widgetClosed);
 					try {
 						sftp = wrapper.getSftpChannel();
 						break;

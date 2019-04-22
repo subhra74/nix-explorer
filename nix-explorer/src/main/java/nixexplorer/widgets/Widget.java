@@ -1,33 +1,17 @@
 package nixexplorer.widgets;
 
-import java.awt.AWTEvent;
-import java.awt.ActiveEvent;
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.MenuComponent;
-import java.awt.Toolkit;
 import java.awt.Window;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import nixexplorer.PathUtils;
-import nixexplorer.app.components.CredentialsDialog;
-import nixexplorer.app.components.FlatTabbedPane;
 import nixexplorer.app.components.TabbedChild;
-import nixexplorer.app.components.CredentialsDialog.Credentials;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
-import nixexplorer.core.ssh.SshFileSystemProvider;
-import nixexplorer.core.ssh.SshUtility;
-import nixexplorer.core.ssh.SshWrapper;
 
 public abstract class Widget extends JPanel implements TabbedChild {
 	private static final long serialVersionUID = -2994169561586076844L;
@@ -85,9 +69,9 @@ public abstract class Widget extends JPanel implements TabbedChild {
 		this.window = window;
 	}
 
-	protected SshWrapper connect() throws Exception {
-		return SshUtility.connect(info, stopRequested);
-	}
+//	protected SshWrapper connect() throws Exception {
+//		return SshUtility.connect(info, stopRequested);
+//	}
 
 //	public synchronized void stopModal() {
 //		BlockedWidgets.remove(this);

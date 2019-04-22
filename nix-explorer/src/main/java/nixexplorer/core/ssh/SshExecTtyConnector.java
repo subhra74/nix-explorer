@@ -17,6 +17,7 @@ import com.jediterm.terminal.Questioner;
 import com.jediterm.terminal.TtyConnector;
 
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.ssh.SshUtility.ExecContext;
 
 public class SshExecTtyConnector implements DisposableTtyConnector {
 	private InputStreamReader myInputStreamReader;
@@ -41,27 +42,31 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 	public boolean init(Questioner q) {
 		System.out.println("Connecting exec tty connector");
 		try {
-			wr = new SshWrapper(info);
-			while (!stopFlag.get()) {
-				try {
-					wr.connect();
-					this.channel = wr.getExecChannel();
-					this.channel.setCommand(command);
-					break;
-				} catch (Exception e) {
-					e.printStackTrace();
-					if (!stopFlag.get()) {
-						if (JOptionPane.showConfirmDialog(null,
-								"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
-							throw new Exception("User cancelled the operation");
-						}
-					}
-				}
-			}
+//			wr = new SshWrapper(info);
+//			while (!stopFlag.get()) {
+//				try {
+//					wr.connect();
+//					this.channel = wr.getExecChannel();
+//					this.channel.setCommand(command);
+//					break;
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//					if (!stopFlag.get()) {
+//						if (JOptionPane.showConfirmDialog(null,
+//								"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
+//							throw new Exception("User cancelled the operation");
+//						}
+//					}
+//				}
+//			}
+//
+//			if (!wr.isConnected()) {
+//				throw new IOException("Unable to connect");
+//			}
 
-			if (!wr.isConnected()) {
-				throw new IOException("Unable to connect");
-			}
+			ExecContext exec = SshUtility.connectExec(info, stopFlag);
+			wr = exec.wrapper;
+			channel = exec.getExec();
 
 			String lang = System.getenv().get("LANG");
 			channel.setEnv("LANG", lang != null ? lang : "en_US.UTF-8");

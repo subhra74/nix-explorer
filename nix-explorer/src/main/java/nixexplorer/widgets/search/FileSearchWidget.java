@@ -54,6 +54,7 @@ import nixexplorer.ShellScriptLoader;
 import nixexplorer.TextHolder;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.Widget;
 import nixexplorer.widgets.component.WaitDialog;
@@ -510,7 +511,7 @@ public class FileSearchWidget extends Widget {
 		System.out.println("Starting search.. ");
 		try {
 			if (wrapper == null || !wrapper.isConnected()) {
-				wrapper = connect();
+				wrapper = SshUtility.connectWrapper(info, widgetClosed);
 			}
 
 			if (searchScript == null) {
@@ -852,7 +853,7 @@ public class FileSearchWidget extends Widget {
 			}
 
 			if (wrapper == null || !wrapper.isConnected()) {
-				wrapper = connect();
+				wrapper = SshUtility.connectWrapper(info, widgetClosed);
 			}
 
 			StringBuilder sb = new StringBuilder();
@@ -860,16 +861,20 @@ public class FileSearchWidget extends Widget {
 				sb.append("rm -rf \"" + model.getItemAt(i).getPath() + "\"\n");
 			}
 			System.out.println("del: " + sb);
-			exec = wrapper.getExecChannel();
-			exec.setCommand(sb.toString());
-			exec.connect();
-			while (exec.getExitStatus() < 0 || exec.isConnected()) {
-				System.out.println("sleeping...");
-				try {
-					Thread.sleep(1000);
-				} catch (Exception e) {
-				}
-			}
+
+			List<String> output = new ArrayList<>();
+			SshUtility.executeCommand(wrapper, sb.toString(), output);
+
+//			exec = wrapper.getExecChannel();
+//			exec.setCommand(sb.toString());
+//			exec.connect();
+//			while (exec.getExitStatus() < 0 || exec.isConnected()) {
+//				System.out.println("sleeping...");
+//				try {
+//					Thread.sleep(1000);
+//				} catch (Exception e) {
+//				}
+//			}
 			System.out.println("Command executed");
 			exec.disconnect();
 		} catch (Exception e) {

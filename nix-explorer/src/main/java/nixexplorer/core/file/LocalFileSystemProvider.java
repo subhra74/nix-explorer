@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import nixexplorer.PathUtils;
+import nixexplorer.core.DataTransferProgress;
 import nixexplorer.core.FileInfo;
 import nixexplorer.core.FileSystemProvider;
 import nixexplorer.core.FileType;
@@ -49,8 +50,7 @@ public class LocalFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public List<FileInfo> ll(String path, boolean dirOnly)
-			throws FileNotFoundException, IOException {
+	public List<FileInfo> list(String path) throws Exception {
 		if (path == null || path.length() < 1) {
 			path = System.getProperty("user.home");
 		}
@@ -63,9 +63,7 @@ public class LocalFileSystemProvider implements FileSystemProvider {
 			return list;
 		}
 		for (File f : childs) {
-			if (dirOnly && (!f.isDirectory())) {
-				continue;
-			}
+
 			Path p = f.toPath();
 			BasicFileAttributes attrs = Files.readAttributes(p,
 					BasicFileAttributes.class);
@@ -109,7 +107,7 @@ public class LocalFileSystemProvider implements FileSystemProvider {
 
 	public synchronized void delete(FileInfo f) throws Exception {
 		if (f.getType() == FileType.Directory) {
-			List<FileInfo> list = ll(f.getPath(), false);
+			List<FileInfo> list = list(f.getPath());
 			if (list != null && list.size() > 0) {
 				for (FileInfo fc : list) {
 					delete(fc);
@@ -176,7 +174,7 @@ public class LocalFileSystemProvider implements FileSystemProvider {
 
 		folderMap.put(dir, parentFolder);
 
-		List<FileInfo> list = ll(dir, false);
+		List<FileInfo> list = list(dir);
 		for (FileInfo f : list) {
 			if (f.getType() == FileType.Directory) {
 				folderMap.put(f.getPath(),
@@ -217,20 +215,38 @@ public class LocalFileSystemProvider implements FileSystemProvider {
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see nixexplorer.core.FileSystemProvider#getFsRoots()
-	 */
-	@Override
-	public String[] getFsRoots() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public void createLink(String src, String dst, boolean hardLink)
 			throws Exception {
 
+	}
+
+	@Override
+	public void connect() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void copyTo(String source, String dest, DataTransferProgress prg,
+			int mode) throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void copyTo(String source, OutputStream dest,
+			DataTransferProgress prg, int mode, long offset) throws Exception {
+	}
+
+	@Override
+	public String[] getRoots() throws Exception {
+		File[] roots = File.listRoots();
+		String arr[] = new String[roots.length];
+		int i = 0;
+		for (File f : roots) {
+			arr[i++] = f.getAbsolutePath();
+		}
+		return arr;
 	}
 
 }

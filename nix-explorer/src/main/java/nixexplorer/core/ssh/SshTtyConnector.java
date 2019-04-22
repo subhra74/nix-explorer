@@ -22,6 +22,7 @@ import com.jediterm.terminal.TtyConnector;
 import nixexplorer.app.components.CredentialsDialog;
 import nixexplorer.app.components.CredentialsDialog.Credentials;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.ssh.SshUtility.ShellContext;
 
 public class SshTtyConnector implements DisposableTtyConnector {
 	private InputStreamReader myInputStreamReader;
@@ -43,27 +44,9 @@ public class SshTtyConnector implements DisposableTtyConnector {
 	@Override
 	public boolean init(Questioner q) {
 		try {
-			wr = new SshWrapper(info);
-			while (!stopFlag.get()) {
-
-				try {
-					wr.connect();
-					this.channel = wr.getShellChannel();
-					break;
-				} catch (Exception e) {
-					e.printStackTrace();
-					if (!stopFlag.get()) {
-						if (JOptionPane.showConfirmDialog(null,
-								"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
-							throw new Exception("User cancelled the operation");
-						}
-					}
-				}
-			}
-
-			if (!wr.isConnected()) {
-				throw new IOException("Unable to connect");
-			}
+			ShellContext shell = SshUtility.connectShell(info, stopFlag);
+			this.wr = shell.wrapper;
+			this.channel = shell.getShell();
 
 			String lang = System.getenv().get("LANG");
 			channel.setEnv("LANG", lang != null ? lang : "en_US.UTF-8");

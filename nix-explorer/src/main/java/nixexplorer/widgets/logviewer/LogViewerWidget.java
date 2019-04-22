@@ -66,6 +66,7 @@ import nixexplorer.app.AppContext;
 import nixexplorer.app.components.FlatTabbedPane;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.FileSystemProvider;
 import nixexplorer.core.ssh.FileSystemWrapper;
 import nixexplorer.core.ssh.SshFileSystemWrapper;
 import nixexplorer.core.ssh.SshWrapper;
@@ -103,7 +104,7 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 	private boolean closing = false;
 	private JSpinner spFont;
 	private LogTableRenderer renderer;
-	private FileSystemWrapper fs;
+	private FileSystemProvider fs;
 
 	public LogViewerWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window) {

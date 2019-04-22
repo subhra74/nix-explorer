@@ -38,6 +38,7 @@ import javax.swing.table.TableRowSorter;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
 import nixexplorer.core.FileInfo;
+import nixexplorer.core.FileSystemProvider;
 import nixexplorer.core.FileType;
 import nixexplorer.core.ssh.FileSystemWrapper;
 import nixexplorer.widgets.util.Utility;
@@ -45,7 +46,7 @@ import nixexplorer.widgets.util.Utility;
 public class FileSelectionDialog extends JDialog {
 //	private DefaultTreeModel treeModel;
 //	private JTree tree;
-	private FileSystemWrapper fs;
+	private FileSystemProvider fs;
 	private boolean loading = false;
 	private boolean folderOnly = false;
 	private JTextField txtSelection;
@@ -65,7 +66,7 @@ public class FileSelectionDialog extends JDialog {
 
 	private DialogResult res = DialogResult.CANCEL;
 
-	public FileSelectionDialog(String path, FileSystemWrapper fs, Window window, boolean folderOnly) {
+	public FileSelectionDialog(String path, FileSystemProvider fs, Window window, boolean folderOnly) {
 		super(window);
 		this.fs = fs;
 		setSize(Utility.toPixel(640), Utility.toPixel(480));

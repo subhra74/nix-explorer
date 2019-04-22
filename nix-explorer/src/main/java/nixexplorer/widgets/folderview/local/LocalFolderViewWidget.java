@@ -37,30 +37,38 @@ import nixexplorer.widgets.folderview.copy.CopyWidget;
 import nixexplorer.widgets.listeners.AppMessageListener;
 import nixexplorer.widgets.util.Utility;
 
-public class LocalFolderViewWidget extends TabbedFolderViewWidget implements SessionEventAware {
+public class LocalFolderViewWidget extends TabbedFolderViewWidget
+		implements SessionEventAware {
 	private static final long serialVersionUID = 1261155106627917513L;
 	private FileSystemProvider fs;
 	private WeakHashMap<FolderViewWidget, Boolean> folderViews = new WeakHashMap<FolderViewWidget, Boolean>();
 
-	public LocalFolderViewWidget(SessionInfo info, String args[], AppSession appSession, Window window) {
+	public LocalFolderViewWidget(SessionInfo info, String args[],
+			AppSession appSession, Window window) {
 		super(info, args, appSession, window);
 		System.out.println("LocalFolderViewWidget app session: " + appSession);
 		try {
-			this.icon = new ScaledIcon(App.class.getResource("/images/local.png"), Utility.toPixel(24),
-					Utility.toPixel(24));
+			this.icon = new ScaledIcon(
+					App.class.getResource("/images/local.png"),
+					Utility.toPixel(24), Utility.toPixel(24));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		this.setLayout(new BorderLayout());
 		this.fs = new LocalFileSystemProvider();
 
-		LocalFolderViewTransferHandler lt = new LocalFolderViewTransferHandler(this);
-		TreeViewTransferHandler treeHandler = new TreeViewTransferHandler(LocalFolderViewWidget.this);
+		LocalFolderViewTransferHandler lt = new LocalFolderViewTransferHandler(
+				this);
+		TreeViewTransferHandler treeHandler = new TreeViewTransferHandler(
+				LocalFolderViewWidget.this);
 
-		String folder = args == null || args.length < 1 ? System.getProperty("user.home") : args[0];
+		String folder = args == null || args.length < 1
+				? System.getProperty("user.home")
+				: args[0];
 
-		FolderViewWidget singleFolderView = new FolderViewWidget(folder, this, lt, treeHandler,
-				new LocalContextMenuActionHandler(this), new OverflowMenuActionHandlerImpl(),
+		FolderViewWidget singleFolderView = new FolderViewWidget(folder, this,
+				lt, treeHandler, new LocalContextMenuActionHandler(this),
+				new OverflowMenuActionHandlerImpl(),
 				new LocalTreeContextMenuHandler(this));
 
 		folderViews.put(singleFolderView, Boolean.TRUE);
@@ -82,10 +90,12 @@ public class LocalFolderViewWidget extends TabbedFolderViewWidget implements Ses
 
 	public void openNewTab(String path) {
 		String title = "Local";
-		LocalFolderViewTransferHandler lt = new LocalFolderViewTransferHandler(this);
+		LocalFolderViewTransferHandler lt = new LocalFolderViewTransferHandler(
+				this);
 		TreeViewTransferHandler treeHandler = new TreeViewTransferHandler(this);
-		FolderViewWidget folderView = new FolderViewWidget(path, this, lt, treeHandler,
-				new LocalContextMenuActionHandler(this), new OverflowMenuActionHandlerImpl(),
+		FolderViewWidget folderView = new FolderViewWidget(path, this, lt,
+				treeHandler, new LocalContextMenuActionHandler(this),
+				new OverflowMenuActionHandlerImpl(),
 				new LocalTreeContextMenuHandler(this));
 		addTab(title, folderView);
 		folderViews.put(folderView, Boolean.TRUE);
@@ -94,10 +104,12 @@ public class LocalFolderViewWidget extends TabbedFolderViewWidget implements Ses
 	@Override
 	public void openNewTab(String title, String path) {
 		System.out.println("called2");
-		LocalFolderViewTransferHandler lt = new LocalFolderViewTransferHandler(this);
+		LocalFolderViewTransferHandler lt = new LocalFolderViewTransferHandler(
+				this);
 		TreeViewTransferHandler treeHandler = new TreeViewTransferHandler(this);
-		FolderViewWidget folderView = new FolderViewWidget(path, this, lt, treeHandler,
-				new LocalContextMenuActionHandler(this), new OverflowMenuActionHandlerImpl(),
+		FolderViewWidget folderView = new FolderViewWidget(path, this, lt,
+				treeHandler, new LocalContextMenuActionHandler(this),
+				new OverflowMenuActionHandlerImpl(),
 				new LocalTreeContextMenuHandler(this));
 		addTab(title, folderView);
 		folderViews.put(folderView, Boolean.TRUE);
@@ -106,7 +118,8 @@ public class LocalFolderViewWidget extends TabbedFolderViewWidget implements Ses
 
 	@Override
 	public void editFile(String fileName) {
-		File tempFolder = new File(System.getProperty("java.io.tmpdir"), UUID.randomUUID() + "");
+		File tempFolder = new File(System.getProperty("java.io.tmpdir"),
+				UUID.randomUUID() + "");
 		tempFolder.mkdirs();
 		// File f = new File(tempFolder, fileName);
 
@@ -120,11 +133,6 @@ public class LocalFolderViewWidget extends TabbedFolderViewWidget implements Ses
 	@Override
 	public FileSystemProvider getFs() {
 		return this.fs;
-	}
-
-	@Override
-	public void reconnectFs() {
-
 	}
 
 	@Override
@@ -144,8 +152,10 @@ public class LocalFolderViewWidget extends TabbedFolderViewWidget implements Ses
 		List<String> args = new ArrayList<>();
 		args.add("d");
 		args.add(widget.getCurrentPath());
-		args.add(finfo.getSourceFiles() == null ? "0" : finfo.getSourceFiles().size() + "");
-		args.add(finfo.getSourceFolders() == null ? "0" : finfo.getSourceFolders().size() + "");
+		args.add(finfo.getSourceFiles() == null ? "0"
+				: finfo.getSourceFiles().size() + "");
+		args.add(finfo.getSourceFolders() == null ? "0"
+				: finfo.getSourceFolders().size() + "");
 		args.addAll(finfo.getSourceFiles());
 		args.addAll(finfo.getSourceFolders());
 
@@ -282,35 +292,39 @@ public class LocalFolderViewWidget extends TabbedFolderViewWidget implements Ses
 		info.setBaseFolder(w.getCurrentPath());
 		List<String> droppedFiles = info.getSourceFiles();
 		List<String> droppedFolders = info.getSourceFolders();
-		System.out.println("copying files to: " + w.getCurrentPath() + " dropped files: " + droppedFiles
-				+ " dropped folders: " + droppedFolders);
+		System.out.println(
+				"copying files to: " + w.getCurrentPath() + " dropped files: "
+						+ droppedFiles + " dropped folders: " + droppedFolders);
 		moveFiles(w.getCurrentPath(), droppedFiles, droppedFolders, copy, w);
 	}
 
-	public void moveFiles(String targetFolder, List<String> sourceFiles, List<String> sourceFolders, boolean copy,
-			FolderViewWidget w) {
+	public void moveFiles(String targetFolder, List<String> sourceFiles,
+			List<String> sourceFolders, boolean copy, FolderViewWidget w) {
 		disableView();
 		new Thread(() -> {
 			try {
 				System.out.println("Moving...");
 				applyPreviousAction = false;
-				ensureConnected();
 //				List<FileInfo> list = getFs().ll(targetFolder, false);
 				Map<String, String> mvMap = new HashMap<>();
-				if (!FolderViewUtility.prepareFileList(targetFolder, sourceFiles, mvMap, true, w.getCurrentFiles())) {
+				if (!FolderViewUtility.prepareFileList(targetFolder,
+						sourceFiles, mvMap, true, w.getCurrentFiles())) {
 					System.out.println("Returing...");
 					return;
 				}
 
-				if (!FolderViewUtility.prepareFileList(targetFolder, sourceFolders, mvMap, true, w.getCurrentFiles())) {
+				if (!FolderViewUtility.prepareFileList(targetFolder,
+						sourceFolders, mvMap, true, w.getCurrentFiles())) {
 					System.out.println("Returing...");
 					return;
 				}
 
 				for (String key : mvMap.keySet()) {
-					System.out.println("Moving file: " + key + " -> " + mvMap.get(key));
+					System.out.println(
+							"Moving file: " + key + " -> " + mvMap.get(key));
 					if (copy) {
-						Copy.copy(new String[] { "-r", "-p", key, mvMap.get(key) });
+						Copy.copy(new String[] { "-r", "-p", key,
+								mvMap.get(key) });
 
 					} else {
 						getFs().rename(key, mvMap.get(key));
@@ -326,7 +340,8 @@ public class LocalFolderViewWidget extends TabbedFolderViewWidget implements Ses
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
+				JOptionPane.showMessageDialog(null,
+						TextHolder.getString("folderview.genericError"));
 			} finally {
 				enableView();
 			}
@@ -453,11 +468,12 @@ public class LocalFolderViewWidget extends TabbedFolderViewWidget implements Ses
 
 	@Override
 	public void fileSystemUpdated(String path) {
-		System.out.println("Local views: "+folderViews.keySet());
+		System.out.println("Local views: " + folderViews.keySet());
 		for (FolderViewWidget view : folderViews.keySet()) {
 			System.out.println("Update notification for: " + path);
 			if (PathUtils.isSamePath(view.getCurrentPath(), path)) {
-				System.out.println("Local view re rendering: "+folderViews.keySet());
+				System.out.println(
+						"Local view re rendering: " + folderViews.keySet());
 				view.render(view.getCurrentPath(), false);
 			}
 		}

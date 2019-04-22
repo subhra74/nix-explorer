@@ -40,7 +40,7 @@ import nixexplorer.core.FileInfo;
 import nixexplorer.core.FileSystemProvider;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.file.LocalFileSystemProvider;
-import nixexplorer.core.ssh.SshFileSystemProvider;
+import nixexplorer.core.ssh.SshFileSystemWrapper;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.folderview.FolderViewUtility;
 import nixexplorer.widgets.util.Utility;
@@ -58,7 +58,7 @@ public class CopyWidget extends JDialog implements DisposableView {
 	private String targetFolder;
 	private List<String> files, folders;
 	private CopyMode mode;
-	private SshWrapper wrapper = null;
+	// private SshWrapper wrapper = null;
 	private JLabel lblTitle;
 	private byte[] b = new byte[8192];
 	private JProgressBar prg;
@@ -71,6 +71,7 @@ public class CopyWidget extends JDialog implements DisposableView {
 	private SessionInfo info;
 	private AppSession appSession;
 	protected AtomicBoolean widgetClosed = new AtomicBoolean(Boolean.FALSE);
+	private FileSystemProvider fs;
 	/*
 	 * args: d/u targetfolder <file_count> <folder_count> file1 file2 folder1
 	 * folder2
@@ -144,7 +145,9 @@ public class CopyWidget extends JDialog implements DisposableView {
 			setVisible(false);
 			new Thread(() -> {
 				try {
-					wrapper.disconnect();
+					if (fs != null) {
+						fs.close();
+					}
 				} catch (Exception e2) {
 				}
 			}).start();
@@ -172,6 +175,8 @@ public class CopyWidget extends JDialog implements DisposableView {
 			}
 		});
 
+		this.fs = new SshFileSystemWrapper(info);
+
 		// this.pack();
 
 		this.setLocationRelativeTo(null);
@@ -187,7 +192,7 @@ public class CopyWidget extends JDialog implements DisposableView {
 //			wrapper = new SshWrapper(info);
 //			wrapper.connect();
 //			return new SshFileSystemProvider(wrapper.getSftpChannel());
-			return connect();
+			return fs;
 		} else {
 			return new LocalFileSystemProvider();
 		}
@@ -200,32 +205,7 @@ public class CopyWidget extends JDialog implements DisposableView {
 //			wrapper = new SshWrapper(info);
 //			wrapper.connect();
 //			return new SshFileSystemProvider(wrapper.getSftpChannel());
-			return connect();
-		}
-	}
-
-	private FileSystemProvider connect() throws Exception {
-		if (wrapper == null || !wrapper.isConnected()) {
-			while (!stopFlag.get()) {
-
-				try {
-					wrapper = new SshWrapper(info);
-					wrapper.connect();
-					return new SshFileSystemProvider(wrapper.getSftpChannel());
-				} catch (Exception e) {
-					if (stopFlag.get()) {
-						throw new Exception("Operation cancelled by user");
-					}
-					e.printStackTrace();
-					if (JOptionPane.showConfirmDialog(null,
-							"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
-						throw new Exception("User cancelled the operation");
-					}
-				}
-			}
-			throw new Exception("Unable to connect");
-		} else {
-			return new SshFileSystemProvider(wrapper.getSftpChannel());
+			return fs;
 		}
 	}
 
@@ -261,7 +241,7 @@ public class CopyWidget extends JDialog implements DisposableView {
 				e.printStackTrace();
 			} finally {
 				try {
-					wrapper.disconnect();
+					fs.close();
 				} catch (Exception e2) {
 				}
 			}
@@ -364,7 +344,7 @@ public class CopyWidget extends JDialog implements DisposableView {
 			FileSystemProvider targetFs, Map<String, String> fileMap)
 			throws Exception {
 
-		List<FileInfo> filesInTargetFolder = targetFs.ll(targetFolder, false);
+		List<FileInfo> filesInTargetFolder = targetFs.list(targetFolder);
 
 //			Map<String, String> fileMap = new HashMap<>();
 		Map<String, String> folderMap = new HashMap<>();

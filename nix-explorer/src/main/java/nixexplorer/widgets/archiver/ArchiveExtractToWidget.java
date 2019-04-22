@@ -323,8 +323,7 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 	private void extractAsync() {
 		System.out.println("Extracting.. " + file);
 		try {
-			wrapper = SshUtility.connect(info, stopFlag);// new
-															// SshWrapper(info);
+			wrapper = SshUtility.connectWrapper(info, stopFlag);
 //			wrapper.connect();
 			String extractCmd = ArchiveExtractToWidget
 					.getExtractCmd(file.toLowerCase());

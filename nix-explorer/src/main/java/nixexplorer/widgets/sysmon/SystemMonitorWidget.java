@@ -7,19 +7,13 @@ import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.zip.GZIPInputStream;
 
 import javax.swing.Box;
 import javax.swing.Icon;
@@ -27,12 +21,10 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
-import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -45,19 +37,13 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
-import com.jcraft.jsch.ChannelExec;
-
 import nixexplorer.ShellScriptLoader;
 import nixexplorer.TextHolder;
 import nixexplorer.app.AppContext;
-import nixexplorer.app.components.CredentialsDialog;
 import nixexplorer.app.components.CustomTabbedPane;
-import nixexplorer.app.components.FlatTabbedPane;
-import nixexplorer.app.components.CredentialsDialog.Credentials;
 import nixexplorer.app.session.AppSession;
-import nixexplorer.app.session.SessionManagerPanel;
 import nixexplorer.app.session.SessionInfo;
-import nixexplorer.core.ssh.SshFileSystemProvider;
+import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.Widget;
 import nixexplorer.widgets.util.Utility;
@@ -405,7 +391,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	private void retrieveStats() throws Exception {
 		listLines.clear();
 		if (wrapper == null || !wrapper.isConnected()) {
-			wrapper = connect();
+			wrapper = SshUtility.connectWrapper(info, widgetClosed);
 		}
 
 		if (os == null) {
@@ -475,41 +461,40 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	}
 
 	private int executeCmd(String cmd, List<String> lines) throws Exception {
-		// System.out.println(cmd);
 		if (wrapper == null || !wrapper.isConnected()) {
-			wrapper = connect();
+			wrapper = SshUtility.connectWrapper(info, widgetClosed);
 		}
-		ChannelExec exec = wrapper.getExecChannel();
-		InputStream in = exec.getInputStream();
-		exec.setCommand(cmd);
-		exec.connect();
+		return SshUtility.executeCommand(wrapper, cmd, true, lines);
 
-		BufferedReader reader = new BufferedReader(
-				new InputStreamReader(new GZIPInputStream(in)));
-		while (true) {
-			String line = reader.readLine();
-			if (line != null && line.length() > 0) {
-				lines.add(line);
-			}
-			if (exec.getExitStatus() >= 0) {
-				break;
-			}
-		}
-
-		// System.err.flush();
-
-		reader.close();
-		int ret = exec.getExitStatus();
-		System.err.println("Exit code: " + ret);
-		exec.disconnect();
-		return ret;
+//		ChannelExec exec = wrapper.getExecChannel();
+//		InputStream in = exec.getInputStream();
+//		exec.setCommand(cmd);
+//		exec.connect();
+//
+//		BufferedReader reader = new BufferedReader(
+//				new InputStreamReader(new GZIPInputStream(in)));
+//		while (true) {
+//			String line = reader.readLine();
+//			if (line != null && line.length() > 0) {
+//				lines.add(line);
+//			}
+//			if (exec.getExitStatus() >= 0) {
+//				break;
+//			}
+//		}
+//
+//		// System.err.flush();
+//
+//		reader.close();
+//		int ret = exec.getExitStatus();
+//		System.err.println("Exit code: " + ret);
+//		exec.disconnect();
+//		return ret;
 	}
 
 	private void executeCommand(String cmd, boolean compressed,
 			Map<String, String> environment) throws Exception {
-
 		List<String> list = executeCommand(cmd, compressed);
-
 		for (String line : list) {
 			if (line.contains("=")) {
 				int index = line.indexOf("=");
@@ -952,36 +937,39 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 			throws Exception {
 		List<String> list = new ArrayList<>();
 		if (wrapper == null || !wrapper.isConnected()) {
-			wrapper = connect();
+			wrapper = SshUtility.connectWrapper(info, widgetClosed);
 		}
-		ChannelExec exec = wrapper.getExecChannel();
-		InputStream in = exec.getInputStream();
-		exec.setCommand(cmd);
-		exec.connect();
-
-		InputStream inStream = compressed ? new GZIPInputStream(in) : in;
-		StringBuilder sb = new StringBuilder();
-		while (true) {
-			int x = inStream.read();
-
-			if (x == '\n') {
-				list.add(sb.toString());
-				sb = new StringBuilder();
-			}
-			if (x != -1 && x != '\n')
-				sb.append((char) x);
-
-			if (exec.getExitStatus() != -1 && x == -1) {
-				break;
-			}
-		}
-
-		in.close();
-		int ret = exec.getExitStatus();
-		System.err.println("Exit code: " + ret);
-
-		exec.disconnect();
+		SshUtility.executeCommand(wrapper, cmd, compressed, list);
 		return list;
+
+//		ChannelExec exec = wrapper.getExecChannel();
+//		InputStream in = exec.getInputStream();
+//		exec.setCommand(cmd);
+//		exec.connect();
+//
+//		InputStream inStream = compressed ? new GZIPInputStream(in) : in;
+//		StringBuilder sb = new StringBuilder();
+//		while (true) {
+//			int x = inStream.read();
+//
+//			if (x == '\n') {
+//				list.add(sb.toString());
+//				sb = new StringBuilder();
+//			}
+//			if (x != -1 && x != '\n')
+//				sb.append((char) x);
+//
+//			if (exec.getExitStatus() != -1 && x == -1) {
+//				break;
+//			}
+//		}
+//
+//		in.close();
+//		int ret = exec.getExitStatus();
+//		System.err.println("Exit code: " + ret);
+//
+//		exec.disconnect();
+//		return list;
 	}
 
 	private void showUnsupportedOS(String os) {

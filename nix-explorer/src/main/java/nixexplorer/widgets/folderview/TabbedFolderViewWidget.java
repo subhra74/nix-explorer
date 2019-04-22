@@ -248,12 +248,7 @@ public abstract class TabbedFolderViewWidget extends Widget
 //		return title;
 //	}
 
-	public void ensureConnected() throws Exception {
-		if (!getFs().isConnected()) {
-			reconnectFs();
-		}
-	}
-
+	
 	@Override
 	public Icon getIcon() {
 		return this.icon;

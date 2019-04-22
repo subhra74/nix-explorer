@@ -47,6 +47,7 @@ import nixexplorer.app.components.DisposableView;
 import nixexplorer.app.components.CredentialsDialog.Credentials;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.Widget;
 import nixexplorer.widgets.util.Utility;
@@ -218,7 +219,8 @@ public class ExternalEditorWidget extends JDialog
 			ExternalEditorWidget.this.revalidate();
 			ExternalEditorWidget.this.repaint();
 		});
-		UploadTask task = new UploadTask(wrapper, remoteFile, file, this);
+		UploadTask task = new UploadTask(wrapper, remoteFile, file, this,
+				stopFlag);
 		callback = threadPool.submit(task);
 	}
 
@@ -241,26 +243,26 @@ public class ExternalEditorWidget extends JDialog
 		downloadFile();
 	}
 
-	private void connectWrapper() throws Exception {
-		if (wrapper == null || !wrapper.isConnected()) {
-			while (!stopFlag.get()) {
-
-				try {
-					wrapper = new SshWrapper(info);
-					wrapper.connect();
-					return;
-				} catch (Exception e) {
-					e.printStackTrace();
-					if (!stopFlag.get()) {
-						if (JOptionPane.showConfirmDialog(null,
-								"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
-							throw new Exception("User cancelled the operation");
-						}
-					}
-				}
-			}
-		}
-	}
+//	private void connectWrapper() throws Exception {
+//		if (wrapper == null || !wrapper.isConnected()) {
+//			while (!stopFlag.get()) {
+//
+//				try {
+//					wrapper = new SshWrapper(info);
+//					wrapper.connect();
+//					return;
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//					if (!stopFlag.get()) {
+//						if (JOptionPane.showConfirmDialog(null,
+//								"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
+//							throw new Exception("User cancelled the operation");
+//						}
+//					}
+//				}
+//			}
+//		}
+//	}
 
 	private void downloadFile() {
 		SwingUtilities.invokeLater(() -> {
@@ -282,7 +284,7 @@ public class ExternalEditorWidget extends JDialog
 			this.file = dir.resolve(PathUtils.getFileName(remoteFile)) // Paths.get(dir.,
 																		// PathUtils.getFileName(remoteFile))
 					.toAbsolutePath().toString();
-			connectWrapper();
+			wrapper = SshUtility.connectWrapper(info, stopFlag);
 			wrapper.getSftpChannel().get(remoteFile, file,
 					new SftpProgressMonitor() {
 						long total = 0L, received = 0L;
@@ -495,6 +497,7 @@ class UploadTask implements Callable<Boolean> {
 	private String remote, local;
 	private byte[] b = new byte[8192];
 	private IProgress prg;
+	private AtomicBoolean stopFlag;
 
 	/**
 	 * @param wrapper
@@ -502,12 +505,13 @@ class UploadTask implements Callable<Boolean> {
 	 * @param local
 	 */
 	public UploadTask(SshWrapper wrapper, String remote, String local,
-			IProgress prg) {
+			IProgress prg, AtomicBoolean stopFlag) {
 		super();
 		this.wrapper = wrapper;
 		this.remote = remote;
 		this.local = local;
 		this.prg = prg;
+		this.stopFlag = stopFlag;
 	}
 
 	/*
@@ -522,8 +526,8 @@ class UploadTask implements Callable<Boolean> {
 		ChannelSftp sftp = null;
 		try {
 			if (!wrapper.isConnected()) {
-				wrapper = new SshWrapper(wrapper.getInfo());
-				wrapper.connect();
+				wrapper = SshUtility.connectWrapper(wrapper.getInfo(),
+						stopFlag);
 			}
 			sftp = wrapper.getSftpChannel();
 			in = new FileInputStream(local);

@@ -4,11 +4,13 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.jcraft.jsch.ChannelExec;
 
 import nixexplorer.core.FileInfo;
+import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.dnd.TransferFileInfo;
 
@@ -18,40 +20,10 @@ public class ShellActions {
 		System.out.println("Copy start");
 		StringBuilder cmd = new StringBuilder();
 		cmd.append("cp -r -f \"" + src + "\" \"" + dst + "\"");
-
-		ChannelExec exec = null;
-		try {
-			exec = wrapper.getExecChannel();
-			exec.setCommand(cmd.toString());
-			exec.connect();
-			BufferedReader r = new BufferedReader(
-					new InputStreamReader(exec.getInputStream()));
-			while (true) {
-				String s = r.readLine();
-				if (s == null) {
-					break;
-				}
-			}
-			r.close();
-			int exit = exec.getExitStatus();
-			while (exit < 0) {
-				System.out.println("Exitcode <0: " + exit + " - waiting 1 sec");
-				Thread.sleep(1000);
-				exit = exec.getExitStatus();
-			}
-			System.out.println("Exit status: " + exit);
-			if (exit > 0) {
-				throw new FileNotFoundException(
-						"Return code not zero: " + exit);
-			}
-		} finally {
-			try {
-				exec.disconnect();
-				System.out.println("Copy end");
-			} catch (Exception e2) {
-			}
+		List<String> list = new ArrayList<>();
+		if (SshUtility.executeCommand(wrapper, cmd.toString(), list) != 0) {
+			throw new FileNotFoundException("Return code not zero");
 		}
-
 	}
 
 	public static void delete(List<FileInfo> files, SshWrapper wrapper)

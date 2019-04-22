@@ -33,8 +33,6 @@ public interface TabCallback {
 
 	public FileSystemProvider getFs();
 
-	public void reconnectFs() throws Exception;
-
 	public boolean handleFileDrop(Object infoList, FolderViewWidget widget);
 
 	public void pasteItem(TransferFileInfo info, FolderViewWidget w);

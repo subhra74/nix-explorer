@@ -36,6 +36,7 @@ import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionStore;
 import nixexplorer.core.FileInfo;
 import nixexplorer.core.FileType;
+import nixexplorer.core.ssh.SshFileSystemWrapper;
 import nixexplorer.registry.contextmenu.ContextMenuEntry;
 import nixexplorer.registry.contextmenu.ContextMenuRegistry;
 import nixexplorer.widgets.dnd.TransferFileInfo;
@@ -54,7 +55,8 @@ import nixexplorer.widgets.scp.ScpTransferWidget;
  * @author subhro
  *
  */
-public class RemoteContextMenuActionHandler implements ContextMenuActionHandler {
+public class RemoteContextMenuActionHandler
+		implements ContextMenuActionHandler {
 
 	private RemoteFolderViewWidget remoteFolderView;
 	private FolderViewWidget folderView;
@@ -62,36 +64,43 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 	/**
 	 * 
 	 */
-	public RemoteContextMenuActionHandler(RemoteFolderViewWidget remoteFolderView) {
+	public RemoteContextMenuActionHandler(
+			RemoteFolderViewWidget remoteFolderView) {
 		this.remoteFolderView = remoteFolderView;
 	}
 
 	public void install(FolderViewWidget folderView) {
 		this.folderView = folderView;
 
-		InputMap map = folderView.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		InputMap map = folderView
+				.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		ActionMap act = folderView.getActionMap();
 
 		this.initMenuItems(map, act);
 
 	}
 
-	private AbstractAction aOpenInTab, aOpen, aRename, aDelete, aNewFile, aNewFolder, aCopy, aPaste, aCut, aAddToFav,
-			aChangePerm, aSendFiles, aUpload, aDownload, aCreateLink;
+	private AbstractAction aOpenInTab, aOpen, aRename, aDelete, aNewFile,
+			aNewFolder, aCopy, aPaste, aCut, aAddToFav, aChangePerm, aSendFiles,
+			aUpload, aDownload, aCreateLink;
 
-	private KeyStroke ksOpenInTab, ksOpen, ksRename, ksDelete, ksNewFile, ksNewFolder, ksCopy, ksPaste, ksCut,
-			ksAddToFav, ksChangePerm, ksSendFiles, ksUpload, ksDownload, ksCreateLink;
+	private KeyStroke ksOpenInTab, ksOpen, ksRename, ksDelete, ksNewFile,
+			ksNewFolder, ksCopy, ksPaste, ksCut, ksAddToFav, ksChangePerm,
+			ksSendFiles, ksUpload, ksDownload, ksCreateLink;
 
-	private JMenuItem mOpenInTab, mOpen, mRename, mDelete, mNewFile, mNewFolder, mCopy, mPaste, mCut, mAddToFav,
-			mChangePerm, mSendFiles, mUpload, mOpenWithDefApp, mOpenWthInternalEdit, mOpenWithCustom, mOpenWithLogView,
-			mDownload, mCreateLink;
+	private JMenuItem mOpenInTab, mOpen, mRename, mDelete, mNewFile, mNewFolder,
+			mCopy, mPaste, mCut, mAddToFav, mChangePerm, mSendFiles, mUpload,
+			mOpenWithDefApp, mOpenWthInternalEdit, mOpenWithCustom,
+			mOpenWithLogView, mDownload, mCreateLink;
 
 	private JMenu mOpenWith;
 
 	private void initMenuItems(InputMap map, ActionMap act) {
 
-		ksOpenInTab = KeyStroke.getKeyStroke(KeyEvent.VK_T, ActionEvent.CTRL_MASK);
-		mOpenInTab = new JMenuItem(TextHolder.getString("folderview.opennewtab"));
+		ksOpenInTab = KeyStroke.getKeyStroke(KeyEvent.VK_T,
+				ActionEvent.CTRL_MASK);
+		mOpenInTab = new JMenuItem(
+				TextHolder.getString("folderview.opennewtab"));
 		mOpenInTab.setAccelerator(ksOpenInTab);
 		aOpenInTab = new AbstractAction() {
 
@@ -118,7 +127,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		act.put("mOpen", aOpen);
 		mOpen.setAccelerator(ksOpen);
 
-		mOpenWithDefApp = new JMenuItem(TextHolder.getString("folderview.openDefault"));
+		mOpenWithDefApp = new JMenuItem(
+				TextHolder.getString("folderview.openDefault"));
 		mOpenWithDefApp.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -126,7 +136,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 			}
 		});
 
-		mOpenWthInternalEdit = new JMenuItem(TextHolder.getString("folderview.openIntern"));
+		mOpenWthInternalEdit = new JMenuItem(
+				TextHolder.getString("folderview.openIntern"));
 		mOpenWthInternalEdit.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -134,7 +145,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 			}
 		});
 
-		mOpenWithCustom = new JMenuItem(TextHolder.getString("folderview.openCust"));
+		mOpenWithCustom = new JMenuItem(
+				TextHolder.getString("folderview.openCust"));
 		mOpenWithCustom.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -142,7 +154,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 			}
 		});
 
-		mOpenWithLogView = new JMenuItem(TextHolder.getString("folderview.openLogView"));
+		mOpenWithLogView = new JMenuItem(
+				TextHolder.getString("folderview.openLogView"));
 		mOpenWithLogView.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -159,7 +172,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		aRename = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				rename(folderView.getSelectedFiles()[0], folderView.getCurrentPath());
+				rename(folderView.getSelectedFiles()[0],
+						folderView.getCurrentPath());
 			}
 		};
 		ksRename = KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0);
@@ -174,7 +188,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		aDelete = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				delete(folderView.getSelectedFiles(), folderView.getCurrentPath());
+				delete(folderView.getSelectedFiles(),
+						folderView.getCurrentPath());
 			}
 		};
 		mDelete = new JMenuItem(TextHolder.getString("folderview.delete"));
@@ -183,7 +198,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		act.put("ksDelete", aDelete);
 		mDelete.setAccelerator(ksDelete);
 
-		ksNewFile = KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
+		ksNewFile = KeyStroke.getKeyStroke(KeyEvent.VK_N,
+				InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
 		aNewFile = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -196,20 +212,23 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		act.put("ksNewFile", aNewFile);
 		mNewFile.setAccelerator(ksNewFile);
 
-		ksNewFolder = KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK);
+		ksNewFolder = KeyStroke.getKeyStroke(KeyEvent.VK_N,
+				InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK);
 		aNewFolder = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				newFolder(folderView.getCurrentPath());
 			}
 		};
-		mNewFolder = new JMenuItem(TextHolder.getString("folderview.newFolder"));
+		mNewFolder = new JMenuItem(
+				TextHolder.getString("folderview.newFolder"));
 		mNewFolder.addActionListener(aNewFolder);
 		mNewFolder.setAccelerator(ksNewFolder);
 		map.put(ksNewFolder, "ksNewFolder");
 		act.put("ksNewFolder", aNewFolder);
 
-		ksCopy = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK);
+		ksCopy = KeyStroke.getKeyStroke(KeyEvent.VK_C,
+				InputEvent.CTRL_DOWN_MASK);
 		aCopy = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -222,12 +241,14 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		act.put("ksCopy", aCopy);
 		mCopy.setAccelerator(ksCopy);
 
-		ksPaste = KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK);
+		ksPaste = KeyStroke.getKeyStroke(KeyEvent.VK_V,
+				InputEvent.CTRL_DOWN_MASK);
 		aPaste = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (AppClipboard.getContent() instanceof TransferFileInfo) {
-					TransferFileInfo info = (TransferFileInfo) AppClipboard.getContent();
+					TransferFileInfo info = (TransferFileInfo) AppClipboard
+							.getContent();
 					remoteFolderView.pasteItem(info, folderView);
 					if (info.getAction() == Action.CUT) {
 						AppClipboard.setContent(null);
@@ -241,7 +262,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		act.put("ksPaste", aPaste);
 		mPaste.setAccelerator(ksPaste);
 
-		ksCut = KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK);
+		ksCut = KeyStroke.getKeyStroke(KeyEvent.VK_X,
+				InputEvent.CTRL_DOWN_MASK);
 		aCut = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -254,7 +276,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		act.put("ksCut", aCut);
 		mCut.setAccelerator(ksCut);
 
-		ksAddToFav = KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
+		ksAddToFav = KeyStroke.getKeyStroke(KeyEvent.VK_B,
+				InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
 		aAddToFav = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -267,11 +290,13 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		act.put("ksAddToFav", aAddToFav);
 		mAddToFav.setAccelerator(ksAddToFav);
 
-		ksChangePerm = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK);
+		ksChangePerm = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,
+				InputEvent.ALT_DOWN_MASK);
 		aChangePerm = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				changePermission(folderView.getSelectedFiles(), folderView.getCurrentPath());
+				changePermission(folderView.getSelectedFiles(),
+						folderView.getCurrentPath());
 			}
 		};
 		mChangePerm = new JMenuItem(TextHolder.getString("folderview.props"));
@@ -280,11 +305,13 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		act.put("ksChangePerm", aChangePerm);
 		mChangePerm.setAccelerator(ksChangePerm);
 
-		ksSendFiles = KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
+		ksSendFiles = KeyStroke.getKeyStroke(KeyEvent.VK_S,
+				InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
 		aSendFiles = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				sendFiles(folderView.getSelectedFiles(), folderView.getCurrentPath());
+				sendFiles(folderView.getSelectedFiles(),
+						folderView.getCurrentPath());
 			}
 		};
 		mSendFiles = new JMenuItem(TextHolder.getString("filetransfer.sendto"));
@@ -293,14 +320,16 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		act.put("ksSendFiles", aSendFiles);
 		mSendFiles.setAccelerator(ksSendFiles);
 
-		ksUpload = KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.CTRL_DOWN_MASK);
+		ksUpload = KeyStroke.getKeyStroke(KeyEvent.VK_U,
+				InputEvent.CTRL_DOWN_MASK);
 		aUpload = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser jfc = new JFileChooser();
 				jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 				jfc.setMultiSelectionEnabled(true);
-				if (jfc.showOpenDialog(remoteFolderView.getWindow()) == JFileChooser.APPROVE_OPTION) {
+				if (jfc.showOpenDialog(remoteFolderView
+						.getWindow()) == JFileChooser.APPROVE_OPTION) {
 					File[] files = jfc.getSelectedFiles();
 					if (files != null && files.length > 0) {
 						uploadFiles(files);
@@ -314,7 +343,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		act.put("ksUpload", aUpload);
 		mUpload.setAccelerator(ksUpload);
 
-		ksDownload = KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK);
+		ksDownload = KeyStroke.getKeyStroke(KeyEvent.VK_D,
+				InputEvent.CTRL_DOWN_MASK);
 		aDownload = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -323,7 +353,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 				jfc.setMultiSelectionEnabled(false);
 				FileInfo[] files = folderView.getSelectedFiles();
 				if (files != null && files.length > 0) {
-					if (jfc.showOpenDialog(remoteFolderView.getWindow()) == JFileChooser.APPROVE_OPTION) {
+					if (jfc.showOpenDialog(remoteFolderView
+							.getWindow()) == JFileChooser.APPROVE_OPTION) {
 						File file = jfc.getSelectedFile();
 						downloadFiles(files, file.getAbsolutePath());
 					}
@@ -336,14 +367,16 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		act.put("ksDownload", aDownload);
 		mDownload.setAccelerator(ksDownload);
 
-		ksCreateLink = KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK);
+		ksCreateLink = KeyStroke.getKeyStroke(KeyEvent.VK_L,
+				InputEvent.CTRL_DOWN_MASK);
 		aCreateLink = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				createLink();
 			}
 		};
-		mCreateLink = new JMenuItem(TextHolder.getString("folderview.createLink"));
+		mCreateLink = new JMenuItem(
+				TextHolder.getString("folderview.createLink"));
 		mCreateLink.addActionListener(aCreateLink);
 		map.put(ksCreateLink, "ksCreateLink");
 		act.put("ksCreateLink", aCreateLink);
@@ -357,7 +390,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 	protected void createLink() {
 		JTextField txtLinkName = new JTextField(30);
 		JTextField txtFileName = new JTextField(30);
-		JCheckBox chkHardLink = new JCheckBox(TextHolder.getString("folderview.hardLink"));
+		JCheckBox chkHardLink = new JCheckBox(
+				TextHolder.getString("folderview.hardLink"));
 
 		if (folderView.getSelectedFiles().length > 0) {
 			FileInfo info = folderView.getSelectedFiles()[0];
@@ -365,12 +399,17 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		}
 
 		while (JOptionPane.showOptionDialog(remoteFolderView.getWindow(),
-				new Object[] { TextHolder.getString("folderview.linkName"), txtLinkName,
-						TextHolder.getString("folderview.fileName"), txtFileName, chkHardLink },
-				TextHolder.getString("folderview.createLink"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
-				null, null, null) == JOptionPane.OK_OPTION) {
-			if (txtLinkName.getText().length() > 0 && txtFileName.getText().length() > 0) {
-				createLinkAsync(txtFileName.getText(), txtLinkName.getText(), chkHardLink.isSelected());
+				new Object[] { TextHolder.getString("folderview.linkName"),
+						txtLinkName,
+						TextHolder.getString("folderview.fileName"),
+						txtFileName, chkHardLink },
+				TextHolder.getString("folderview.createLink"),
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
+				null, null) == JOptionPane.OK_OPTION) {
+			if (txtLinkName.getText().length() > 0
+					&& txtFileName.getText().length() > 0) {
+				createLinkAsync(txtFileName.getText(), txtLinkName.getText(),
+						chkHardLink.isSelected());
 				notifyReload(folderView.getCurrentPath());
 				break;
 			}
@@ -391,15 +430,18 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		List<String> folders = new ArrayList<>();
 
 		for (FileInfo info : selectedFiles) {
-			if (info.getType() == FileType.Directory || info.getType() == FileType.DirLink) {
+			if (info.getType() == FileType.Directory
+					|| info.getType() == FileType.DirLink) {
 				folders.add(info.getPath());
 			} else {
 				files.add(info.getPath());
 			}
 		}
 
-		ScpTransferWidget scpWidget = new ScpTransferWidget(remoteFolderView.getInfo(), files, folders, srcFolder,
-				remoteFolderView.getSession(), SwingUtilities.windowForComponent(remoteFolderView));
+		ScpTransferWidget scpWidget = new ScpTransferWidget(
+				remoteFolderView.getInfo(), files, folders, srcFolder,
+				remoteFolderView.getSession(),
+				SwingUtilities.windowForComponent(remoteFolderView));
 		scpWidget.setVisible(true);
 	}
 
@@ -422,7 +464,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		FileInfo[] selectedFiles = folderView.getSelectedFiles();
 		if (selectedFiles != null && selectedFiles.length > 0) {
 			FileInfo info = selectedFiles[0];
-			if (info.getType() == FileType.DirLink || info.getType() == FileType.Directory) {
+			if (info.getType() == FileType.DirLink
+					|| info.getType() == FileType.Directory) {
 				path = info.getPath();
 				name = info.getName();
 			}
@@ -437,17 +480,19 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 
 	private void rename(FileInfo info, String baseFolder) {
 		String text = JOptionPane
-				.showInputDialog(TextHolder.getString("folderview.renameTitle") + "\n" + info.getName());
+				.showInputDialog(TextHolder.getString("folderview.renameTitle")
+						+ "\n" + info.getName());
 		if (text != null && text.length() > 0) {
-			renameAsync(info.getPath(), PathUtils.combineUnix(PathUtils.getParent(info.getPath()), text), baseFolder);
+			renameAsync(info.getPath(), PathUtils.combineUnix(
+					PathUtils.getParent(info.getPath()), text), baseFolder);
 		}
 	}
 
-	private void renameAsync(String oldName, String newName, String baseFolder) {
+	private void renameAsync(String oldName, String newName,
+			String baseFolder) {
 		remoteFolderView.disableView();
 		new Thread(() -> {
 			try {
-				remoteFolderView.ensureConnected();
 				remoteFolderView.getFs().rename(oldName, newName);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -455,7 +500,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 				return;
 			} catch (Exception e) {
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
+				JOptionPane.showMessageDialog(null,
+						TextHolder.getString("folderview.genericError"));
 			} finally {
 				notifyReload(baseFolder);
 				remoteFolderView.enableView();
@@ -486,7 +532,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 			args[0] = "-c";
 			args[1] = command.toString();
 			System.out.println("Opening dialog window");
-			RemoteFolderViewUtils.openTerminalDialog(command.toString(), remoteFolderView);
+			RemoteFolderViewUtils.openTerminalDialog(command.toString(),
+					remoteFolderView);
 		});
 	}
 
@@ -514,7 +561,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 			args[0] = "-c";
 			args[1] = command.toString();
 			System.out.println("Opening terminal: " + command);
-			RemoteFolderViewUtils.openTerminalDialog(command.toString(), remoteFolderView);
+			RemoteFolderViewUtils.openTerminalDialog(command.toString(),
+					remoteFolderView);
 		});
 	}
 
@@ -542,7 +590,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 			args[0] = "-c";
 			args[1] = command.toString();
 			System.out.println("Opening terminal: " + command);
-			RemoteFolderViewUtils.openTerminalDialog(command.toString(), remoteFolderView);
+			RemoteFolderViewUtils.openTerminalDialog(command.toString(),
+					remoteFolderView);
 		});
 	}
 
@@ -550,9 +599,10 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		remoteFolderView.disableView();
 		new Thread(() -> {
 			try {
-				remoteFolderView.ensureConnected();
 				try {
-					ShellActions.delete(Arrays.asList(targetList), remoteFolderView.getWrapper());
+					ShellActions.delete(Arrays.asList(targetList),
+							((SshFileSystemWrapper) remoteFolderView.getFs())
+									.getWrapper());
 				} catch (FileNotFoundException e) {
 					System.out.println("file not found");
 					e.printStackTrace();
@@ -568,7 +618,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 				deletePriviledge(targetList);
 			} catch (Exception e) {
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
+				JOptionPane.showMessageDialog(null,
+						TextHolder.getString("folderview.genericError"));
 			} finally {
 				notifyReload(baseFolder);
 				remoteFolderView.enableView();
@@ -607,7 +658,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		String[] args = new String[2];
 		args[0] = "-c";
 		args[1] = command.toString();
-		RemoteFolderViewUtils.openTerminalDialog(command.toString(), remoteFolderView);
+		RemoteFolderViewUtils.openTerminalDialog(command.toString(),
+				remoteFolderView);
 	}
 
 	protected void newFile(String folder) {
@@ -615,9 +667,9 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		new Thread(() -> {
 			String text = null;
 			try {
-				remoteFolderView.ensureConnected();
 				while (true) {
-					text = JOptionPane.showInputDialog(TextHolder.getString("folderview.newFile"));
+					text = JOptionPane.showInputDialog(
+							TextHolder.getString("folderview.newFile"));
 					if (text == null || text.length() < 1) {
 						return;
 					}
@@ -629,9 +681,11 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 						}
 					}
 					if (alreadyExists) {
-						JOptionPane.showMessageDialog(null, "File with same name already exists");
+						JOptionPane.showMessageDialog(null,
+								"File with same name already exists");
 					}
-					remoteFolderView.getFs().createFile(PathUtils.combineUnix(folder, text));
+					remoteFolderView.getFs()
+							.createFile(PathUtils.combineUnix(folder, text));
 					return;
 				}
 			} catch (AccessDeniedException e1) {
@@ -639,7 +693,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 				touchWithPriviledge(folder, text);
 			} catch (Exception e1) {
 				e1.printStackTrace();
-				JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
+				JOptionPane.showMessageDialog(null,
+						TextHolder.getString("folderview.genericError"));
 			} finally {
 				notifyReload(folder);
 				remoteFolderView.enableView();
@@ -649,20 +704,22 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 	}
 
 	protected void newFolder(String folder) {
-		String text = JOptionPane.showInputDialog(TextHolder.getString("folderview.newFolder"));
+		String text = JOptionPane
+				.showInputDialog(TextHolder.getString("folderview.newFolder"));
 		if (text != null && text.length() > 0) {
 			remoteFolderView.disableView();
 			new Thread(() -> {
 				try {
-					remoteFolderView.ensureConnected();
-					remoteFolderView.getFs().mkdir(PathUtils.combineUnix(folder, text));
+					remoteFolderView.getFs()
+							.mkdir(PathUtils.combineUnix(folder, text));
 					folderView.render(folder);
 				} catch (AccessDeniedException e1) {
 					e1.printStackTrace();
 					mkdirWithPriviledge(folder, text);
 				} catch (Exception e1) {
 					e1.printStackTrace();
-					JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
+					JOptionPane.showMessageDialog(null,
+							TextHolder.getString("folderview.genericError"));
 				} finally {
 					notifyReload(folder);
 					remoteFolderView.enableView();
@@ -675,7 +732,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		if (files == null || files.length == 0) {
 			return;
 		}
-		PermissionsDialog pdlg = new PermissionsDialog(remoteFolderView.getWindow(), files.length > 1);
+		PermissionsDialog pdlg = new PermissionsDialog(
+				remoteFolderView.getWindow(), files.length > 1);
 		if (files.length == 1) {
 			pdlg.setDetails(files[0]);
 		} else {
@@ -697,13 +755,13 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		remoteFolderView.disableView();
 		new Thread(() -> {
 			try {
-				remoteFolderView.ensureConnected();
 				for (String path : paths) {
 					remoteFolderView.getFs().chmod(perm, path);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
+				JOptionPane.showMessageDialog(null,
+						TextHolder.getString("folderview.genericError"));
 			}
 
 			notifyReload(baseFolder);
@@ -714,7 +772,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 	protected void copyToClipboard(boolean cut) {
 		TransferFileInfo info = createTransferInfo();
 		if (info != null) {
-			info.setAction(cut ? TransferFileInfo.Action.CUT : TransferFileInfo.Action.COPY);
+			info.setAction(cut ? TransferFileInfo.Action.CUT
+					: TransferFileInfo.Action.COPY);
 			AppClipboard.setContent(info);
 		}
 	}
@@ -744,12 +803,14 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 			addBookmark(folderView.getCurrentPath());
 		} else {
 			for (FileInfo f : files) {
-				if (f.getType() == FileType.Directory || f.getType() == FileType.DirLink) {
+				if (f.getType() == FileType.Directory
+						|| f.getType() == FileType.DirLink) {
 					addBookmark(f.getPath());
 				}
 			}
 		}
-		SessionStore.updateFavourites(remoteFolderView.getInfo().getId(), null, remoteFolderView.listFavourites());
+		SessionStore.updateFavourites(remoteFolderView.getInfo().getId(), null,
+				remoteFolderView.listFavourites());
 		loadFavourites();
 		// SessionStore.getSharedInstance().save(null);
 	}
@@ -765,12 +826,14 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 	private void createBuitinItems1(int selectionCount, JPopupMenu popup) {
 		if (selectionCount == 1) {
 			if (folderView.getSelectedFiles()[0].getType() == FileType.Directory
-					|| folderView.getSelectedFiles()[0].getType() == FileType.DirLink) {
+					|| folderView.getSelectedFiles()[0]
+							.getType() == FileType.DirLink) {
 				popup.add(mOpenInTab);
 			}
 
 			if ((folderView.getSelectedFiles()[0].getType() == FileType.File
-					|| folderView.getSelectedFiles()[0].getType() == FileType.FileLink)) {
+					|| folderView.getSelectedFiles()[0]
+							.getType() == FileType.FileLink)) {
 				popup.add(mOpen);
 				popup.add(mOpenWith);
 			}
@@ -804,7 +867,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		// check only if folder is selected
 		boolean allFolder = true;
 		for (FileInfo f : folderView.getSelectedFiles()) {
-			if (f.getType() != FileType.Directory && f.getType() != FileType.DirLink) {
+			if (f.getType() != FileType.Directory
+					&& f.getType() != FileType.DirLink) {
 				allFolder = false;
 				break;
 			}
@@ -847,7 +911,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 				}
 			} else if (selectionCount == 1) {
 				FileInfo info = files[0];
-				if (info.getType() == FileType.Directory || info.getType() == FileType.DirLink) {
+				if (info.getType() == FileType.Directory
+						|| info.getType() == FileType.DirLink) {
 					if (ent.isFolderSupported()) {
 						createMenuItem(ent, popup);
 					}
@@ -893,7 +958,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 								if ("%d".equals(arg)) {
 									argsList.add(folderView.getCurrentPath());
 								} else if ("%f".equals(arg)) {
-									for (FileInfo info : folderView.getSelectedFiles()) {
+									for (FileInfo info : folderView
+											.getSelectedFiles()) {
 										argsList.add(info.getPath());
 									}
 								} else {
@@ -937,14 +1003,16 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 
 		System.out.println("args: " + args);
 
-		remoteFolderView.getAppSession().createWidget(CopyWidget.class.getName(), arr);
+		remoteFolderView.getAppSession()
+				.createWidget(CopyWidget.class.getName(), arr);
 	}
 
 	private void downloadFiles(FileInfo[] files, String localPath) {
 		List<String> fs = new ArrayList<>();
 		List<String> ds = new ArrayList<>();
 		for (FileInfo f : files) {
-			if (f.getType() == FileType.Directory || f.getType() == FileType.DirLink) {
+			if (f.getType() == FileType.Directory
+					|| f.getType() == FileType.DirLink) {
 				ds.add(f.getPath());
 			} else {
 				fs.add(f.getPath());
@@ -963,7 +1031,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 
 		System.out.println("Local drop args: " + args);
 		try {
-			remoteFolderView.getSession().createWidget(CopyWidget.class.getName(), arr);
+			remoteFolderView.getSession()
+					.createWidget(CopyWidget.class.getName(), arr);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -985,7 +1054,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		FileInfo[] selectedFiles = folderView.getSelectedFiles();
 		if (selectedFiles != null && selectedFiles.length == 1) {
 			FileInfo info = selectedFiles[0];
-			remoteFolderView.getAppSession().createWidget(LogViewerWidget.class.getName(),
+			remoteFolderView.getAppSession().createWidget(
+					LogViewerWidget.class.getName(),
 					new String[] { info.getPath() });
 		}
 	}
@@ -997,7 +1067,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		FileInfo[] selectedFiles = folderView.getSelectedFiles();
 		if (selectedFiles != null && selectedFiles.length == 1) {
 			FileInfo info = selectedFiles[0];
-			remoteFolderView.getAppSession().createWidget(FormattedEditorWidget.class.getName(),
+			remoteFolderView.getAppSession().createWidget(
+					FormattedEditorWidget.class.getName(),
 					new String[] { info.getPath() });
 		}
 	}
@@ -1009,7 +1080,8 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		FileInfo[] selectedFiles = folderView.getSelectedFiles();
 		if (selectedFiles != null && selectedFiles.length == 1) {
 			FileInfo info = selectedFiles[0];
-			remoteFolderView.getAppSession().createWidget(ExternalEditorWidget.class.getName(),
+			remoteFolderView.getAppSession().createWidget(
+					ExternalEditorWidget.class.getName(),
 					new String[] { "-e", info.getPath() });
 		}
 	}
@@ -1021,11 +1093,13 @@ public class RemoteContextMenuActionHandler implements ContextMenuActionHandler 
 		FileInfo[] selectedFiles = folderView.getSelectedFiles();
 		if (selectedFiles != null && selectedFiles.length == 1) {
 			FileInfo info = selectedFiles[0];
-			if (info.getType() == FileType.Directory || info.getType() == FileType.DirLink) {
+			if (info.getType() == FileType.Directory
+					|| info.getType() == FileType.DirLink) {
 
 			}
 		}
-		int action = AppContext.INSTANCE.getConfig().getFileBrowser().getDblClickAction();
+		int action = AppContext.INSTANCE.getConfig().getFileBrowser()
+				.getDblClickAction();
 		switch (action) {
 		case 0:
 			openTextEditor();
