@@ -42,9 +42,9 @@ import nixexplorer.TextHolder;
 import nixexplorer.app.components.DisposableView;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.app.session.SessionManagerPanel;
 import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
-import nixexplorer.widgets.console.TabbedConsoleWidget;
 import nixexplorer.widgets.console.TerminalDialog;
 import nixexplorer.widgets.util.Utility;
 
@@ -52,24 +52,21 @@ import nixexplorer.widgets.util.Utility;
  * @author subhro
  *
  */
-public class ScpTransferWidget extends JDialog implements DisposableView {
+public class DirectTransferWidget extends JDialog implements DisposableView {
 	/**
 	 * 
 	 */
 	private AppSession appSession;
 	private SessionInfo info;
-	private JPanel content, frontPanel, backPanel;
-	private JPanel panels[][];
-	private JButton btnSave, btnManage, btnConnect, btnDelete, btnNew;
+	private JButton btnSave, btnImport, btnConnect, btnDelete, btnNew;
 	private JTextField txtHost, txtUser, txtFolder;
 	private JSpinner spPort;
 	private JLabel lblError;
-	private ScpServerInfo serverInfo;
-	private ScpTableModel connectionTableModel;
+	private SshServerInfo serverInfo;
+	private SshItemTableModel connectionTableModel;
 	private JTable connectionTable;
 	private List<String> files = new ArrayList<>(), folders = new ArrayList<>();
 	private JPanel contentPage;
-	private TabbedConsoleWidget console;
 	private Window window;
 	protected AtomicBoolean widgetClosed = new AtomicBoolean(Boolean.FALSE);
 	private JComboBox<String> cmbTransferMode;
@@ -80,7 +77,7 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 
 	// private List<ScpServerInfo> serverList = new ArrayList<>();
 
-	public ScpTransferWidget(SessionInfo info, List<String> files,
+	public DirectTransferWidget(SessionInfo info, List<String> files,
 			List<String> folders, String sourceDirectory, AppSession appSession,
 			Window window) {
 		super(window);
@@ -289,7 +286,7 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 		lblError.setForeground(Color.RED);
 		connectionPanel.add(lblError, BorderLayout.SOUTH);
 
-		connectionTableModel = new ScpTableModel(appSession, info);
+		connectionTableModel = new SshItemTableModel(appSession, info);
 
 		connectionTable = new JTable(connectionTableModel);
 		connectionTable.setShowGrid(false);
@@ -299,7 +296,7 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 		connectionTable.getSelectionModel().addListSelectionListener(e -> {
 			int index = e.getFirstIndex();
 			if (index != -1) {
-				ScpServerInfo info = connectionTableModel.getItemAt(index);
+				SshServerInfo info = connectionTableModel.getItemAt(index);
 				txtUser.setText(info.getUser());
 				txtHost.setText(info.getHost());
 				txtFolder.setText(info.getFolder());
@@ -327,7 +324,7 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 				new Dimension(Utility.toPixel(5), Utility.toPixel(5))));
 
 		txtHost = new JTextField(20);
-		txtHost.setMaximumSize(txtHost.getPreferredSize());
+		adjustSize(txtHost);
 		txtHost.setAlignmentX(Box.LEFT_ALIGNMENT);
 		cb.add(txtHost);
 
@@ -343,6 +340,8 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 
 		spPort = new JSpinner(
 				new SpinnerNumberModel(22, 1, Short.MAX_VALUE, 1));
+		spPort.setPreferredSize(txtHost.getPreferredSize());
+		adjustSize(spPort);
 		spPort.setAlignmentX(Box.LEFT_ALIGNMENT);
 		cb.add(spPort);
 
@@ -358,7 +357,7 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 
 		txtUser = new JTextField(20);
 		txtUser.setAlignmentX(Box.LEFT_ALIGNMENT);
-		txtUser.setMaximumSize(txtUser.getPreferredSize());
+		adjustSize(txtUser);
 		cb.add(txtUser);
 
 		cb.add(Box.createRigidArea(
@@ -373,7 +372,7 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 
 		txtFolder = new JTextField(20);
 		txtFolder.setAlignmentX(Box.LEFT_ALIGNMENT);
-		txtFolder.setMaximumSize(txtFolder.getPreferredSize());
+		adjustSize(txtFolder);
 		cb.add(txtFolder);
 
 		cb.add(Box.createRigidArea(
@@ -388,7 +387,8 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 
 		cmbTransferMode = new JComboBox<String>(
 				new String[] { "SFTP", "SCP", "SSH" });
-		cmbTransferMode.setMaximumSize(txtFolder.getPreferredSize());
+		cmbTransferMode.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+				txtFolder.getPreferredSize().height));
 		cmbTransferMode.setAlignmentX(Box.LEFT_ALIGNMENT);
 		cb.add(cmbTransferMode);
 
@@ -404,12 +404,26 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 
 		txtTempDir = new JTextField(20);
 		txtTempDir.setAlignmentX(Box.LEFT_ALIGNMENT);
-		txtTempDir.setMaximumSize(txtTempDir.getPreferredSize());
+		adjustSize(txtTempDir);
 		cb.add(txtTempDir);
 
 		cb.add(Box.createVerticalGlue());
 
 		Box bb = Box.createHorizontalBox();
+
+		btnImport = new JButton("Import");
+		btnImport.addActionListener(e -> {
+			SessionInfo info = new SessionManagerPanel().newSession();
+			if (info == null) {
+				return;
+			}
+			txtHost.setText(info.getHost());
+			spPort.setValue((Integer) info.getPort());
+			txtUser.setText(info.getUser());
+		});
+		bb.add(btnImport);
+		bb.add(Box.createRigidArea(
+				new Dimension(Utility.toPixel(5), Utility.toPixel(5))));
 
 		btnNew = new JButton("New");
 		btnNew.addActionListener(e -> {
@@ -430,6 +444,9 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 
 		bb.add(btnDelete);
 
+		bb.add(Box.createRigidArea(
+				new Dimension(Utility.toPixel(5), Utility.toPixel(5))));
+
 		bb.add(Box.createHorizontalGlue());
 
 		btnConnect = new JButton("Send");
@@ -445,8 +462,8 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 
 		cb.add(bb);
 
-		spPort.setMaximumSize(new Dimension(txtUser.getPreferredSize().width,
-				spPort.getPreferredSize().height));
+//		spPort.setMaximumSize(new Dimension(txtUser.getPreferredSize().width,
+//				spPort.getPreferredSize().height));
 
 		contentPage.add(cb, BorderLayout.EAST);
 
@@ -545,6 +562,11 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 
 	}
 
+	private void adjustSize(JComponent c) {
+		Dimension d = c.getPreferredSize();
+		c.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+	}
+
 	/**
 	 * 
 	 */
@@ -561,7 +583,7 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 	/**
 	 * 
 	 */
-	private ScpServerInfo updateAndSave() {
+	private SshServerInfo updateAndSave() {
 		if (txtUser.getText().length() < 1) {
 			lblError.setText("User can not be blank");
 			return null;
@@ -584,7 +606,7 @@ public class ScpTransferWidget extends JDialog implements DisposableView {
 
 		int index = connectionTable.getSelectedRow();
 
-		ScpServerInfo scpItem = new ScpServerInfo();
+		SshServerInfo scpItem = new SshServerInfo();
 		scpItem.setFolder(txtFolder.getText());
 		scpItem.setHost(txtHost.getText());
 		scpItem.setUser(txtUser.getText());

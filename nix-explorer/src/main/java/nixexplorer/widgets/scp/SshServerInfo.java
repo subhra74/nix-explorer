@@ -7,7 +7,7 @@ package nixexplorer.widgets.scp;
  * @author subhro
  *
  */
-public class ScpServerInfo {
+public class SshServerInfo {
 	private String host, user, folder = ".", temp = "/tmp";
 	private int transferMode = 0;
 	private int port;

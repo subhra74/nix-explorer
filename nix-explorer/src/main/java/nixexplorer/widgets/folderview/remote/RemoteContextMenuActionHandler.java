@@ -49,7 +49,7 @@ import nixexplorer.widgets.folderview.PermissionsDialog;
 import nixexplorer.widgets.folderview.ShellActions;
 import nixexplorer.widgets.folderview.copy.CopyWidget;
 import nixexplorer.widgets.logviewer.LogViewerWidget;
-import nixexplorer.widgets.scp.ScpTransferWidget;
+import nixexplorer.widgets.scp.DirectTransferWidget;
 
 /**
  * @author subhro
@@ -438,7 +438,7 @@ public class RemoteContextMenuActionHandler
 			}
 		}
 
-		ScpTransferWidget scpWidget = new ScpTransferWidget(
+		DirectTransferWidget scpWidget = new DirectTransferWidget(
 				remoteFolderView.getInfo(), files, folders, srcFolder,
 				remoteFolderView.getSession(),
 				SwingUtilities.windowForComponent(remoteFolderView));

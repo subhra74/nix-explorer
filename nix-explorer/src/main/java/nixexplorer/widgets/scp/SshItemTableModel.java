@@ -24,12 +24,12 @@ import nixexplorer.app.settings.AppConfig;
  * @author subhro
  *
  */
-public class ScpTableModel extends AbstractTableModel {
+public class SshItemTableModel extends AbstractTableModel {
 
 	private String[] columns = { "Host name", "Port", "Username",
 			"Remote folder" };
 
-	private List<ScpServerInfo> list = new ArrayList<>();
+	private List<SshServerInfo> list = new ArrayList<>();
 
 	private AppSession appSession;
 
@@ -39,7 +39,7 @@ public class ScpTableModel extends AbstractTableModel {
 	/**
 	 * 
 	 */
-	public ScpTableModel(AppSession appSession, SessionInfo info) {
+	public SshItemTableModel(AppSession appSession, SessionInfo info) {
 		this.appSession = appSession;
 		this.info = info;
 		objectMapper = new ObjectMapper();
@@ -47,7 +47,7 @@ public class ScpTableModel extends AbstractTableModel {
 		fireTableDataChanged();
 	}
 
-	public ScpServerInfo getItemAt(int index) {
+	public SshServerInfo getItemAt(int index) {
 		return list.get(index);
 	}
 
@@ -55,10 +55,10 @@ public class ScpTableModel extends AbstractTableModel {
 		File f = new File(App.getConfig("app.dir"),
 				this.info.getId() + ".scp-sessions.json");
 		if (f.exists()) {
-			List<ScpServerInfo> items = null;
+			List<SshServerInfo> items = null;
 			try {
 				items = objectMapper.readValue(f,
-						new TypeReference<List<ScpServerInfo>>() {
+						new TypeReference<List<SshServerInfo>>() {
 						});
 			} catch (JsonParseException e) {
 				// TODO Auto-generated catch block
@@ -78,7 +78,7 @@ public class ScpTableModel extends AbstractTableModel {
 		}
 	}
 
-	public void updateItem(int index, ScpServerInfo scpItem) {
+	public void updateItem(int index, SshServerInfo scpItem) {
 		list.set(index, scpItem);
 		fireTableRowsUpdated(index, index);
 		saveItems();
@@ -94,13 +94,13 @@ public class ScpTableModel extends AbstractTableModel {
 		}
 	}
 
-	public void addItem(ScpServerInfo scpItem) {
+	public void addItem(SshServerInfo scpItem) {
 		int r = list.size();
 		list.add(scpItem);
 		fireTableRowsInserted(r, r);
 	}
 
-	public void addItems(List<ScpServerInfo> scpItems) {
+	public void addItems(List<SshServerInfo> scpItems) {
 		int r = list.size();
 		list.addAll(scpItems);
 		fireTableRowsInserted(r, list.size() - 1);
@@ -171,7 +171,7 @@ public class ScpTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		ScpServerInfo scpInfo = list.get(rowIndex);
+		SshServerInfo scpInfo = list.get(rowIndex);
 		switch (columnIndex) {
 		case 0:
 			return scpInfo.getHost();

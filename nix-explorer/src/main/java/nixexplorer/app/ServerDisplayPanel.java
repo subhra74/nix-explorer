@@ -307,6 +307,18 @@ public class ServerDisplayPanel extends JPanel {
 		}, TextHolder.getString("diskUsageViewer.title"),
 				UIManager.getIcon("ServerTools.taskmgrIcon"));
 
+		toolbar.addButton("app.control.utility", new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+		}, TextHolder.getString("app.control.utility"),
+				UIManager.getIcon("ServerTools.utilityIcon"));
+
 		toolbar.add(Box.createHorizontalGlue());
 
 		// at the end
