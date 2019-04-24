@@ -352,7 +352,7 @@ public class FileSelectionDialog extends JDialog {
 				}
 				System.out.println("Home: " + path);
 				List<FileInfo> list = fs.list(path);
-				System.out.println("List: " + list);
+				//System.out.println("List: " + list);
 				this.folder = path;
 				if (list != null) {
 					SwingUtilities.invokeLater(() -> {

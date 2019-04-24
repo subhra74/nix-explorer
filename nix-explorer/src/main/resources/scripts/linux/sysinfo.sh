@@ -15,9 +15,7 @@ my_whereis(){
 }
 
 sysinfo(){
-echo " "
 echo "System information:"
-echo " "
 
 KERNEL_NAME=`uname -s`
 KERNEL_RELEASE=`uname -r`
@@ -45,7 +43,7 @@ fi;
 
 if [ -e /proc/cpuinfo ];then
 	MEM=`cat /proc/meminfo|grep 'MemTotal:'|sed -E 's/MemTotal:\s+//g'`
-	SWAP=`cat /proc/meminfo|grep 'SwapTotal:'|sed -E 's/SwapTotal:\s+//g`
+	SWAP=`cat /proc/meminfo|grep 'SwapTotal:'|sed -E 's/SwapTotal:\s+//g'`
 	echo "Total memory            $MEM"
 	echo "Total swap              $SWAP"
 fi
@@ -59,16 +57,6 @@ echo "System is up since      $UPTIME"
 echo "Logged in user          $USER"
 echo "User group              $GROUP"
 
-echo " "
-echo " "
-
-echo "Diskspace usage"
-echo " "
-df -h
-#DISKSPACE=`df / -h|tail -n 1|sed -E 's/\s+/ /g'|cut -d ' ' -f 5`
-#echo "Diskspace used on /     $DISKSPACE"
-
-echo " "
 echo " "
 
 
@@ -87,14 +75,9 @@ echo " "
 
 
 echo "Network interfaces:"
-echo " "
 
-my_whereis ip
 
-if [ $? -eq 0 ]
-then
-	$CMD_PATH addr
-fi
+ip a|awk '{ if (/^[0-9]+:/){iface=$2} if(/inet /){printf("%s\t\t\t%s\n",substr(iface,1,length(iface)-1),$2)}}'
 
 }
 

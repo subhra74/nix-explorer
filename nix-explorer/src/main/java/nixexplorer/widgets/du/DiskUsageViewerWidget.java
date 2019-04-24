@@ -192,7 +192,7 @@ public class DiskUsageViewerWidget extends Widget implements Runnable {
 			List<String> output = new LinkedList<>();
 
 			if (SshUtility.executeCommand(wrapper,
-					"export BLOCKSIZE=512; du -c \"" + text + "\"|gzip|cat",
+					"export BLOCKSIZE=512; du \"" + text + "\"|gzip|cat",
 					true, output) != 0) {
 				throw new Exception();
 			}

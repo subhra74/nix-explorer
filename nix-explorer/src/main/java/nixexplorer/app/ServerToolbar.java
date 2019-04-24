@@ -70,7 +70,7 @@ public class ServerToolbar extends JPanel {
 		adjustButtons();
 	}
 
-	public void addButton(String key, ActionListener action, String title,
+	public JButton addButton(String key, ActionListener action, String title,
 			Icon icon) {
 		JButton btn = new JButton(icon);
 		btn.setText(title);
@@ -92,6 +92,8 @@ public class ServerToolbar extends JPanel {
 
 		revalidate();
 		repaint();
+
+		return btn;
 	}
 
 	private void adjustButtons() {

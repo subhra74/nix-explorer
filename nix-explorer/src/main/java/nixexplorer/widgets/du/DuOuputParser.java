@@ -8,14 +8,11 @@ import java.util.regex.Pattern;
 import nixexplorer.PathUtils;
 
 public final class DuOuputParser {
-	private static final Pattern duPattern = Pattern
-			.compile("([\\d]+)\\s+(.+)");
+	private static final Pattern duPattern = Pattern.compile("([\\d]+)\\s+(.+)");
 
-	public static final long parse(List<String> inputList,
-			List<DiskUsageEntry> outputList) {
+	public static final long parse(List<String> inputList, List<DiskUsageEntry> outputList) {
 		long total = -1;
-		ListIterator<String> reverseIterator = inputList
-				.listIterator(inputList.size());
+		ListIterator<String> reverseIterator = inputList.listIterator(inputList.size());
 		boolean first = true;
 		while (reverseIterator.hasPrevious()) {
 			String item = reverseIterator.previous();
@@ -25,15 +22,14 @@ public final class DuOuputParser {
 				if (first) {
 					total = Long.parseLong(matcher.group(1)) * 512;
 					first = false;
-				} else {
-					long size = Long.parseLong(matcher.group(1)) * 512;
-					String path = matcher.group(2);
-					String name = PathUtils.getFileName(path);
-					double usage = ((double) size * 100) / total;
-					DiskUsageEntry ent = new DiskUsageEntry(name, path, size,
-							usage < 0 ? 0 : usage);
-					outputList.add(ent);
 				}
+
+				long size = Long.parseLong(matcher.group(1)) * 512;
+				String path = matcher.group(2);
+				String name = PathUtils.getFileName(path);
+				double usage = ((double) size * 100) / total;
+				DiskUsageEntry ent = new DiskUsageEntry(name, path, size, usage < 0 ? 0 : usage);
+				outputList.add(ent);
 			}
 		}
 		return total;

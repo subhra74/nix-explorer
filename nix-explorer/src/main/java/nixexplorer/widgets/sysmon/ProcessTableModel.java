@@ -16,8 +16,10 @@ public class ProcessTableModel extends AbstractTableModel {
 	private JTable table;
 
 	public ProcessTableModel() {
+		columnList.add(new ColumnInfo("Name", "comm", String.class));
 		columnList.add(new ColumnInfo("CPU % (pcpu)", "pcpu", Double.class));
-		columnList.add(new ColumnInfo("Memory [KiB] (rss)", "rss", Double.class));
+		columnList
+				.add(new ColumnInfo("Memory [KiB] (rss)", "rss", Double.class));
 		columnList
 				.add(new ColumnInfo("Process id (pid)", "pid", Integer.class));
 		columnList.add(new ColumnInfo("User (user)", "user", String.class));
@@ -107,7 +109,11 @@ public class ProcessTableModel extends AbstractTableModel {
 							tableData[i][j] = Integer.MIN_VALUE;
 						}
 					} else if (clz == Double.class) {
-						tableData[i][j] = Double.parseDouble(cols[j]);
+						try {
+							tableData[i][j] = Double.parseDouble(cols[j]);
+						} catch (Exception e) {
+							tableData[i][j] = Double.NaN;
+						}
 					} else {
 						if (j + 1 == tableData[i].length) {
 							StringBuilder sb = new StringBuilder();

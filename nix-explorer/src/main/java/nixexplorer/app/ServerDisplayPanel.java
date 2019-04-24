@@ -14,8 +14,11 @@ import java.awt.event.MouseAdapter;
 
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
@@ -27,6 +30,8 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 import nixexplorer.TextHolder;
 import nixexplorer.app.components.FlatTabbedPane;
 import nixexplorer.app.components.TabbedChild;
+import nixexplorer.app.components.keygen.KeyGeneratorDialog;
+import nixexplorer.app.components.net.NetworkChecker;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.app.settings.ui.ConfigDialog;
@@ -64,11 +69,15 @@ public class ServerDisplayPanel extends JPanel {
 //	private MatteBorder expB, clpB;
 	private Window window;
 	private SessionListCallback callback;
+
+	private JPopupMenu utilityPopup;
+	private JButton utilityButton;
+
+
 //
 	// private LocalFolderViewWidget localFileView;
 
-	public ServerDisplayPanel(SessionInfo info, Window window,
-			SessionListCallback callback, AppSession appSession) {
+	public ServerDisplayPanel(SessionInfo info, Window window, SessionListCallback callback, AppSession appSession) {
 		this.info = info;
 		setBackground(UIManager.getColor("Panel.secondary"));// "DefaultBorder.color"));//
 																// "Panel.secondary"));
@@ -107,10 +116,8 @@ public class ServerDisplayPanel extends JPanel {
 		// localFileView = new LocalFolderViewWidget(info, new String[] {},
 		// appSession, window);
 		lblDragSide = new JLabel();
-		lblDragSide.setMinimumSize(
-				new Dimension(Utility.toPixel(8), Utility.toPixel(8)));
-		lblDragSide.setPreferredSize(
-				new Dimension(Utility.toPixel(8), Utility.toPixel(8)));
+		lblDragSide.setMinimumSize(new Dimension(Utility.toPixel(8), Utility.toPixel(8)));
+		lblDragSide.setPreferredSize(new Dimension(Utility.toPixel(8), Utility.toPixel(8)));
 		lblDragSide.setCursor(new Cursor(Cursor.W_RESIZE_CURSOR));
 		// add(lblDragSide, BorderLayout.WEST);
 
@@ -198,29 +205,25 @@ public class ServerDisplayPanel extends JPanel {
 
 	private ServerToolbar createToolbar() {
 		ServerToolbar toolbar = new ServerToolbar();
-		toolbar.setBorder(new MatteBorder(0, 0, Utility.toPixel(1), 0,
-				UIManager.getColor("DefaultBorder.color")));
+		toolbar.setBorder(new MatteBorder(0, 0, Utility.toPixel(1), 0, UIManager.getColor("DefaultBorder.color")));
 		toolbar.addButton("app.control.terminal", new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					TabbedConsoleWidget w = new TabbedConsoleWidget(info,
-							new String[] {}, appSession, window);
+					TabbedConsoleWidget w = new TabbedConsoleWidget(info, new String[] {}, appSession, window);
 					appSession.addToSession(w);
 					addTab(w);
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
 			}
-		}, TextHolder.getString("app.control.terminal"),
-				UIManager.getIcon("ServerTools.terminalIcon"));
+		}, TextHolder.getString("app.control.terminal"), UIManager.getIcon("ServerTools.terminalIcon"));
 		toolbar.addButton("app.control.files", new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				createFolderView(null);
 			}
-		}, TextHolder.getString("app.control.files"),
-				UIManager.getIcon("ServerTools.filesIcon"));
+		}, TextHolder.getString("app.control.files"), UIManager.getIcon("ServerTools.filesIcon"));
 //		toolbar.addButton("app.control.editor", new ActionListener() {
 //			@Override
 //			public void actionPerformed(ActionEvent e) {
@@ -251,73 +254,64 @@ public class ServerDisplayPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					SystemMonitorWidget w = new SystemMonitorWidget(info,
-							new String[] {}, appSession, window);
+					SystemMonitorWidget w = new SystemMonitorWidget(info, new String[] {}, appSession, window);
 					addTab(w);
 					appSession.addToSession(w);
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
 			}
-		}, TextHolder.getString("app.control.taskmgr"),
-				UIManager.getIcon("ServerTools.taskmgrIcon"));
+		}, TextHolder.getString("app.control.taskmgr"), UIManager.getIcon("ServerTools.taskmgrIcon"));
 
 		toolbar.addButton("logviewer.title", new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					LogViewerWidget w = new LogViewerWidget(info,
-							new String[] {}, appSession, window);
+					LogViewerWidget w = new LogViewerWidget(info, new String[] {}, appSession, window);
 					appSession.addToSession(w);
 					addTab(w);
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
 			}
-		}, TextHolder.getString("logviewer.title"),
-				UIManager.getIcon("ServerTools.taskmgrIcon"));
+		}, TextHolder.getString("logviewer.title"), UIManager.getIcon("ServerTools.taskmgrIcon"));
 
 		toolbar.addButton("app.control.search", new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					FileSearchWidget w = new FileSearchWidget(info,
-							new String[] {}, appSession, window);
+					FileSearchWidget w = new FileSearchWidget(info, new String[] {}, appSession, window);
 					appSession.addToSession(w);
 					addTab(w);
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
 			}
-		}, TextHolder.getString("app.control.search"),
-				UIManager.getIcon("ServerTools.findFilesIcon"));
+		}, TextHolder.getString("app.control.search"), UIManager.getIcon("ServerTools.findFilesIcon"));
 
 		toolbar.addButton("diskUsageViewer.title", new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					DiskUsageViewerWidget w = new DiskUsageViewerWidget(info,
-							new String[] {}, appSession, window);
+					DiskUsageViewerWidget w = new DiskUsageViewerWidget(info, new String[] {}, appSession, window);
 					appSession.addToSession(w);
 					addTab(w);
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
 			}
-		}, TextHolder.getString("diskUsageViewer.title"),
-				UIManager.getIcon("ServerTools.taskmgrIcon"));
+		}, TextHolder.getString("diskUsageViewer.title"), UIManager.getIcon("ServerTools.taskmgrIcon"));
 
-		toolbar.addButton("app.control.utility", new ActionListener() {
+		utilityButton = toolbar.addButton("app.control.utility", new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-
+					openPopup(utilityButton);
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
 			}
-		}, TextHolder.getString("app.control.utility"),
-				UIManager.getIcon("ServerTools.utilityIcon"));
+		}, TextHolder.getString("app.control.utility"), UIManager.getIcon("ServerTools.utilityIcon"));
 
 		toolbar.add(Box.createHorizontalGlue());
 
@@ -327,15 +321,13 @@ public class ServerDisplayPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					System.out.println("called");
-					new ConfigDialog(window, AppContext.INSTANCE.getConfig())
-							.setVisible(true);
+					new ConfigDialog(window, AppContext.INSTANCE.getConfig()).setVisible(true);
 					AppContext.INSTANCE.configChanged();
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
 			}
-		}, TextHolder.getString("app.control.settings"),
-				UIManager.getIcon("ServerTools.settingsIcon"));
+		}, TextHolder.getString("app.control.settings"), UIManager.getIcon("ServerTools.settingsIcon"));
 
 		// at the end
 //		toolbar.addButton("app.control.notification", new ActionListener() {
@@ -364,8 +356,7 @@ public class ServerDisplayPanel extends JPanel {
 					e2.printStackTrace();
 				}
 			}
-		}, TextHolder.getString("app.control.disconnect"),
-				UIManager.getIcon("ServerTools.disconnectIcon"));
+		}, TextHolder.getString("app.control.disconnect"), UIManager.getIcon("ServerTools.disconnectIcon"));
 
 //		toolbar.addButton("app.control.settings", new ActionListener() {
 //			@Override
@@ -400,8 +391,7 @@ public class ServerDisplayPanel extends JPanel {
 	public void createFolderView(String folder) {
 		try {
 			FileBrowserWidget w = new FileBrowserWidget(info,
-					folder == null ? new String[] {} : new String[] { folder },
-					appSession, window);
+					folder == null ? new String[] {} : new String[] { folder }, appSession, window);
 //			RemoteFolderViewWidget w = new RemoteFolderViewWidget(info,
 //					new String[] {}, appSession, window);
 			appSession.addToSession(w);
@@ -448,6 +438,25 @@ public class ServerDisplayPanel extends JPanel {
 
 	public void removeSelf() {
 		callback.close(appSession);
+	}
+
+	private void openPopup(JComponent c) {
+		if (utilityPopup == null) {
+			utilityPopup = new JPopupMenu();
+			JMenuItem mSshItem = new JMenuItem("SSH Keys");
+			mSshItem.addActionListener(e -> {
+				KeyGeneratorDialog.show(window, info);
+			});
+			JMenuItem mChkConnectivity = new JMenuItem("Network tools");
+			mChkConnectivity.addActionListener(e -> {
+				new NetworkChecker(window, info).setVisible(true);
+			});
+			utilityPopup.add(mSshItem);
+			utilityPopup.add(mChkConnectivity);
+		}
+
+		utilityPopup.setInvoker(c);
+		utilityPopup.show(c, 0, c.getHeight());
 	}
 
 }

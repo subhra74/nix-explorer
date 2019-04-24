@@ -91,6 +91,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	private Map<String, String> psMap;
 	private boolean tableResized = false;
 	private JSpinner spInterval;
+	private String sysInfo;
 
 	public SystemMonitorWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window) {
@@ -130,6 +131,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 
 		processTable = new JTable(processTableModel);
 		processTable.setIntercellSpacing(new Dimension(0, 0));
+		processTable.setRowHeight(Utility.toPixel(30));
 		processTable.setShowGrid(false);
 
 		TableRowSorter<ProcessTableModel> sorter = new TableRowSorter<ProcessTableModel>(
@@ -644,7 +646,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 				readSysinfo = false;
 			}
 			// diskTableModel.updateTable(environment.get("DISK_USAGE_TABLE"));
-			loadPanel.updateValues(statMap);
+			loadPanel.updateValues(statMap, sysInfoText);
 		});
 
 	}

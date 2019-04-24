@@ -15,8 +15,8 @@ import nixexplorer.app.session.SessionInfo;
 
 public class SshUtility {
 
-	public static final int executeCommand(SshWrapper wrapper, String command,
-			boolean compressed, List<String> output) {
+	public static final int executeCommand(SshWrapper wrapper, String command, boolean compressed,
+			List<String> output) {
 		System.out.println("Executing: " + command);
 		ChannelExec exec = null;
 		try {
@@ -56,22 +56,22 @@ public class SshUtility {
 		}
 	}
 
-	public static final int executeCommand(SshWrapper wrapper, String command,
-			List<String> output) {
+	public static final int executeCommand(SshWrapper wrapper, String command, List<String> output) {
 		return executeCommand(wrapper, command, false, output);
 	}
 
-	public static final SshWrapper connectWrapper(SessionInfo info,
-			AtomicBoolean stopFlag) throws Exception {
+	public static final SshWrapper connectWrapper(SessionInfo info, AtomicBoolean stopFlag) throws Exception {
 		return connecReal(info, stopFlag, 0).wrapper;
 	}
 
-	private static SshContext connecReal(SessionInfo info,
-			AtomicBoolean stopFlag, int type) throws Exception {
+	private static SshContext connecReal(SessionInfo info, AtomicBoolean stopFlag, int type) throws Exception {
 		SshWrapper wrapper = new SshWrapper(info);
 		while (!stopFlag.get()) {
 			try {
 				wrapper.connect();
+				if (stopFlag.get()) {
+					break;
+				}
 				switch (type) {
 				case 0: {
 					SshContext res = new SshContext();
@@ -122,18 +122,15 @@ public class SshUtility {
 		throw new Exception("User cancelled the operation");
 	}
 
-	public static final SftpContext connectSftp(SessionInfo info,
-			AtomicBoolean stopFlag) throws Exception {
+	public static final SftpContext connectSftp(SessionInfo info, AtomicBoolean stopFlag) throws Exception {
 		return (SftpContext) connecReal(info, stopFlag, 1);
 	}
 
-	public static final ShellContext connectShell(SessionInfo info,
-			AtomicBoolean stopFlag) throws Exception {
+	public static final ShellContext connectShell(SessionInfo info, AtomicBoolean stopFlag) throws Exception {
 		return (ShellContext) connecReal(info, stopFlag, 2);
 	}
 
-	public static final ExecContext connectExec(SessionInfo info,
-			AtomicBoolean stopFlag) throws Exception {
+	public static final ExecContext connectExec(SessionInfo info, AtomicBoolean stopFlag) throws Exception {
 		return (ExecContext) connecReal(info, stopFlag, 3);
 	}
 
