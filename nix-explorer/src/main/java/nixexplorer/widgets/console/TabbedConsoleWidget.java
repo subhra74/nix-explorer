@@ -44,6 +44,7 @@ import nixexplorer.app.settings.ui.ConfigDialog;
 import nixexplorer.core.ssh.DisposableTtyConnector;
 import nixexplorer.core.ssh.SshExecTtyConnector;
 import nixexplorer.core.ssh.SshTtyConnector;
+import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.Widget;
 import nixexplorer.widgets.util.Utility;
 
@@ -61,11 +62,17 @@ public final class TabbedConsoleWidget extends Widget
 
 	public TabbedConsoleWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window) {
-		this(info, args, appSession, window, true);
+		this(info, args, appSession, window, true, null, false);
 	}
 
 	public TabbedConsoleWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window, boolean shell) {
+		this(info, args, appSession, window, shell, null, false);
+	}
+
+	public TabbedConsoleWidget(SessionInfo info, String[] args,
+			AppSession appSession, Window window, boolean shell,
+			SshWrapper wrapper, boolean alreadyConnected) {
 
 		super(info, args, appSession, window);
 
@@ -326,7 +333,9 @@ public final class TabbedConsoleWidget extends Widget
 		System.out.println("Commnd: " + cmd);
 
 		tty = shell ? new SshTtyConnector(info)
-				: new SshExecTtyConnector(info, command, true);
+				: (alreadyConnected
+						? new SshExecTtyConnector(wrapper, command, true)
+						: new SshExecTtyConnector(info, command, true));
 
 		// tty = new SshTtyConnector(info); // shell ? new SshTtyConnector(info)
 		// : new ExecTtyConnector(info, command);

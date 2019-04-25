@@ -2,6 +2,7 @@ package nixexplorer.widgets.sysmon;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Window;
@@ -22,6 +23,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -100,10 +102,15 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	private JSpinner spInterval;
 	private AtomicBoolean runAsSuperUser = new AtomicBoolean(false);
 	private JCheckBox chkRunAsSuperUserSock, chkRunAsSuperUserPs;
+	private boolean first = true;
+	private final Cursor DEFAULT_CURSOR;
 
 	public SystemMonitorWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window) {
 		super(info, args, appSession, window);
+
+		DEFAULT_CURSOR = getCursor();
+		setCursor(new Cursor(Cursor.WAIT_CURSOR));
 
 		statMap = new HashMap<>();
 		psMap = new HashMap<>();
@@ -386,9 +393,9 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 				socketPanel);
 		tabs.addCustomTab(TextHolder.getString("sysmon.diskTitle"),
 				panDiskInfo);
-		tabs.addCustomTab(TextHolder.getString("sysmon.loadTitle"), loadPanel);
 		tabs.addCustomTab(TextHolder.getString("sysmon.processTitle"), panel1);
 		tabs.addCustomTab(TextHolder.getString("sysmon.sysinfo"), panSysInfo);
+		tabs.addCustomTab(TextHolder.getString("sysmon.loadTitle"), loadPanel);
 
 //		final TableColumnModel columnModel = processTable.getColumnModel();
 //		for (int column = 0; column < processTable.getColumnCount(); column++) {
@@ -490,11 +497,13 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		return text;
 	}
 
-	private int executeCmd(String cmd, List<String> lines) throws Exception {
+	private void executeCmd(String cmd, List<String> lines) throws Exception {
 		if (wrapper == null || !wrapper.isConnected()) {
 			wrapper = SshUtility.connectWrapper(info, widgetClosed);
 		}
-		return SshUtility.executeCommand(wrapper, cmd, false, lines);
+		if (SshUtility.executeCommand(wrapper, cmd, false, lines) != 0) {
+			throw new Exception();
+		}
 
 //		ChannelExec exec = wrapper.getExecChannel();
 //		InputStream in = exec.getInputStream();
@@ -623,6 +632,9 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	private void updateStats() {
 
 		SwingUtilities.invokeLater(() -> {
+			if (first) {
+				setCursor(DEFAULT_CURSOR);
+			}
 			// System.out.println(environment);
 
 //			StringBuilder sb = new StringBuilder();
@@ -704,6 +716,10 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			if (!widgetClosed.get()) {
+				JOptionPane.showMessageDialog(getWindow(),
+						TextHolder.getString("sysmon.error"));
+			}
 		}
 		commandToExecute = null;
 	}
@@ -711,7 +727,8 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	/**
 	 * @param commandToExecute
 	 */
-	private List<String> runPriviledged(String commandToExecute) {
+	private List<String> runPriviledged(String commandToExecute)
+			throws Exception {
 		List<String> list = new ArrayList<>();
 		String suCmd = generatePriviledgedCommand(commandToExecute);
 		if (suCmd == null) {
@@ -719,12 +736,15 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		}
 		TerminalDialog terminalDialog = new TerminalDialog(getInfo(),
 				new String[] { "-c", suCmd }, getAppSession(), getWindow(),
-				"Command window", true, true);
+				"Command window", true, true, wrapper);
 		terminalDialog.setLocationRelativeTo(getWindow());
 		terminalDialog.setVisible(true);
 		if (terminalDialog.getExitCode() == 0) {
 			list.addAll(Arrays.asList(
 					new String(terminalDialog.getOutput()).split("\n")));
+		} else {
+			throw new Exception(
+					"Unsuccessfull exit code: " + terminalDialog.getExitCode());
 		}
 		return list;
 	}

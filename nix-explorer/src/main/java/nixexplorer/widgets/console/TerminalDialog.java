@@ -21,6 +21,7 @@ import nixexplorer.app.components.DisposableView;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.ssh.SshExecTtyConnector;
+import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.util.Utility;
 
 /**
@@ -39,6 +40,12 @@ public class TerminalDialog extends JDialog implements DisposableView {
 	public TerminalDialog(SessionInfo info, String[] args,
 			AppSession appSession, Window window, String title,
 			boolean autoClose, boolean modal) {
+		this(info, args, appSession, window, title, autoClose, modal, null);
+	}
+
+	public TerminalDialog(SessionInfo info, String[] args,
+			AppSession appSession, Window window, String title,
+			boolean autoClose, boolean modal, SshWrapper wrapper) {
 		super(window);
 		setTitle(title);
 		setModal(modal);
@@ -48,8 +55,10 @@ public class TerminalDialog extends JDialog implements DisposableView {
 		lblResult.setBorder(new EmptyBorder(Utility.toPixel(10),
 				Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
 		lblResult.setFont(Utility.getFont(Constants.NORMAL));
-		this.terminal = new TabbedConsoleWidget(info, args, appSession, window,
-				false);
+		this.terminal = wrapper == null
+				? new TabbedConsoleWidget(info, args, appSession, window, false)
+				: new TabbedConsoleWidget(info, args, appSession, window, false,
+						wrapper, true);
 		this.add(terminal);
 		this.setSize(Utility.toPixel(640), Utility.toPixel(480));
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -99,6 +108,7 @@ public class TerminalDialog extends JDialog implements DisposableView {
 					Thread.sleep(1000);
 				} catch (Exception e) {
 					e.printStackTrace();
+					break;
 				}
 			}
 		});

@@ -1,23 +1,16 @@
 package nixexplorer.core.ssh;
 
 import java.awt.Dimension;
-import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.Writer;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.swing.JOptionPane;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jediterm.terminal.Questioner;
-import com.jediterm.terminal.TtyConnector;
 
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.ssh.SshUtility.ExecContext;
@@ -36,12 +29,26 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 	private Dimension myPendingTermSize;
 	private Dimension myPendingPixelSize;
 	private CharArrayWriter buffer;
+	private boolean alreadyConnected = false;
 
 	public SshExecTtyConnector(SessionInfo info, String command,
 			boolean captureOutput) {
 		this.info = info;
 		this.command = command;
-		buffer = new CharArrayWriter();
+		if (captureOutput) {
+			buffer = new CharArrayWriter();
+		}
+	}
+
+	public SshExecTtyConnector(SshWrapper wrapper, String command,
+			boolean captureOutput) {
+		this.info = wrapper.getInfo();
+		this.wr = wrapper;
+		this.command = command;
+		this.alreadyConnected = true;
+		if (captureOutput) {
+			buffer = new CharArrayWriter();
+		}
 	}
 
 	@Override
@@ -69,10 +76,14 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 //			if (!wr.isConnected()) {
 //				throw new IOException("Unable to connect");
 //			}
-
-			ExecContext exec = SshUtility.connectExec(info, stopFlag);
-			wr = exec.wrapper;
-			channel = exec.getExec();
+			if (!alreadyConnected) {
+				ExecContext exec = SshUtility.connectExec(info, stopFlag);
+				wr = exec.wrapper;
+				channel = exec.getExec();
+			} else {
+				System.out.println("already established session");
+				channel = wr.getExecChannel();
+			}
 
 			String lang = System.getenv().get("LANG");
 			channel.setEnv("LANG", lang != null ? lang : "en_US.UTF-8");
@@ -109,11 +120,16 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 	public void close() {
 		System.out.println("Closed has been called");
 		stopFlag.set(true);
+
 		try {
 			if (channel != null) {
 				System.out.println("Channel exit: " + channel.getExitStatus());
 			}
 			System.out.println("Terminal wrapper disconnecting");
+			if (alreadyConnected) {
+				System.out.println("Not closing as not owner");
+				return;
+			}
 			wr.disconnect();
 		} catch (Exception e) {
 		}
