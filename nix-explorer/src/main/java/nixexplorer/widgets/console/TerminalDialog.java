@@ -20,6 +20,7 @@ import nixexplorer.Constants;
 import nixexplorer.app.components.DisposableView;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.ssh.SshExecTtyConnector;
 import nixexplorer.widgets.util.Utility;
 
 /**
@@ -35,25 +36,30 @@ public class TerminalDialog extends JDialog implements DisposableView {
 	private Thread t;
 	private JLabel lblResult;
 
-	public TerminalDialog(SessionInfo info, String[] args, AppSession appSession, Window window, String title) {
+	public TerminalDialog(SessionInfo info, String[] args,
+			AppSession appSession, Window window, String title,
+			boolean autoClose, boolean modal) {
 		super(window);
 		setTitle(title);
+		setModal(modal);
 		lblResult = new JLabel();
 		lblResult.setForeground(Color.WHITE);
 		lblResult.setOpaque(true);
-		lblResult.setBorder(
-				new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
+		lblResult.setBorder(new EmptyBorder(Utility.toPixel(10),
+				Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
 		lblResult.setFont(Utility.getFont(Constants.NORMAL));
-		this.terminal = new TabbedConsoleWidget(info, args, appSession, window, false);
+		this.terminal = new TabbedConsoleWidget(info, args, appSession, window,
+				false);
 		this.add(terminal);
 		this.setSize(Utility.toPixel(640), Utility.toPixel(480));
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				System.out.println("Exit status: " + terminal.getTtyConnector() != null
-						? terminal.getTtyConnector().getExitStatus()
-						: "");
+				System.out.println(
+						"Exit status: " + terminal.getTtyConnector() != null
+								? terminal.getTtyConnector().getExitStatus()
+								: "");
 				System.out.println("Closing terminal dialog");
 				terminal.close();
 				if (t != null) {
@@ -66,17 +72,28 @@ public class TerminalDialog extends JDialog implements DisposableView {
 		t = new Thread(() -> {
 			while (!t.isInterrupted()) {
 				try {
-					if (this.terminal.getTtyConnector() != null) {
-						int res = this.terminal.getTtyConnector().getExitStatus();
-						if (res >= 0) {
+					if (this.terminal.getTtyConnector() != null && this.terminal
+							.getTtyConnector().isInitialized()) {
+						int res = this.terminal.getTtyConnector()
+								.getExitStatus();
+						if (!this.terminal.getTtyConnector().isConnected()) {
+							System.out.println("Command exit code: " + res);
 							SwingUtilities.invokeLater(() -> {
-								this.lblResult.setBackground(res == 0 ? new Color(1, 99, 26) : new Color(249, 40, 1));
-								this.lblResult.setText(
-										res == 0 ? "Command completed successfully" : "Command completed with error");
+								this.lblResult.setBackground(
+										res == 0 ? new Color(1, 99, 26)
+												: new Color(249, 40, 1));
+								this.lblResult.setText(res == 0
+										? "Command completed successfully"
+										: "Command completed with error");
 								this.add(this.lblResult, BorderLayout.NORTH);
 								this.revalidate();
 								this.repaint();
+								if (autoClose && res == 0) {
+									terminal.close();
+									this.dispose();
+								}
 							});
+							return;
 						}
 					}
 					Thread.sleep(1000);
@@ -106,7 +123,7 @@ public class TerminalDialog extends JDialog implements DisposableView {
 	 */
 	@Override
 	public void viewClosed() {
-		
+
 	}
 
 	@Override
@@ -123,5 +140,17 @@ public class TerminalDialog extends JDialog implements DisposableView {
 	public boolean closeView() {
 		dispose();
 		return true;
+	}
+
+	public char[] getOutput() {
+		if (this.terminal != null && this.terminal.getTtyConnector() != null) {
+			return ((SshExecTtyConnector) (this.terminal.getTtyConnector()))
+					.getOutput();
+		}
+		return new char[0];
+	}
+
+	public int getExitCode() {
+		return this.terminal.getTtyConnector().getExitStatus();
 	}
 }

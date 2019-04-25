@@ -326,7 +326,7 @@ public final class TabbedConsoleWidget extends Widget
 		System.out.println("Commnd: " + cmd);
 
 		tty = shell ? new SshTtyConnector(info)
-				: new SshExecTtyConnector(info, command);
+				: new SshExecTtyConnector(info, command, true);
 
 		// tty = new SshTtyConnector(info); // shell ? new SshTtyConnector(info)
 		// : new ExecTtyConnector(info, command);

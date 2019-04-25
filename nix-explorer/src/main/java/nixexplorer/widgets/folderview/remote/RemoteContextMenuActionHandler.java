@@ -497,7 +497,6 @@ public class RemoteContextMenuActionHandler
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 				renameWithPriviledge(oldName, newName);
-				return;
 			} catch (Exception e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(null,
@@ -510,35 +509,34 @@ public class RemoteContextMenuActionHandler
 	}
 
 	private void renameWithPriviledge(String oldName, String newName) {
-		SwingUtilities.invokeLater(() -> {
-			String suCmd = AskForPriviledgeDlg.askForPriviledge();
-			if (suCmd == null)
-				return;
-			StringBuilder command = new StringBuilder();
-			command.append(suCmd + " ");
-			boolean sudo = false;
-			sudo = suCmd.startsWith("sudo");
-			if (!sudo) {
-				command.append("'");
-			}
-			command.append("mv \"" + oldName + "\" \"" + newName + "\"");
-			if (!sudo) {
-				command.append("; exit'");
-			} else {
-				command.append("; exit");
-			}
-			System.out.println("Command: " + command);
-			String[] args = new String[2];
-			args[0] = "-c";
-			args[1] = command.toString();
-			System.out.println("Opening dialog window");
-			RemoteFolderViewUtils.openTerminalDialog(command.toString(),
-					remoteFolderView);
-		});
+
+		String suCmd = AskForPriviledgeDlg.askForPriviledge();
+		if (suCmd == null)
+			return;
+		StringBuilder command = new StringBuilder();
+		command.append(suCmd + " ");
+		boolean sudo = false;
+		sudo = suCmd.startsWith("sudo");
+		if (!sudo) {
+			command.append("'");
+		}
+		command.append("mv \"" + oldName + "\" \"" + newName + "\"");
+		if (!sudo) {
+			command.append("; exit'");
+		} else {
+			command.append("; exit");
+		}
+		System.out.println("Command: " + command);
+		String[] args = new String[2];
+		args[0] = "-c";
+		args[1] = command.toString();
+		System.out.println("Opening dialog window");
+		RemoteFolderViewUtils.openTerminalDialog(command.toString(),
+				remoteFolderView, true, true);
+
 	}
 
 	private void mkdirWithPriviledge(String path, String newFolder) {
-		SwingUtilities.invokeLater(() -> {
 			String suCmd = AskForPriviledgeDlg.askForPriviledge();
 			if (suCmd == null) {
 				return;
@@ -553,8 +551,6 @@ public class RemoteContextMenuActionHandler
 			command.append("mkdir \"" + newFolder + "\"");
 			if (!sudo) {
 				command.append("; exit'");
-			} else {
-				command.append("; exit");
 			}
 			System.out.println("Command: " + command);
 			String[] args = new String[2];
@@ -562,12 +558,10 @@ public class RemoteContextMenuActionHandler
 			args[1] = command.toString();
 			System.out.println("Opening terminal: " + command);
 			RemoteFolderViewUtils.openTerminalDialog(command.toString(),
-					remoteFolderView);
-		});
+					remoteFolderView, true, true);
 	}
 
 	private void touchWithPriviledge(String path, String newFile) {
-		SwingUtilities.invokeLater(() -> {
 			String suCmd = AskForPriviledgeDlg.askForPriviledge();
 			if (suCmd == null) {
 				return;
@@ -591,8 +585,7 @@ public class RemoteContextMenuActionHandler
 			args[1] = command.toString();
 			System.out.println("Opening terminal: " + command);
 			RemoteFolderViewUtils.openTerminalDialog(command.toString(),
-					remoteFolderView);
-		});
+					remoteFolderView, true, true);
 	}
 
 	private void delete(FileInfo[] targetList, String baseFolder) {
@@ -659,7 +652,7 @@ public class RemoteContextMenuActionHandler
 		args[0] = "-c";
 		args[1] = command.toString();
 		RemoteFolderViewUtils.openTerminalDialog(command.toString(),
-				remoteFolderView);
+				remoteFolderView, true, true);
 	}
 
 	protected void newFile(String folder) {

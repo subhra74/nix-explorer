@@ -19,7 +19,9 @@ public class ProcessTableModel extends AbstractTableModel {
 		columnList.add(new ColumnInfo("Name", "comm", String.class));
 		columnList.add(new ColumnInfo("CPU % (pcpu)", "pcpu", Double.class));
 		columnList
-				.add(new ColumnInfo("Memory [KiB] (rss)", "rss", Double.class));
+				.add(new ColumnInfo("Memory [KiB] (RSS)", "rss", Double.class));
+		columnList.add(new ColumnInfo("Virtual Memory [KiB] (VSZ)", "vsz",
+				Double.class));
 		columnList
 				.add(new ColumnInfo("Process id (pid)", "pid", Integer.class));
 		columnList.add(new ColumnInfo("User (user)", "user", String.class));

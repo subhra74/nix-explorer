@@ -116,7 +116,7 @@ public class DirectTransferWidget extends JDialog implements DisposableView {
 					System.out.println("Transfer command: " + transferCommand);
 					TerminalDialog dlg = new TerminalDialog(info,
 							new String[] { "-c", transferCommand }, appSession,
-							window, "Command window");
+							window, "Command window", false, true);
 					this.dispose();
 					dlg.setLocationRelativeTo(window);
 					dlg.setVisible(true);

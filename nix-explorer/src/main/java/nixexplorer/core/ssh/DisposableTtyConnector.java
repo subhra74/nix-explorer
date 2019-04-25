@@ -11,6 +11,8 @@ public interface DisposableTtyConnector extends TtyConnector {
 	public boolean isBusy();
 
 	public boolean isRunning(Channel channel);
-	
+
 	public int getExitStatus();
+
+	public boolean isInitialized();
 }

@@ -10,10 +10,14 @@ import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextArea;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 
 import nixexplorer.Constants;
+import nixexplorer.TextHolder;
+import nixexplorer.app.AppContext;
 import nixexplorer.widgets.util.Utility;
 
 public class SystemLoadPanel extends JPanel {
@@ -29,16 +33,27 @@ public class SystemLoadPanel extends JPanel {
 
 	private GaugeViewComponent cpuGauge, memoryGauge, diskGauge;
 
-	public SystemLoadPanel() {
+	public SystemLoadPanel(JLabel lblInterval, JSpinner spInterval) {
 		setLayout(new BorderLayout());
 
 		b1 = Box.createVerticalBox();
+
+		Box bStat = Box.createHorizontalBox();
+
 		lblLoadAvg = new JLabel("Uptime: ");
-		lblLoadAvg.setFont(Utility.getFont(Constants.NORMAL));
-		lblLoadAvg.setBorder(new EmptyBorder(Utility.toPixel(5),
+		
+
+		bStat.add(lblLoadAvg);
+		bStat.add(Box.createHorizontalGlue());
+		bStat.add(lblInterval);
+		bStat.add(Box.createHorizontalStrut(Utility.toPixel(5)));
+		bStat.add(spInterval);
+		bStat.add(Box.createHorizontalStrut(Utility.toPixel(5)));
+		bStat.add(new JLabel("Sec"));
+		bStat.setBorder(new EmptyBorder(Utility.toPixel(5),
 				Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 
-		add(lblLoadAvg, BorderLayout.SOUTH);
+		add(bStat, BorderLayout.SOUTH);
 		b1.add(Box.createVerticalStrut(Utility.toPixel(5)));
 
 		JPanel gaugeGrid = new JPanel(

@@ -1,5 +1,3 @@
-#!/bin/sh
-
 CMD_PATH=""
 
 my_whereis(){

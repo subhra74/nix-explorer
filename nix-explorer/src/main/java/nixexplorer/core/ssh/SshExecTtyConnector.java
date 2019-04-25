@@ -1,12 +1,15 @@
 package nixexplorer.core.ssh;
 
 import java.awt.Dimension;
+import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.io.Writer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JOptionPane;
@@ -32,10 +35,13 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 	private String command;
 	private Dimension myPendingTermSize;
 	private Dimension myPendingPixelSize;
+	private CharArrayWriter buffer;
 
-	public SshExecTtyConnector(SessionInfo info, String command) {
+	public SshExecTtyConnector(SessionInfo info, String command,
+			boolean captureOutput) {
 		this.info = info;
 		this.command = command;
+		buffer = new CharArrayWriter();
 	}
 
 	@Override
@@ -72,7 +78,8 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 			channel.setEnv("LANG", lang != null ? lang : "en_US.UTF-8");
 			channel.setPtyType("xterm");
 			channel.setPty(true);
-
+			System.out.println("Setting command for execution: " + command);
+			channel.setCommand(command);
 //			PipedOutputStream pout1 = new PipedOutputStream();
 //			PipedInputStream pin1 = new PipedInputStream(pout1);
 //			channel.setOutputStream(pout1);
@@ -100,8 +107,12 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 
 	@Override
 	public void close() {
+		System.out.println("Closed has been called");
 		stopFlag.set(true);
 		try {
+			if (channel != null) {
+				System.out.println("Channel exit: " + channel.getExitStatus());
+			}
 			System.out.println("Terminal wrapper disconnecting");
 			wr.disconnect();
 		} catch (Exception e) {
@@ -130,7 +141,21 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 
 	@Override
 	public int read(char[] buf, int offset, int length) throws IOException {
-		return myInputStreamReader.read(buf, offset, length);
+		int r = myInputStreamReader.read(buf, offset, length);
+		if (r == -1) {
+			while (channel.isConnected() && (!channel.isClosed())) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		} else {
+			if (buffer != null) {
+				buffer.write(buf, offset, r);
+			}
+		}
+		return r;
 	}
 
 	@Override
@@ -141,6 +166,7 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 
 	@Override
 	public boolean isConnected() {
+		System.out.println("Is connected?");
 		if (channel != null && channel.isConnected() && isInitiated.get()) {
 			return true;
 		}
@@ -164,11 +190,13 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 	}
 
 	public boolean isRunning(Channel channel) {
+		System.out.println("Is running?");
 		return channel != null && channel.getExitStatus() < 0
 				&& channel.isConnected();
 	}
 
 	public boolean isBusy() {
+		System.out.println("Is busy?");
 		return channel.getExitStatus() < 0 && channel.isConnected();
 	}
 
@@ -200,7 +228,21 @@ public class SshExecTtyConnector implements DisposableTtyConnector {
 
 	private void setPtySize(ChannelExec channel, int col, int row, int wp,
 			int hp) {
-		System.out.println("Exec pty resized");
-		channel.setPtySize(col, row, wp, hp);
+		if (channel != null && channel.isConnected()) {
+			System.out.println("Exec pty resized");
+			channel.setPtySize(col, row, wp, hp);
+		}
+	}
+
+	@Override
+	public boolean isInitialized() {
+		return isInitiated.get();
+	}
+
+	public char[] getOutput() {
+		if (buffer == null) {
+			return new char[] {};
+		}
+		return this.buffer.toCharArray();
 	}
 }

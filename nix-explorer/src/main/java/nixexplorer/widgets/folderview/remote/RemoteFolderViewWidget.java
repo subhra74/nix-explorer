@@ -517,7 +517,7 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 					args[1] = command.toString();
 
 					RemoteFolderViewUtils.openTerminalDialog(command.toString(),
-							this);
+							this, true, true);
 
 //					getDesktop().createWidget(
 //							TabbedConsoleWidget.class.getName(), env, args,

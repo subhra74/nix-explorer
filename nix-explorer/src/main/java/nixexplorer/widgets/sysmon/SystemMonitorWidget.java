@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -43,9 +44,12 @@ import nixexplorer.app.AppContext;
 import nixexplorer.app.components.CustomTabbedPane;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.FileInfo;
 import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.Widget;
+import nixexplorer.widgets.console.TerminalDialog;
+import nixexplorer.widgets.folderview.remote.AskForPriviledgeDlg;
 import nixexplorer.widgets.util.Utility;
 
 public class SystemMonitorWidget extends Widget implements Runnable {
@@ -84,14 +88,18 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	private JTextArea txtDiskStat;
 	private JTextArea txtSysInfo;
 	private String sysInfoScript;
-	private boolean readSysinfo = true, readNetworkStatus = true,
-			readDiskStatus = true;
-	private JButton btnSockRefresh, btnDiskRefresh, btnInfoRefresh;
+	private AtomicBoolean readSysinfo = new AtomicBoolean(true),
+			readNetworkStatus = new AtomicBoolean(true),
+			readDiskStatus = new AtomicBoolean(true),
+			readPsStatus = new AtomicBoolean(true);
+	private JButton btnSockRefresh, btnDiskRefresh, btnInfoRefresh,
+			btnProcRefresh;
 	private Map<String, String> statMap;
 	private Map<String, String> psMap;
 	private boolean tableResized = false;
 	private JSpinner spInterval;
-	private String sysInfo;
+	private AtomicBoolean runAsSuperUser = new AtomicBoolean(false);
+	private JCheckBox chkRunAsSuperUserSock, chkRunAsSuperUserPs;
 
 	public SystemMonitorWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window) {
@@ -100,22 +108,43 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		statMap = new HashMap<>();
 		psMap = new HashMap<>();
 
+		chkRunAsSuperUserSock = new JCheckBox(
+				TextHolder.getString("sysmon.superuser"));
+		chkRunAsSuperUserPs = new JCheckBox(
+				TextHolder.getString("sysmon.superuser"));
+
+		chkRunAsSuperUserSock.addActionListener(e -> {
+			runAsSuperUser.set(chkRunAsSuperUserSock.isSelected());
+			chkRunAsSuperUserPs.setSelected(chkRunAsSuperUserSock.isSelected());
+		});
+
+		chkRunAsSuperUserPs.addActionListener(e -> {
+			runAsSuperUser.set(chkRunAsSuperUserPs.isSelected());
+			chkRunAsSuperUserSock.setSelected(chkRunAsSuperUserPs.isSelected());
+		});
+
 		btnDiskRefresh = new JButton(TextHolder.getString("sysmon.refresh"));
 		btnInfoRefresh = new JButton(TextHolder.getString("sysmon.refresh"));
 		btnSockRefresh = new JButton(TextHolder.getString("sysmon.refresh"));
+		btnProcRefresh = new JButton(TextHolder.getString("sysmon.refresh"));
 
 		btnDiskRefresh.addActionListener(e -> {
-			readDiskStatus = true;
+			readDiskStatus.set(true);
 			t.interrupt();
 		});
 
 		btnInfoRefresh.addActionListener(e -> {
-			readSysinfo = true;
+			readSysinfo.set(true);
 			t.interrupt();
 		});
 
 		btnSockRefresh.addActionListener(e -> {
-			readNetworkStatus = true;
+			readNetworkStatus.set(true);
+			t.interrupt();
+		});
+
+		btnProcRefresh.addActionListener(e -> {
+			readPsStatus.set(true);
 			t.interrupt();
 		});
 
@@ -143,9 +172,12 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		processTable.setRowSorter(sorter);
 		processTableModel.setTable(processTable);
 
-		spInterval = new JSpinner(new SpinnerNumberModel(
-				AppContext.INSTANCE.getConfig().getMonitor().getInterval(), 1,
-				100, 1));
+		spInterval = new JSpinner(new SpinnerNumberModel(100, 1, 100, 1));
+		spInterval.setMaximumSize(spInterval.getPreferredSize());
+
+		spInterval.setValue(
+				AppContext.INSTANCE.getConfig().getMonitor().getInterval());
+
 		spInterval.addChangeListener(e -> {
 			int interval = (Integer) spInterval.getValue();
 			System.out.println("New interval: " + interval);
@@ -221,23 +253,12 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 			popSig.show(btnSig, 0, btnSig.getY() - h);
 		});
 
-		JCheckBox chkAllProcs = new JCheckBox(
-				TextHolder.getString("sysmon.showAll"));
-		chkAllProcs.addActionListener(e -> {
-			if (chkAllProcs.isSelected()) {
-				psMap.put("show_all", "\"true\"");
-			} else {
-				psMap.remove("show_all");
-			}
-			t.interrupt();
-		});
-
 		Box bottomBox = Box.createHorizontalBox();
 //		bottomBox.setBorder(new EmptyBorder(Utility.toPixel(5),
 //				Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 //		bottomBox.add(
 //				Box.createRigidArea(new Dimension(Utility.toPixel(10), 0)));
-		bottomBox.add(chkAllProcs);
+		bottomBox.add(chkRunAsSuperUserPs);
 		bottomBox.add(Box.createHorizontalGlue());
 		bottomBox.add(btnKill);
 		bottomBox.add(Box.createHorizontalStrut(Utility.toPixel(5)));
@@ -269,9 +290,10 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		btop1.add(Box.createHorizontalStrut(Utility.toPixel(5)));
 		btop1.add(btnFilterClear);
 		btop1.add(Box.createHorizontalStrut(Utility.toPixel(5)));
-		btop1.add(lblInterval);
-		btop1.add(Box.createHorizontalStrut(Utility.toPixel(5)));
-		btop1.add(spInterval);
+		btop1.add(btnProcRefresh);
+		// btop1.add(lblInterval);
+		// btop1.add(Box.createHorizontalStrut(Utility.toPixel(5)));
+		// btop1.add(spInterval);
 
 		JScrollPane jsp1 = new JScrollPane(processTable);
 		jsp1.getViewport().setBackground(processTable.getBackground());
@@ -286,11 +308,12 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		panel1.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
 				Utility.toPixel(5), Utility.toPixel(5)));
 
-		loadPanel = new SystemLoadPanel();
+		loadPanel = new SystemLoadPanel(lblInterval, spInterval);
 		loadPanel.setBorder(new EmptyBorder(Utility.toPixel(5),
 				Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
 
 		JPanel socketPanel = new JPanel(new BorderLayout());
+		socketPanel.add(chkRunAsSuperUserSock, BorderLayout.NORTH);
 		socketStatus = new JTextArea();
 		socketStatus.setEditable(false);
 		socketStatus.setFont(
@@ -306,13 +329,13 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		filterBtn = new JButton(TextHolder.getString("sysmon.filterTxt"));
 		filterBtn.addActionListener(e -> {
 			searchText = txtSockSearch.getText();
-			setSocketText();
+			filterAndSetSocketText();
 		});
 		clearBtn = new JButton(TextHolder.getString("sysmon.clear"));
 		clearBtn.addActionListener(e -> {
 			searchText = null;
 			txtSockSearch.setText("");
-			setSocketText();
+			filterAndSetSocketText();
 		});
 
 		Box bx1 = Box.createHorizontalBox();
@@ -430,24 +453,29 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 
 		executeCommand(script, false, statMap);
 
-		if (readNetworkStatus) {
-			List<String> list = executeCommand(sockScript, false);
+		if (readNetworkStatus.get()) {
+			List<String> list = runAsSuperUser.get()
+					? runPriviledged(sockScript)
+					: executeCommand(sockScript, false);
 			sockText = list;
 		}
 
-		if (readDiskStatus) {
+		if (readDiskStatus.get()) {
 			List<String> list = executeCommand(diskScript, false);
 			diskText = String.join("\n", list);
 		}
 
-		if (readSysinfo) {
+		if (readSysinfo.get()) {
 			List<String> list = executeCommand(sysInfoScript, false);
 			sysInfoText = String.join("\n", list);
 		}
 
-		procList = executeCommand(applyEnv(procScript, psMap), false);
-
-		System.out.println("Process count:" + procList.size());
+		if (readPsStatus.get()) {
+			procScript = procScript.replace("<PROC_LIST_COLUMS>",
+					processTableModel.getCommandString());
+			procList = executeCommand(procScript, false);
+			System.out.println("Process count:" + procList.size());
+		}
 
 		// System.out.println("PROC_LIST: " + procList + "\n\n");
 	}
@@ -466,7 +494,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		if (wrapper == null || !wrapper.isConnected()) {
 			wrapper = SshUtility.connectWrapper(info, widgetClosed);
 		}
-		return SshUtility.executeCommand(wrapper, cmd, true, lines);
+		return SshUtility.executeCommand(wrapper, cmd, false, lines);
 
 //		ChannelExec exec = wrapper.getExecChannel();
 //		InputStream in = exec.getInputStream();
@@ -592,41 +620,10 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		}
 	}
 
-	private void setSocketText() {
-		System.out.println(sockText);
-		if (readNetworkStatus) {
-			StringBuilder sb = new StringBuilder();
-			for (String l : sockText) {
-				if (searchText == null || searchText.length() < 1) {
-					sb.append(l + "\n");
-				} else if (l.contains(searchText)) {
-					sb.append(l + "\n");
-				}
-			}
-			socketStatus.setText(sb.toString());
-			socketStatus.setCaretPosition(0);
-			readNetworkStatus = false;
-		}
-	}
-
 	private void updateStats() {
 
 		SwingUtilities.invokeLater(() -> {
 			// System.out.println(environment);
-			processTableModel.updateData(procList);// environment.get("PROCESS_TABLE"));
-			setSocketText();
-			if (!tableResized) {
-				final TableColumnModel columnModel = processTable
-						.getColumnModel();
-				for (int column = 0; column < processTable
-						.getColumnCount(); column++) {
-					TableColumn col = columnModel.getColumn(column);
-					if (column == 0) {
-						col.setPreferredWidth(300);
-					} // col.getPreferredWidth());
-				}
-				tableResized = true;
-			}
 
 //			StringBuilder sb = new StringBuilder();
 //			for (String l : listLines) {
@@ -634,16 +631,40 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 //			}
 //			socketStatus.setText(sb.toString());
 			// System.out.println("SB--" + sb);
-			if (readDiskStatus) {
+			if (readDiskStatus.get()) {
 				txtDiskStat.setText(diskText);
 				txtDiskStat.setCaretPosition(0);
-				readDiskStatus = false;
+				readDiskStatus.set(false);
 			}
 
-			if (readSysinfo) {
+			if (readSysinfo.get()) {
 				txtSysInfo.setText(sysInfoText);
 				txtSysInfo.setCaretPosition(0);
-				readSysinfo = false;
+				readSysinfo.set(false);
+			}
+
+			if (readNetworkStatus.get()) {
+				filterAndSetSocketText();
+				readNetworkStatus.set(false);
+			}
+
+			if (readPsStatus.get()) {
+				processTableModel.updateData(procList);// environment.get("PROCESS_TABLE"));
+				if (!tableResized) {
+					final TableColumnModel columnModel = processTable
+							.getColumnModel();
+					for (int column = 0; column < processTable
+							.getColumnCount(); column++) {
+						TableColumn col = columnModel.getColumn(column);
+						if (column == 0) {
+							col.setPreferredWidth(Utility.toPixel(300));
+						} else {
+							col.setPreferredWidth(Utility.toPixel(150));// col.getPreferredWidth());
+						}
+					}
+					tableResized = true;
+				}
+				readPsStatus.set(false);
 			}
 			// diskTableModel.updateTable(environment.get("DISK_USAGE_TABLE"));
 			loadPanel.updateValues(statMap, sysInfoText);
@@ -665,7 +686,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 			}
 		}
 		System.out.println(sb);
-		commandToExecute = "#!/bin/sh\nkill -9 " + sb;
+		commandToExecute = "kill -9 " + sb;
 		t.interrupt();
 	}
 
@@ -676,11 +697,36 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		listLines.clear();
 		try {
 			System.out.println("commandToExecute: " + commandToExecute);
-			executeCmd(commandToExecute, listLines);
+			if (runAsSuperUser.get()) {
+				listLines = runPriviledged(commandToExecute);
+			} else {
+				executeCmd(commandToExecute, listLines);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		commandToExecute = null;
+	}
+
+	/**
+	 * @param commandToExecute
+	 */
+	private List<String> runPriviledged(String commandToExecute) {
+		List<String> list = new ArrayList<>();
+		String suCmd = generatePriviledgedCommand(commandToExecute);
+		if (suCmd == null) {
+			return list;
+		}
+		TerminalDialog terminalDialog = new TerminalDialog(getInfo(),
+				new String[] { "-c", suCmd }, getAppSession(), getWindow(),
+				"Command window", true, true);
+		terminalDialog.setLocationRelativeTo(getWindow());
+		terminalDialog.setVisible(true);
+		if (terminalDialog.getExitCode() == 0) {
+			list.addAll(Arrays.asList(
+					new String(terminalDialog.getOutput()).split("\n")));
+		}
+		return list;
 	}
 
 	@Override
@@ -770,8 +816,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 					}
 				}
 				System.out.println(sb);
-				commandToExecute = "#!/bin/sh\nrenice " + nice + " " + sb
-						+ "|gzip|cat";
+				commandToExecute = "renice " + nice + " " + sb;
 				t.interrupt();
 			}
 		};
@@ -818,8 +863,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 					}
 				}
 				System.out.println(sb);
-				commandToExecute = "#!/bin/sh\nkill -s " + sig + " " + sb
-						+ "|gzip|cat";
+				commandToExecute = "kill -s " + sig + " " + sb;
 				t.interrupt();
 			}
 		};
@@ -987,6 +1031,41 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		this.add(lbl, BorderLayout.NORTH);
 		this.revalidate();
 		this.repaint();
+	}
+
+	private void filterAndSetSocketText() {
+		StringBuilder sb = new StringBuilder();
+		for (String l : sockText) {
+			if (searchText == null || searchText.length() < 1) {
+				sb.append(l + "\n");
+			} else if (l.contains(searchText)) {
+				sb.append(l + "\n");
+			}
+		}
+		socketStatus.setText(sb.toString());
+		socketStatus.setCaretPosition(0);
+	}
+
+	private String generatePriviledgedCommand(String cmd) {
+		String suCmd = AskForPriviledgeDlg.askForPriviledge();
+		if (suCmd == null) {
+			return null;
+		}
+		StringBuilder command = new StringBuilder();
+		command.append(suCmd + " ");
+		boolean sudo = false;
+		sudo = suCmd.startsWith("sudo");
+		if (!sudo) {
+			command.append(" '");
+		}
+
+		command.append("sh<<EOF\n" + cmd + "\nEOF\n");
+
+		if (!sudo) {
+			command.append("'");
+		}
+		System.out.println("Command: " + command);
+		return command.toString();
 	}
 
 }

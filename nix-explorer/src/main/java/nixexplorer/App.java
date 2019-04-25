@@ -243,6 +243,7 @@ public final class App {
 		TextHolder.addString("folderview.unSelectSimilar", "Unselect similar file types");
 		TextHolder.addString("folderview.filter", "Filter files");
 
+		TextHolder.addString("sysmon.superuser", "Run as superuser");
 		TextHolder.addString("sysmon.unsupported", "This os is not supported yet: %s");
 		TextHolder.addString("sysmon.processTitle", "Processes");
 		TextHolder.addString("sysmon.pollInterval", "Refresh interval");

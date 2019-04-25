@@ -183,4 +183,9 @@ public class SshTtyConnector implements DisposableTtyConnector {
 		channel.setPtySize(col, row, wp, hp);
 	}
 
+	@Override
+	public boolean isInitialized() {
+		return isInitiated.get();
+	}
+
 }

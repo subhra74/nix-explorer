@@ -1,5 +1,3 @@
-#!/bin/sh
-
 #awk_process_table
 
 get_memory_usage(){
@@ -52,58 +50,16 @@ get_cpu_usage(){
 	}'
 }
 
-get_process_table(){
-	UNIX95=1
-	export UNIX95
-	#show_all={env}
-	#ps_options={env}
-	if [ ! -z $show_all ];then
-		ps_options=" $ps_options"
-		echo "with extended options"
-	fi
-	ps $ps_options |awk -v ps_parse=1 'BEGIN{ 
-		fields=0;
-		text="";
-	}
-	{
-		if(NR==1){
-			fields=NF;
-			for(i=1;i<=NF;i++){
-				if(i>1){
-					text=text "|";
-				}
-				text=text $i;		
-			}
-		}
-		else{
-			text=text ";";
-			for(i=1;i<=fields;i++){
-				if(i>NF)break;
-					if(i>1){
-						text=text "|";
-					}
-					text=text $i;
-						}
-						for(;i<=NF;i++){
-							text=text " " $i;
-						}
-					}
-	}
-	END{
-		print "PROCESS_TABLE=" text;
-	}'
-}
-
 get_uptime(){
 	UPTIME=`uptime`
-	echo "UPTIME=$UPTIME"
+	SYSTEM_TIME=`date`
+	echo "UPTIME=$UPTIME  System date: $SYSTEM_TIME"
 }
 
 get_stats(){
 	get_cpu_usage
 	get_memory_usage
 	get_uptime
-	#get_process_table
 }
 
 get_stats
