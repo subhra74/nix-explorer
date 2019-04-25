@@ -42,7 +42,7 @@ import nixexplorer.registry.contextmenu.ContextMenuRegistry;
 import nixexplorer.widgets.dnd.TransferFileInfo;
 import nixexplorer.widgets.dnd.TransferFileInfo.Action;
 import nixexplorer.widgets.editor.ExternalEditorWidget;
-import nixexplorer.widgets.editor.FormattedEditorWidget;
+import nixexplorer.widgets.editor.RemoteEditorWidget;
 import nixexplorer.widgets.folderview.ContextMenuActionHandler;
 import nixexplorer.widgets.folderview.FolderViewWidget;
 import nixexplorer.widgets.folderview.PermissionsDialog;
@@ -1061,7 +1061,7 @@ public class RemoteContextMenuActionHandler
 		if (selectedFiles != null && selectedFiles.length == 1) {
 			FileInfo info = selectedFiles[0];
 			remoteFolderView.getAppSession().createWidget(
-					FormattedEditorWidget.class.getName(),
+					RemoteEditorWidget.class.getName(),
 					new String[] { info.getPath() });
 		}
 	}

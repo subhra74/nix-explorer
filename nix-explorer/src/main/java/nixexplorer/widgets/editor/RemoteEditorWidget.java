@@ -68,19 +68,21 @@ import org.fife.ui.rtextarea.SearchResult;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpATTRS;
+import com.jcraft.jsch.SftpException;
 
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
 import nixexplorer.app.AppContext;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.ssh.SshFileSystemWrapper;
 import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.Widget;
 import nixexplorer.widgets.folderview.ContentChangeListener;
 import nixexplorer.widgets.util.Utility;
 
-public class FormattedEditorWidget extends Widget implements SearchListener {
+public class RemoteEditorWidget extends Widget implements SearchListener {
 	private ContentChangeListener listener;
 	private static final long serialVersionUID = -3968450910174508931L;
 	private String file;
@@ -110,10 +112,13 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 	private Cursor curBusy, curDef;
 	private JCheckBox chkWrapText;
 	private JSpinner spFont;
-
+	private SshFileSystemWrapper fs;
+	private SftpATTRS attrs;
+	private String text;
 	private JComboBox<String> cmbTheme;
+	private boolean useTempFile;
 
-	public FormattedEditorWidget(SessionInfo info, String[] args,
+	public RemoteEditorWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window) {
 		super(info, args, appSession, window);
 		if (args.length > 0) {
@@ -162,7 +167,7 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 		// top.add(createMenu(), BorderLayout.NORTH);
 		this.toolbar = Box.createHorizontalBox();
 		this.toolbar.add(Box.createRigidArea(
-				new Dimension(Utility.toPixel(0), Utility.toPixel(30))));
+				new Dimension(Utility.toPixel(0), Utility.toPixel(40))));
 		this.toolbar.setBorder(
 				new MatteBorder(Utility.toPixel(1), 0, Utility.toPixel(1), 0,
 						UIManager.getColor("DefaultBorder.color")));
@@ -478,7 +483,9 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 
 		cmbTheme.setSelectedItem(UIManager.getString("Editor.theme"));
 
-		loadFile();
+		fs = new SshFileSystemWrapper(info);
+
+		retrieveFileContents();
 	}
 
 	/**
@@ -503,7 +510,7 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 		if (changed) {
 			if (JOptionPane.showConfirmDialog(getWindow(),
 					"Changes will be lost. Reload now?") == JOptionPane.YES_OPTION) {
-				loadFile();
+				retrieveFileContents();
 			}
 		}
 	}
@@ -567,19 +574,6 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 		}
 	}
 
-	private void loadFile() {
-		if (this.file != null && this.file.length() > 0) {
-			this.changed = false;
-			try {
-				new Thread(() -> {
-					load();
-				}).start();
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
-		}
-	}
-
 	@Override
 	public void reconnect() {
 		// TODO Auto-generated method stub
@@ -588,239 +582,127 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 
 	@Override
 	public void close() {
-		cleanup();
 		try {
-			if (this.wrapper != null) {
-				this.wrapper.disconnect();
-				System.out.println("Text editors connection is closed");
-			}
+			fs.close();
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
+	}
+
+	private String generateTempFile() {
+		String tmpFile = UUID.randomUUID().toString();
+		String folder = PathUtils.getParent(file);
+		String tmpFullPath = PathUtils.combineUnix(folder, tmpFile);
+		return tmpFullPath;
+	}
+
+	private void save() {
+		disableEditor();
+		text = textArea.getText();
+		saving.set(true);
+		new Thread(() -> {
+			try {
+				String targetFile = useTempFile ? generateTempFile() : file;
+				fs.getSftp().put(
+						new ByteArrayInputStream(text.getBytes("utf-8")),
+						targetFile);
+				if (useTempFile) {
+					attrs = fs.getSftp().stat(file);
+					fs.deleteFile(file);
+					fs.rename(targetFile, file);
+					fs.getSftp().setStat(file, attrs);
+				}
+
+				if (widgetClosed.get()) {
+					return;
+				}
+
+				ByteArrayOutputStream bout = new ByteArrayOutputStream();
+				fs.copyTo(file, bout, null, ChannelSftp.OVERWRITE, 0);
+				if (widgetClosed.get()) {
+					return;
+				}
+				this.text = new String(bout.toByteArray(), "utf-8");
+
+				SwingUtilities.invokeLater(() -> {
+					textArea.requestFocusInWindow();
+					changed = false;
+				});
+
+			} catch (SftpException e) {
+				if (e.id == ChannelSftp.SSH_FX_PERMISSION_DENIED) {
+					fallbackSaveWithPriviledge();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				if (!widgetClosed.get()) {
+					JOptionPane.showMessageDialog(getWindow(),
+							"File could not be loaded");
+				}
+			} finally {
+				saving.set(false);
+				enableEditor();
+			}
+		}).start();
 	}
 
 	/**
 	 * 
 	 */
-	private void saveChanges() {
-		saving.set(true);
+	private void fallbackSaveWithPriviledge() {
+		// TODO Auto-generated method stub
 
-		try {
-			new Thread(() -> {
-				save();
-			}).start();
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-		if (saving.get()) {
-			saveProgressDialog.setLocationRelativeTo(getWindow());
-			saveProgressDialog.setVisible(true);
-		}
 	}
 
-	private void save() {
-		while (true) {
+	private void retrieveFileContents() {
+		disableEditor();
+		new Thread(() -> {
 			try {
-				try {
-					open(true);
-					write();
-					cleanup();
-					changed = false;
+				attrs = fs.getSftp().stat(file);
+				ByteArrayOutputStream bout = new ByteArrayOutputStream();
+				fs.copyTo(file, bout, null, ChannelSftp.OVERWRITE, 0);
+				if (widgetClosed.get()) {
 					return;
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
-				if (cancelled.get()) {
-					break;
-				}
-				System.out.println("Error encountered");
-				if (JOptionPane.showConfirmDialog(saveProgressDialog,
-						"Error saving file, retry?") != JOptionPane.YES_OPTION) {
-					break;
-				}
-			} finally {
-				saving.set(false);
-				saveProgressDialog.setVisible(false);
-			}
-		}
-	}
-
-	private void load() {
-		SwingUtilities.invokeLater(() -> {
-			textArea.setEditable(false);
-			prgLoad.setValue(0);
-			prgLoad.setVisible(true);
-			this.setCursor(curBusy);
-		});
-		while (true) {
-			try {
-				open(false);
-			} catch (Exception e) {
-				changed = false;
-				e.printStackTrace();
-				this.close();
+				this.text = new String(bout.toByteArray(), "utf-8");
 				SwingUtilities.invokeLater(() -> {
-					closeView();
-				});
-				break;
-			}
-			try {
-				byte[] data = read();
-				cleanup();
-				SwingUtilities.invokeLater(() -> {
-					this.setCursor(curDef);
-					textArea.setText(new String(data));
-					textArea.setEditable(true);
-					prgLoad.setVisible(false);
+					textArea.setText(text);
 					textArea.setCaretPosition(0);
 					super.updateTabTitle(fileName);
-//					if (lblTitleTab != null) {
-//						String fileName = PathUtils.getFileName(this.file);
-//						lblTitleTab.setText(fileName);
-//					}
 					changed = false;
 					textArea.requestFocusInWindow();
 				});
-				return;
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
-			if (cancelled.get()) {
-				this.close();
-				break;
-			}
-			if (JOptionPane.showConfirmDialog(this,
-					"Error loading file, retry?") != JOptionPane.YES_OPTION) {
-				this.close();
+				if (!widgetClosed.get()) {
+					JOptionPane.showMessageDialog(getWindow(),
+							"File could not be loaded");
+				}
+			} finally {
 				SwingUtilities.invokeLater(() -> {
-					closeView();
+					this.setCursor(curDef);
+					enableEditor();
 				});
-				break;
 			}
-		}
+		}).start();
 	}
 
-	private void open(boolean write) throws Exception {
-		if (info != null) {
-			if (wrapper == null || !wrapper.isConnected()) {
-				while (true) {
-					wrapper = SshUtility.connectWrapper(info, widgetClosed);
-					try {
-						sftp = wrapper.getSftpChannel();
-						break;
-					} catch (Exception e) {
-						try {
-							wrapper.disconnect();
-						} catch (Exception e1) {
-						}
-					}
-					if (JOptionPane.showConfirmDialog(null,
-							"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
-						throw new Exception("User cancelled the operation");
-					}
-				}
-			}
-
-			if (!write) {
-				SftpATTRS attrs = sftp.stat(file);
-				long sz = attrs.getSize();
-				if (sz > Integer.MAX_VALUE) {
-					throw new Exception("File larger than 2GB");
-				}
-				this.length = (int) sz;
-				this.in = sftp.get(file);
-			} else {
-				String tmpFile = UUID.randomUUID().toString();
-				String folder = PathUtils.getParent(file);
-				String tmpFullPath = PathUtils.combineUnix(folder, tmpFile);
-				this.tmpFile = tmpFullPath;
-				this.out = sftp.put(tmpFullPath);
-			}
-		} else {
-			if (!write) {
-				this.in = new FileInputStream(file);
-			} else {
-				String tmpFile = UUID.randomUUID().toString();
-				String folder = new File(file).getParent();
-				String tmpFullPath = new File(folder, tmpFile)
-						.getAbsolutePath();
-				this.tmpFile = tmpFullPath;
-				this.out = new FileOutputStream(tmpFullPath);
-			}
-		}
+	private void disableEditor() {
+		setCursor(curBusy);
+		btnSave.setEnabled(false);
+		prgLoad.setValue(0);
+		prgLoad.setVisible(true);
+		textArea.setEditable(false);
+		saving.set(true);
 	}
 
-	private void write() throws Exception {
-		byte[] data = textArea.getText().getBytes();
-		this.length = data.length;
-		ByteArrayInputStream bin = new ByteArrayInputStream(data);
-		byte[] b = new byte[8192];
-		int write = 0;
-		saveProgressDialog.setValue(0);
-		while (true) {
-			int x = bin.read(b);
-			if (x == -1)
-				break;
-			this.out.write(b, 0, x);
-			write += x;
-			int w = write;
-			saveProgressDialog.setValue((w * 100) / length);
-		}
-		this.out.close();
-		SftpATTRS attrs1 = sftp.stat(file);
-		sftp.rm(file);
-		sftp.rename(tmpFile, file);
-		SftpATTRS attrs2 = sftp.stat(file);
-		attrs2.setPERMISSIONS(attrs1.getPermissions());
-		sftp.setStat(file, attrs2);
-	}
-
-	private byte[] read() throws Exception {
-		SwingUtilities.invokeLater(() -> {
-			prgLoad.setValue(0);
-			textArea.setText("");
-		});
-
-		ByteArrayOutputStream out = new ByteArrayOutputStream(length);
-		byte[] b = new byte[8192];
-		int read = 0;
-		while (true) {
-			int x = in.read(b);
-			if (x == -1)
-				break;
-			out.write(b, 0, x);
-			read += x;
-			int r = read;
-			SwingUtilities.invokeLater(() -> {
-				prgLoad.setValue((r * 100) / length);
-			});
-		}
-		return out.toByteArray();
-	}
-
-	private void cleanup() {
-		try {
-			if (this.in != null) {
-				this.in.close();
-			}
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-
-		try {
-			if (this.out != null) {
-				this.out.close();
-			}
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-
-//		try {
-//			if (this.sftp != null) {
-//				this.sftp.disconnect();
-//			}
-//		} catch (Exception e) {
-//			// TODO: handle exception
-//		}
+	private void enableEditor() {
+		setCursor(curDef);
+		btnSave.setEnabled(true);
+		prgLoad.setValue(0);
+		prgLoad.setVisible(false);
+		textArea.setEditable(true);
+		saving.set(false);
 	}
 
 	/*
@@ -830,27 +712,19 @@ public class FormattedEditorWidget extends Widget implements SearchListener {
 	 */
 	@Override
 	public boolean viewClosing() {
-		try {
-			if (closing.get()) {
-				return true;
-			}
-			if (saving.get()) {
-				return true;
-			}
-
-			if (changed) {
-				if (JOptionPane.showConfirmDialog(getWindow(),
-						"Save changes?") != JOptionPane.YES_OPTION) {
-					return true;
-				} else {
-					saveChanges();
-					return true;
-				}
-			}
-			return true;
-		} finally {
-			widgetClosed.set(true);
+		if (saving.get()) {
+			return JOptionPane.showConfirmDialog(getWindow(),
+					"Saving file, if you close now, changes may not be saved.\nAre you sure you want cancel?") == JOptionPane.YES_OPTION;
 		}
+
+		if (changed) {
+			if (JOptionPane.showConfirmDialog(getWindow(),
+					"Close editor?\n\nChanges may not be saved.") != JOptionPane.YES_OPTION) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/*
