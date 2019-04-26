@@ -74,6 +74,7 @@ import nixexplorer.drawables.icons.ScaledIcon;
 import nixexplorer.widgets.Widget;
 import nixexplorer.widgets.component.WaitDialog;
 import nixexplorer.widgets.folderview.FileSelectionDialog;
+import nixexplorer.widgets.folderview.FileSelectionDialog.DialogMode;
 import nixexplorer.widgets.logviewer.LogMonitoringEngine.LineTextSearch;
 import nixexplorer.widgets.util.Utility;
 
@@ -120,7 +121,8 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 			FileSelectionDialog dlg = new FileSelectionDialog(null, fs,
 					getWindow(), false);
 			dlg.setLocationRelativeTo(getWindow());
-			if (dlg.showDialog() == FileSelectionDialog.DialogResult.APPROVE) {
+			if (dlg.showDialog(
+					DialogMode.OPEN) == FileSelectionDialog.DialogResult.APPROVE) {
 				this.path = dlg.getSelectedPath();
 			} else {
 				System.out.println("No file selected closing tab");

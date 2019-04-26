@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,6 +46,7 @@ import javax.swing.border.MatteBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Caret;
 
 import org.fife.rsta.ui.GoToDialog;
 import org.fife.rsta.ui.search.FindDialog;
@@ -73,17 +75,21 @@ import com.jcraft.jsch.SftpException;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
 import nixexplorer.app.AppContext;
+import nixexplorer.app.components.PriviledgedUtility;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.ssh.SshFileSystemWrapper;
 import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.Widget;
+import nixexplorer.widgets.console.TerminalDialog;
 import nixexplorer.widgets.folderview.ContentChangeListener;
+import nixexplorer.widgets.folderview.FileSelectionDialog;
+import nixexplorer.widgets.folderview.FileSelectionDialog.DialogMode;
+import nixexplorer.widgets.folderview.FileSelectionDialog.DialogResult;
 import nixexplorer.widgets.util.Utility;
 
 public class RemoteEditorWidget extends Widget implements SearchListener {
-	private ContentChangeListener listener;
 	private static final long serialVersionUID = -3968450910174508931L;
 	private String file;
 	private RSyntaxTextArea textArea;
@@ -92,13 +98,7 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 	private Box toolbar;
 	private JButton btnSave, btnFind, btnReplace, btnGotoLine, btnReload,
 			btnCut, btnCopy, btnPaste;
-	private SshWrapper wrapper;
-	private ChannelSftp sftp;
-	private InputStream in;
-	private OutputStream out;
-	private int length;
 	private JProgressBar prgLoad;
-	private String tmpFile;
 	private Box statusBox;
 	private boolean changed = false;
 	private FindDialog findDialog;
@@ -106,8 +106,6 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 	private GoToDialog dialog;
 	private AtomicBoolean closing = new AtomicBoolean(false);
 	private AtomicBoolean saving = new AtomicBoolean(false);
-	private AtomicBoolean cancelled = new AtomicBoolean(false);
-	private SaveProgressDialog saveProgressDialog;
 	private String fileName;
 	private Cursor curBusy, curDef;
 	private JCheckBox chkWrapText;
@@ -117,14 +115,14 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 	private String text;
 	private JComboBox<String> cmbTheme;
 	private boolean useTempFile;
+	private JTextField txtFilePath;
 
 	public RemoteEditorWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window) {
 		super(info, args, appSession, window);
-		if (args.length > 0) {
-			this.file = args[0];
-			this.fileName = PathUtils.getFileName(this.file);
-		}
+
+		this.file = null;
+		this.fileName = "Untitled";
 
 		this.curBusy = new Cursor(Cursor.WAIT_CURSOR);
 		this.curDef = new Cursor(Cursor.DEFAULT_CURSOR);
@@ -156,7 +154,7 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 			AppContext.INSTANCE.getConfig().save();
 		});
 
-		JTextField txtFilePath = new JTextField(30);
+		txtFilePath = new JTextField(30);
 		txtFilePath.setFont(
 				new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(14)));
 		txtFilePath.setEditable(false);
@@ -226,7 +224,7 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 		toolbar.add(Box.createHorizontalStrut(Utility.toPixel(5)));
 
 		btnSave.addActionListener(e -> {
-			saveFile();
+			save();
 		});
 
 		btnFind.addActionListener(e -> {
@@ -381,34 +379,23 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 			@Override
 			public void removeUpdate(DocumentEvent e) {
 				System.out.println("document change event");
-				changed = true;
+				setChanged(true);
 			}
 
 			@Override
 			public void insertUpdate(DocumentEvent e) {
 				System.out.println("document change event");
-				changed = true;
+				setChanged(true);
 			}
 
 			@Override
 			public void changedUpdate(DocumentEvent e) {
 				System.out.println("document change event");
-				changed = true;
+				setChanged(true);
 			}
 		});
 
-		saveProgressDialog = new SaveProgressDialog(getWindow(), e -> {
-			cancelled.set(true);
-			new Thread(() -> {
-				try {
-					wrapper.disconnect();
-				} catch (Exception e2) {
-				}
-				saveProgressDialog.setVisible(false);
-			}).start();
-		});
-
-		this.changed = false;
+		setChanged(false);
 
 		for (int i = 0; i < stylesArr.length; i++) {
 			String str = stylesArr[i];
@@ -429,7 +416,7 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				saveFile();
+				save();
 			}
 		});
 
@@ -485,7 +472,10 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 
 		fs = new SshFileSystemWrapper(info);
 
-		retrieveFileContents();
+		if (args.length > 0) {
+			retrieveFileContents(args[0]);
+		}
+
 	}
 
 	/**
@@ -510,7 +500,7 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 		if (changed) {
 			if (JOptionPane.showConfirmDialog(getWindow(),
 					"Changes will be lost. Reload now?") == JOptionPane.YES_OPTION) {
-				retrieveFileContents();
+				retrieveFileContents(this.file);
 			}
 		}
 	}
@@ -560,23 +550,8 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 		findDialog.setVisible(true);
 	}
 
-	/**
-	 * 
-	 */
-	protected void saveFile() {
-		System.out.println("Saving file");
-		try {
-			new Thread(() -> {
-				save();
-			}).start();
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-	}
-
 	@Override
 	public void reconnect() {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -589,20 +564,31 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 		}
 	}
 
-	private String generateTempFile() {
+	private String generateTempFile(boolean inTempDir) {
 		String tmpFile = UUID.randomUUID().toString();
-		String folder = PathUtils.getParent(file);
+		String folder = inTempDir ? "/tmp" : PathUtils.getParent(file);
 		String tmpFullPath = PathUtils.combineUnix(folder, tmpFile);
 		return tmpFullPath;
 	}
 
 	private void save() {
+		if (this.file == null) {
+			FileSelectionDialog dlg = new FileSelectionDialog(null, fs,
+					getWindow(), false);
+			if (dlg.showDialog(DialogMode.SAVE) == DialogResult.APPROVE) {
+				this.file = dlg.getSelectedPath();
+				this.fileName = PathUtils.getFileName(file);
+			} else {
+				return;
+			}
+		}
 		disableEditor();
 		text = textArea.getText();
 		saving.set(true);
 		new Thread(() -> {
 			try {
-				String targetFile = useTempFile ? generateTempFile() : file;
+				String targetFile = useTempFile ? generateTempFile(false)
+						: file;
 				fs.getSftp().put(
 						new ByteArrayInputStream(text.getBytes("utf-8")),
 						targetFile);
@@ -617,18 +603,7 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 					return;
 				}
 
-				ByteArrayOutputStream bout = new ByteArrayOutputStream();
-				fs.copyTo(file, bout, null, ChannelSftp.OVERWRITE, 0);
-				if (widgetClosed.get()) {
-					return;
-				}
-				this.text = new String(bout.toByteArray(), "utf-8");
-
-				SwingUtilities.invokeLater(() -> {
-					textArea.requestFocusInWindow();
-					changed = false;
-				});
-
+				setChanged(false);
 			} catch (SftpException e) {
 				if (e.id == ChannelSftp.SSH_FX_PERMISSION_DENIED) {
 					fallbackSaveWithPriviledge();
@@ -641,7 +616,10 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 				}
 			} finally {
 				saving.set(false);
-				enableEditor();
+				SwingUtilities.invokeLater(() -> {
+					txtFilePath.setText(file);
+					enableEditor();
+				});
 			}
 		}).start();
 	}
@@ -650,28 +628,41 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 	 * 
 	 */
 	private void fallbackSaveWithPriviledge() {
-		// TODO Auto-generated method stub
-
+		try {
+			String targetFile = generateTempFile(true);
+			fs.getSftp().put(new ByteArrayInputStream(text.getBytes("utf-8")),
+					targetFile);
+			String suCmd = PriviledgedUtility.generatePriviledgedCommand(
+					"cp '" + targetFile + "' '" + file + "'");
+			if (suCmd == null) {
+				return;
+			}
+			TerminalDialog terminalDialog = new TerminalDialog(getInfo(),
+					new String[] { "-c", suCmd }, getAppSession(), getWindow(),
+					"Command window", true, true, fs.getWrapper());
+			terminalDialog.setLocationRelativeTo(getWindow());
+			terminalDialog.setVisible(true);
+			if (terminalDialog.getExitCode() == 0) {
+				setChanged(false);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	private void retrieveFileContents() {
+	private void retrieveFileContents(String path) {
 		disableEditor();
+		AtomicBoolean success = new AtomicBoolean(false);
 		new Thread(() -> {
 			try {
-				attrs = fs.getSftp().stat(file);
+				attrs = fs.getSftp().stat(path);
 				ByteArrayOutputStream bout = new ByteArrayOutputStream();
-				fs.copyTo(file, bout, null, ChannelSftp.OVERWRITE, 0);
+				fs.copyTo(path, bout, null, ChannelSftp.OVERWRITE, 0);
 				if (widgetClosed.get()) {
 					return;
 				}
 				this.text = new String(bout.toByteArray(), "utf-8");
-				SwingUtilities.invokeLater(() -> {
-					textArea.setText(text);
-					textArea.setCaretPosition(0);
-					super.updateTabTitle(fileName);
-					changed = false;
-					textArea.requestFocusInWindow();
-				});
+				success.set(true);
 			} catch (Exception e) {
 				e.printStackTrace();
 				if (!widgetClosed.get()) {
@@ -680,8 +671,14 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 				}
 			} finally {
 				SwingUtilities.invokeLater(() -> {
-					this.setCursor(curDef);
 					enableEditor();
+					if (success.get()) {
+						this.file = path;
+						this.fileName = path;
+						textArea.setText(text);
+						textArea.setCaretPosition(0);
+						setChanged(false);
+					}
 				});
 			}
 		}).start();
@@ -703,6 +700,8 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 		prgLoad.setVisible(false);
 		textArea.setEditable(true);
 		saving.set(false);
+		textArea.requestFocusInWindow();
+		textArea.getCaret().setVisible(true);
 	}
 
 	/*
@@ -714,12 +713,12 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 	public boolean viewClosing() {
 		if (saving.get()) {
 			return JOptionPane.showConfirmDialog(getWindow(),
-					"Saving file, if you close now, changes may not be saved.\nAre you sure you want cancel?") == JOptionPane.YES_OPTION;
+					"Close editor?\nChanges may not be saved.") == JOptionPane.YES_OPTION;
 		}
 
 		if (changed) {
 			if (JOptionPane.showConfirmDialog(getWindow(),
-					"Close editor?\n\nChanges may not be saved.") != JOptionPane.YES_OPTION) {
+					"Close editor?\nChanges may not be saved.") != JOptionPane.YES_OPTION) {
 				return false;
 			}
 		}
@@ -755,8 +754,8 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 	 */
 	@Override
 	public void tabSelected() {
-		// TODO Auto-generated method stub
-
+		setChanged(changed);
+		textArea.requestFocusInWindow();
 	}
 
 	/*
@@ -777,12 +776,6 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 	@Override
 	public String getTitle() {
 		return "Text editor";
-	}
-
-	private void closeDocument() {
-		if (changed) {
-
-		}
 	}
 
 	/**
@@ -820,18 +813,17 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 			break;
 		}
 
-		String text = null;
-		if (result != null && result.wasFound()) {
-			text = "Text found; occurrences marked: " + result.getMarkedCount();
-		} else if (type == SearchEvent.Type.MARK_ALL) {
-			if (result.getMarkedCount() > 0) {
-				text = "Occurrences marked: " + result.getMarkedCount();
-			} else {
-				text = "";
-			}
-		} else {
-			text = "Text not found";
-		}
+//		if (result != null && result.wasFound()) {
+//			text = "Text found; occurrences marked: " + result.getMarkedCount();
+//		} else if (type == SearchEvent.Type.MARK_ALL) {
+//			if (result.getMarkedCount() > 0) {
+//				text = "Occurrences marked: " + result.getMarkedCount();
+//			} else {
+//				text = "";
+//			}
+//		} else {
+//			text = "Text not found";
+//		}
 		// statusBar.setLabel(text);
 
 	}
@@ -839,6 +831,11 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 	@Override
 	public String getSelectedText() {
 		return textArea.getSelectedText();
+	}
+
+	private void setChanged(boolean changed) {
+		this.changed = changed;
+		super.updateTabTitle((changed ? "* " : "") + fileName);
 	}
 
 }

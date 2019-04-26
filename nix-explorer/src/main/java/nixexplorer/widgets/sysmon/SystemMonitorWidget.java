@@ -44,6 +44,7 @@ import nixexplorer.ShellScriptLoader;
 import nixexplorer.TextHolder;
 import nixexplorer.app.AppContext;
 import nixexplorer.app.components.CustomTabbedPane;
+import nixexplorer.app.components.PriviledgedUtility;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.FileInfo;
@@ -730,7 +731,8 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	private List<String> runPriviledged(String commandToExecute)
 			throws Exception {
 		List<String> list = new ArrayList<>();
-		String suCmd = generatePriviledgedCommand(commandToExecute);
+		String suCmd = PriviledgedUtility
+				.generatePriviledgedCommand(commandToExecute);
 		if (suCmd == null) {
 			return list;
 		}
@@ -1065,27 +1067,4 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		socketStatus.setText(sb.toString());
 		socketStatus.setCaretPosition(0);
 	}
-
-	private String generatePriviledgedCommand(String cmd) {
-		String suCmd = AskForPriviledgeDlg.askForPriviledge();
-		if (suCmd == null) {
-			return null;
-		}
-		StringBuilder command = new StringBuilder();
-		command.append(suCmd + " ");
-		boolean sudo = false;
-		sudo = suCmd.startsWith("sudo");
-		if (!sudo) {
-			command.append(" '");
-		}
-
-		command.append("sh<<EOF\n" + cmd + "\nEOF\n");
-
-		if (!sudo) {
-			command.append("'");
-		}
-		System.out.println("Command: " + command);
-		return command.toString();
-	}
-
 }

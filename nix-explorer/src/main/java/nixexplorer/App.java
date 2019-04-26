@@ -167,6 +167,8 @@ public final class App {
 	 */
 	private static void loadStrings() {
 		TextHolder.addString("common.ok", "OK");
+		TextHolder.addString("common.save", "Save");
+		TextHolder.addString("common.open", "Open");
 		TextHolder.addString("common.cancel", "Cancel");
 
 		TextHolder.addString("messagebox.ok", "OK");
@@ -382,6 +384,7 @@ public final class App {
 		TextHolder.addString("editor.wrapText", "Wrap text");
 		TextHolder.addString("editor.syntax", "Syntax");
 		TextHolder.addString("editor.theme", "Theme");
+		TextHolder.addString("editor.title", "Text Editor");
 
 		TextHolder.addString("searchbox.search", "Find");
 		TextHolder.addString("searchbox.replace", "Replace");

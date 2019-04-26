@@ -11,6 +11,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.FileNotFoundException;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -59,14 +60,20 @@ public class FileSelectionDialog extends JDialog {
 	private JButton btnGo;
 	private JTextField txtAddress;
 	private String folder;
+	private DialogMode mode;
 
 	public enum DialogResult {
 		APPROVE, CANCEL
 	}
 
+	public enum DialogMode {
+		OPEN, SAVE
+	}
+
 	private DialogResult res = DialogResult.CANCEL;
 
-	public FileSelectionDialog(String path, FileSystemProvider fs, Window window, boolean folderOnly) {
+	public FileSelectionDialog(String path, FileSystemProvider fs,
+			Window window, boolean folderOnly) {
 		super(window);
 		this.fs = fs;
 		setSize(Utility.toPixel(640), Utility.toPixel(480));
@@ -76,7 +83,11 @@ public class FileSelectionDialog extends JDialog {
 		render(path);
 	}
 
-	public DialogResult showDialog() {
+	public DialogResult showDialog(DialogMode mode) {
+		btnOk.setText(
+				mode == DialogMode.OPEN ? TextHolder.getString("common.open")
+						: TextHolder.getString("common.save"));
+		this.mode = mode;
 		setVisible(true);
 		return res;
 	}
@@ -88,7 +99,8 @@ public class FileSelectionDialog extends JDialog {
 		waitCursor = new Cursor(Cursor.WAIT_CURSOR);
 		normalCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 		JPanel pan = new JPanel(new BorderLayout());
-		pan.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
+		pan.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+				Utility.toPixel(5), Utility.toPixel(5)));
 
 		btnUp = new JButton(UIManager.getIcon("AddressBar.up"));
 		btnUp.addActionListener(e -> {
@@ -136,23 +148,29 @@ public class FileSelectionDialog extends JDialog {
 		folderTable.setDefaultRenderer(Long.class, r);
 		folderTable.setDefaultRenderer(Date.class, r);
 
-		TableRowSorter<FolderViewTableModel> sorter = new TableRowSorter<FolderViewTableModel>(folderViewModel);
+		TableRowSorter<FolderViewTableModel> sorter = new TableRowSorter<FolderViewTableModel>(
+				folderViewModel);
 		sorter.setComparator(0, new Comparator<Object>() {
 			@Override
 			public int compare(Object s1, Object s2) {
 				FileInfo info1 = (FileInfo) s1;
 				FileInfo info2 = (FileInfo) s2;
-				if (info1.getType() == FileType.Directory || info1.getType() == FileType.DirLink) {
-					if (info2.getType() == FileType.Directory || info2.getType() == FileType.DirLink) {
-						return info1.getName().compareToIgnoreCase(info2.getName());
+				if (info1.getType() == FileType.Directory
+						|| info1.getType() == FileType.DirLink) {
+					if (info2.getType() == FileType.Directory
+							|| info2.getType() == FileType.DirLink) {
+						return info1.getName()
+								.compareToIgnoreCase(info2.getName());
 					} else {
 						return 1;
 					}
 				} else {
-					if (info2.getType() == FileType.Directory || info2.getType() == FileType.DirLink) {
+					if (info2.getType() == FileType.Directory
+							|| info2.getType() == FileType.DirLink) {
 						return -1;
 					} else {
-						return info1.getName().compareToIgnoreCase(info2.getName());
+						return info1.getName()
+								.compareToIgnoreCase(info2.getName());
 					}
 				}
 			}
@@ -169,17 +187,22 @@ public class FileSelectionDialog extends JDialog {
 
 			@Override
 			public int compare(FileInfo info1, FileInfo info2) {
-				if (info1.getType() == FileType.Directory || info1.getType() == FileType.DirLink) {
-					if (info2.getType() == FileType.Directory || info2.getType() == FileType.DirLink) {
-						return info1.getLastModified().compareTo(info2.getLastModified());
+				if (info1.getType() == FileType.Directory
+						|| info1.getType() == FileType.DirLink) {
+					if (info2.getType() == FileType.Directory
+							|| info2.getType() == FileType.DirLink) {
+						return info1.getLastModified()
+								.compareTo(info2.getLastModified());
 					} else {
 						return 1;
 					}
 				} else {
-					if (info2.getType() == FileType.Directory || info2.getType() == FileType.DirLink) {
+					if (info2.getType() == FileType.Directory
+							|| info2.getType() == FileType.DirLink) {
 						return -1;
 					} else {
-						return info1.getLastModified().compareTo(info2.getLastModified());
+						return info1.getLastModified()
+								.compareTo(info2.getLastModified());
 					}
 				}
 			}
@@ -195,7 +218,8 @@ public class FileSelectionDialog extends JDialog {
 			public void actionPerformed(ActionEvent ae) {
 				FileInfo[] files = getSelectedFiles();
 				if (files.length > 0) {
-					if (files[0].getType() == FileType.Directory || files[0].getType() == FileType.DirLink) {
+					if (files[0].getType() == FileType.Directory
+							|| files[0].getType() == FileType.DirLink) {
 						String str = files[0].getPath();
 						render(str);
 					}
@@ -203,7 +227,8 @@ public class FileSelectionDialog extends JDialog {
 			}
 		});
 
-		folderTable.addKeyListener(new FolderViewKeyHandler(folderTable, folderViewModel));
+		folderTable.addKeyListener(
+				new FolderViewKeyHandler(folderTable, folderViewModel));
 
 		folderTable.addMouseListener(new MouseAdapter() {
 			@Override
@@ -216,20 +241,32 @@ public class FileSelectionDialog extends JDialog {
 						return;
 					}
 					if (r == folderTable.getSelectedRow()) {
-						FileInfo fileInfo = folderViewModel.getItemAt(getRow(r));
-						if (fileInfo.getType() == FileType.Directory || fileInfo.getType() == FileType.DirLink) {
+						FileInfo fileInfo = folderViewModel
+								.getItemAt(getRow(r));
+						if (fileInfo.getType() == FileType.Directory
+								|| fileInfo.getType() == FileType.DirLink) {
 							render(fileInfo.getPath());
 						}
 					}
-				} else if (e.getClickCount() == 1 && e.getButton() == MouseEvent.BUTTON1) {
+				} else if (e.getClickCount() == 1
+						&& e.getButton() == MouseEvent.BUTTON1) {
 					FileInfo[] files = getSelectedFiles();
 					if (files != null && files.length > 0) {
 						FileInfo f = files[0];
-						if (folderOnly && (f.getType() == FileType.Directory || f.getType() == FileType.DirLink)) {
-							txtSelection.setText(f.getPath());
+						if (folderOnly && (f.getType() == FileType.Directory
+								|| f.getType() == FileType.DirLink)) {
+							txtSelection.putClientProperty("text.fullpath",
+									f.getPath());
+							txtSelection.setText(
+									PathUtils.getFileName(f.getPath()));
 						}
-						if (!folderOnly && (f.getType() == FileType.File || f.getType() == FileType.FileLink)) {
-							txtSelection.setText(f.getPath());
+
+						if (!folderOnly && (f.getType() == FileType.File
+								|| f.getType() == FileType.FileLink)) {
+							txtSelection.putClientProperty("text.fullpath",
+									f.getPath());
+							txtSelection.setText(
+									PathUtils.getFileName(f.getPath()));
 						}
 					}
 				}
@@ -246,7 +283,8 @@ public class FileSelectionDialog extends JDialog {
 		b2.add(lbl1);
 		b2.add(Box.createHorizontalStrut(Utility.toPixel(5)));
 		txtSelection = new JTextField(30);
-		txtSelection.setMaximumSize(new Dimension(Integer.MAX_VALUE, txtSelection.getPreferredSize().height));
+		txtSelection.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+				txtSelection.getPreferredSize().height));
 		b2.add(txtSelection);
 		b2.setAlignmentX(Box.LEFT_ALIGNMENT);
 		b1.add(b2);
@@ -254,15 +292,9 @@ public class FileSelectionDialog extends JDialog {
 
 		Box b3 = Box.createHorizontalBox();
 		b3.add(Box.createHorizontalGlue());
-		btnOk = new JButton(TextHolder.getString("common.ok"));
+		btnOk = new JButton();
 		btnOk.addActionListener(e -> {
-			if (txtSelection.getText().length() < 1) {
-				JOptionPane.showMessageDialog(this, TextHolder.getString("fileselection.empty"));
-				return;
-			}
-			res = DialogResult.APPROVE;
-			okClicked = true;
-			dispose();
+			validateSelection();
 		});
 		b3.add(btnOk);
 		b3.add(Box.createHorizontalStrut(Utility.toPixel(5)));
@@ -276,7 +308,8 @@ public class FileSelectionDialog extends JDialog {
 		b3.setAlignmentX(Box.LEFT_ALIGNMENT);
 		b1.add(b3);
 
-		b1.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
+		b1.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+				Utility.toPixel(5), Utility.toPixel(5)));
 
 		pan.add(b1, BorderLayout.SOUTH);
 		add(pan);
@@ -285,7 +318,8 @@ public class FileSelectionDialog extends JDialog {
 			@Override
 			public void windowClosed(WindowEvent e) {
 				if (!okClicked) {
-					System.out.println("Window closed by user, setting result to cancel");
+					System.out.println(
+							"Window closed by user, setting result to cancel");
 					res = DialogResult.CANCEL;
 				}
 			}
@@ -317,7 +351,14 @@ public class FileSelectionDialog extends JDialog {
 	}
 
 	public String getSelectedPath() {
-		return txtSelection.getText();
+		if (txtSelection.getText().length() < 1) {
+			return null;
+		}
+		String text = (String) txtSelection.getClientProperty("text.fullpath");
+		if (text == null) {
+			return PathUtils.combineUnix(folder, txtSelection.getText());
+		}
+		return text;
 	}
 
 	private void disableView() {
@@ -352,17 +393,15 @@ public class FileSelectionDialog extends JDialog {
 				}
 				System.out.println("Home: " + path);
 				List<FileInfo> list = fs.list(path);
-				//System.out.println("List: " + list);
+				// System.out.println("List: " + list);
 				this.folder = path;
 				if (list != null) {
 					SwingUtilities.invokeLater(() -> {
 						folderViewModel.clear();
-						List<FileInfo> files = folderOnly
-								? list.stream()
-										.filter(a -> a.getType() == FileType.Directory
-												|| a.getType() == FileType.DirLink)
-										.collect(Collectors.toList())
-								: list;
+						List<FileInfo> files = folderOnly ? list.stream()
+								.filter(a -> a.getType() == FileType.Directory
+										|| a.getType() == FileType.DirLink)
+								.collect(Collectors.toList()) : list;
 						folderViewModel.addAll(files);
 						txtAddress.setText(this.folder);
 					});
@@ -383,6 +422,48 @@ public class FileSelectionDialog extends JDialog {
 
 	public void setFolderOnly(boolean folderOnly) {
 		this.folderOnly = folderOnly;
+	}
+
+	private void validateSelection() {
+		String selected = getSelectedPath();
+		if (selected == null) {
+			JOptionPane.showMessageDialog(this,
+					TextHolder.getString("fileselection.empty"));
+			return;
+		}
+
+		if (mode == DialogMode.SAVE) {
+			disableView();
+			new Thread(() -> {
+				boolean close = false;
+				try {
+					fs.getInfo(selected);
+					close = JOptionPane.showConfirmDialog(this,
+							"File already exists, overwrite?", "Confirm",
+							JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+				} catch (FileNotFoundException e) {
+					close = true;
+				} catch (Exception e) {
+					e.printStackTrace();
+					JOptionPane.showMessageDialog(this, "Error");
+				}
+
+				boolean shouldClose = close;
+				SwingUtilities.invokeLater(() -> {
+					if (shouldClose) {
+						res = DialogResult.APPROVE;
+						okClicked = true;
+						dispose();
+					} else {
+						enableView();
+					}
+				});
+			}).start();
+		} else {
+			res = DialogResult.APPROVE;
+			okClicked = true;
+			dispose();
+		}
 	}
 
 }

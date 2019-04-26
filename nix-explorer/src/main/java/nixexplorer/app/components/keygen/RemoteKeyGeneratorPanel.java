@@ -12,6 +12,7 @@ import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.ssh.SshFileSystemWrapper;
 import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.widgets.folderview.FileSelectionDialog;
+import nixexplorer.widgets.folderview.FileSelectionDialog.DialogMode;
 
 public class RemoteKeyGeneratorPanel extends KeyGeneratorPanel {
 	private SshFileSystemWrapper ssh;
@@ -30,7 +31,9 @@ public class RemoteKeyGeneratorPanel extends KeyGeneratorPanel {
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
-			String path = this.pubKeyPath == null ? ssh.getHome() + "/.ssh/id_rsa.pub" : pubKeyPath;
+			String path = this.pubKeyPath == null
+					? ssh.getHome() + "/.ssh/id_rsa.pub"
+					: pubKeyPath;
 			ssh.getSftp().get(path, out);
 			this.pubKey = new String(out.toByteArray(), "utf-8");
 			this.pubKeyPath = path;
@@ -52,7 +55,8 @@ public class RemoteKeyGeneratorPanel extends KeyGeneratorPanel {
 		String path1 = ssh.getHome() + "/.ssh/id_rsa";
 		String path = path1 + ".pub";
 
-		String cmd = "ssh-keygen -q -N \"" + passPhrase + "\" -f \"" + path1 + "\"";
+		String cmd = "ssh-keygen -q -N \"" + passPhrase + "\" -f \"" + path1
+				+ "\"";
 
 		try {
 			ssh.getSftp().rm(path1);
@@ -70,7 +74,8 @@ public class RemoteKeyGeneratorPanel extends KeyGeneratorPanel {
 			}
 		}
 
-		if (SshUtility.executeCommand(ssh.getWrapper(), cmd, new ArrayList<String>()) != 0) {
+		if (SshUtility.executeCommand(ssh.getWrapper(), cmd,
+				new ArrayList<String>()) != 0) {
 			throw new Exception();
 		}
 	}
@@ -94,9 +99,11 @@ public class RemoteKeyGeneratorPanel extends KeyGeneratorPanel {
 
 	@Override
 	protected void selectKeyFile() {
-		FileSelectionDialog dlg = new FileSelectionDialog(null, ssh, super.dlg, false);
+		FileSelectionDialog dlg = new FileSelectionDialog(null, ssh, super.dlg,
+				false);
 		dlg.setLocationRelativeTo(super.dlg);
-		if (dlg.showDialog() == FileSelectionDialog.DialogResult.APPROVE) {
+		if (dlg.showDialog(
+				DialogMode.OPEN) == FileSelectionDialog.DialogResult.APPROVE) {
 			this.pubKeyPath = dlg.getSelectedPath();
 			loadKeys();
 		}
