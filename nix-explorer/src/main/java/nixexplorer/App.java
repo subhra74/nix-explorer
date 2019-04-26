@@ -354,6 +354,7 @@ public final class App {
 		TextHolder.addString("duplicate.confirm", "Confirm");
 
 		TextHolder.addString("editor.save", "Save");
+		TextHolder.addString("editor.font", "Font");
 		TextHolder.addString("editor.open", "Open");
 		TextHolder.addString("editor.find", "Find");
 		TextHolder.addString("editor.replace", "Replace");
@@ -1717,6 +1718,23 @@ public final class App {
 						App.class.getResource("/images/" + black + "_down.png"),
 						Utility.toPixel(24), Utility.toPixel(24)));
 
+		UIManager.put("TextEditor.saveAsIcon",
+				new ScaledIcon(
+						App.class.getResource(
+								"/images/" + black + "_save_as.png"),
+						Utility.toPixel(18), Utility.toPixel(18)));
+		
+		UIManager.put("TextEditor.fontIcon",
+				new ScaledIcon(
+						App.class.getResource(
+								"/images/" + black + "_font.png"),
+						Utility.toPixel(18), Utility.toPixel(18)));
+
+		UIManager.put("TextEditor.openIcon",
+				new ScaledIcon(
+						App.class
+								.getResource("/images/" + black + "_files.png"),
+						Utility.toPixel(18), Utility.toPixel(18)));
 		UIManager.put("TextEditor.saveIcon",
 				new ScaledIcon(
 						App.class.getResource("/images/" + black + "_save.png"),

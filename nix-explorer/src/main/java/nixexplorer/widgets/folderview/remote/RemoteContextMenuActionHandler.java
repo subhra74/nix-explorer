@@ -3,6 +3,8 @@
  */
 package nixexplorer.widgets.folderview.remote;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -82,16 +84,16 @@ public class RemoteContextMenuActionHandler
 
 	private AbstractAction aOpenInTab, aOpen, aRename, aDelete, aNewFile,
 			aNewFolder, aCopy, aPaste, aCut, aAddToFav, aChangePerm, aSendFiles,
-			aUpload, aDownload, aCreateLink;
+			aUpload, aDownload, aCreateLink, aCopyPath;
 
 	private KeyStroke ksOpenInTab, ksOpen, ksRename, ksDelete, ksNewFile,
 			ksNewFolder, ksCopy, ksPaste, ksCut, ksAddToFav, ksChangePerm,
-			ksSendFiles, ksUpload, ksDownload, ksCreateLink;
+			ksSendFiles, ksUpload, ksDownload, ksCreateLink, ksCopyPath;
 
 	private JMenuItem mOpenInTab, mOpen, mRename, mDelete, mNewFile, mNewFolder,
 			mCopy, mPaste, mCut, mAddToFav, mChangePerm, mSendFiles, mUpload,
 			mOpenWithDefApp, mOpenWthInternalEdit, mOpenWithCustom,
-			mOpenWithLogView, mDownload, mCreateLink;
+			mOpenWithLogView, mDownload, mCreateLink, mCopyPath;
 
 	private JMenu mOpenWith;
 
@@ -240,6 +242,20 @@ public class RemoteContextMenuActionHandler
 		map.put(ksCopy, "ksCopy");
 		act.put("ksCopy", aCopy);
 		mCopy.setAccelerator(ksCopy);
+
+		ksCopyPath = KeyStroke.getKeyStroke(KeyEvent.VK_C,
+				InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
+		aCopyPath = new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				copyPathToClipboard();
+			}
+		};
+		mCopyPath = new JMenuItem(TextHolder.getString("folderview.copyPath"));
+		mCopyPath.addActionListener(aCopyPath);
+		map.put(ksCopyPath, "ksCopyPath");
+		act.put("ksCopyPath", aCopyPath);
+		mCopyPath.setAccelerator(ksCopyPath);
 
 		ksPaste = KeyStroke.getKeyStroke(KeyEvent.VK_V,
 				InputEvent.CTRL_DOWN_MASK);
@@ -537,55 +553,55 @@ public class RemoteContextMenuActionHandler
 	}
 
 	private void mkdirWithPriviledge(String path, String newFolder) {
-			String suCmd = AskForPriviledgeDlg.askForPriviledge();
-			if (suCmd == null) {
-				return;
-			}
-			StringBuilder command = new StringBuilder("cd \"" + path + "\"; ");
-			command.append(suCmd + " ");
-			boolean sudo = false;
-			sudo = suCmd.startsWith("sudo");
-			if (!sudo) {
-				command.append("'");
-			}
-			command.append("mkdir \"" + newFolder + "\"");
-			if (!sudo) {
-				command.append("; exit'");
-			}
-			System.out.println("Command: " + command);
-			String[] args = new String[2];
-			args[0] = "-c";
-			args[1] = command.toString();
-			System.out.println("Opening terminal: " + command);
-			RemoteFolderViewUtils.openTerminalDialog(command.toString(),
-					remoteFolderView, true, true);
+		String suCmd = AskForPriviledgeDlg.askForPriviledge();
+		if (suCmd == null) {
+			return;
+		}
+		StringBuilder command = new StringBuilder("cd \"" + path + "\"; ");
+		command.append(suCmd + " ");
+		boolean sudo = false;
+		sudo = suCmd.startsWith("sudo");
+		if (!sudo) {
+			command.append("'");
+		}
+		command.append("mkdir \"" + newFolder + "\"");
+		if (!sudo) {
+			command.append("; exit'");
+		}
+		System.out.println("Command: " + command);
+		String[] args = new String[2];
+		args[0] = "-c";
+		args[1] = command.toString();
+		System.out.println("Opening terminal: " + command);
+		RemoteFolderViewUtils.openTerminalDialog(command.toString(),
+				remoteFolderView, true, true);
 	}
 
 	private void touchWithPriviledge(String path, String newFile) {
-			String suCmd = AskForPriviledgeDlg.askForPriviledge();
-			if (suCmd == null) {
-				return;
-			}
-			StringBuilder command = new StringBuilder("cd \"" + path + "\"; ");
-			command.append(suCmd + " ");
-			boolean sudo = false;
-			sudo = suCmd.startsWith("sudo");
-			if (!sudo) {
-				command.append("'");
-			}
-			command.append("touch \"" + newFile + "\"");
-			if (!sudo) {
-				command.append("; exit'");
-			} else {
-				command.append("; exit");
-			}
-			System.out.println("Command: " + command);
-			String[] args = new String[2];
-			args[0] = "-c";
-			args[1] = command.toString();
-			System.out.println("Opening terminal: " + command);
-			RemoteFolderViewUtils.openTerminalDialog(command.toString(),
-					remoteFolderView, true, true);
+		String suCmd = AskForPriviledgeDlg.askForPriviledge();
+		if (suCmd == null) {
+			return;
+		}
+		StringBuilder command = new StringBuilder("cd \"" + path + "\"; ");
+		command.append(suCmd + " ");
+		boolean sudo = false;
+		sudo = suCmd.startsWith("sudo");
+		if (!sudo) {
+			command.append("'");
+		}
+		command.append("touch \"" + newFile + "\"");
+		if (!sudo) {
+			command.append("; exit'");
+		} else {
+			command.append("; exit");
+		}
+		System.out.println("Command: " + command);
+		String[] args = new String[2];
+		args[0] = "-c";
+		args[1] = command.toString();
+		System.out.println("Opening terminal: " + command);
+		RemoteFolderViewUtils.openTerminalDialog(command.toString(),
+				remoteFolderView, true, true);
 	}
 
 	private void delete(FileInfo[] targetList, String baseFolder) {
@@ -771,6 +787,24 @@ public class RemoteContextMenuActionHandler
 		}
 	}
 
+	protected void copyPathToClipboard() {
+		StringBuilder sb = new StringBuilder();
+		boolean first = true;
+		for (FileInfo f : folderView.getSelectedFiles()) {
+			if (!first) {
+				sb.append("\n");
+			}
+			sb.append(f.getPath());
+			if (first) {
+				first = false;
+			}
+		}
+		if (sb.length() > 0) {
+			Toolkit.getDefaultToolkit().getSystemClipboard()
+					.setContents(new StringSelection(sb.toString()), null);
+		}
+	}
+
 	private TransferFileInfo createTransferInfo() {
 
 		TransferFileInfo sf = new TransferFileInfo();
@@ -835,6 +869,7 @@ public class RemoteContextMenuActionHandler
 		if (selectionCount > 0) {
 			popup.add(mCut);
 			popup.add(mCopy);
+			popup.add(mCopyPath);
 		}
 
 		if (AppClipboard.getContent() instanceof TransferFileInfo) {

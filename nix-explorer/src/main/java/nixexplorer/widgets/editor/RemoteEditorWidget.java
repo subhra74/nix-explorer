@@ -88,6 +88,7 @@ import nixexplorer.widgets.folderview.FileSelectionDialog;
 import nixexplorer.widgets.folderview.FileSelectionDialog.DialogMode;
 import nixexplorer.widgets.folderview.FileSelectionDialog.DialogResult;
 import nixexplorer.widgets.util.Utility;
+import support.external.fontchooser.paint.JFontChooser;
 
 public class RemoteEditorWidget extends Widget implements SearchListener {
 	private static final long serialVersionUID = -3968450910174508931L;
@@ -97,7 +98,7 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 	private JComboBox<String> cmbSyntax;
 	private Box toolbar;
 	private JButton btnSave, btnFind, btnReplace, btnGotoLine, btnReload,
-			btnCut, btnCopy, btnPaste;
+			btnCut, btnCopy, btnPaste, btnOpen, btnSaveAs, btnFont;
 	private JProgressBar prgLoad;
 	private Box statusBox;
 	private boolean changed = false;
@@ -170,9 +171,18 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 				new MatteBorder(Utility.toPixel(1), 0, Utility.toPixel(1), 0,
 						UIManager.getColor("DefaultBorder.color")));
 
+		this.btnOpen = new JButton(UIManager.getIcon("TextEditor.openIcon"));
+		this.btnOpen.setBorderPainted(false);
+		this.btnOpen.setToolTipText(TextHolder.getString("editor.open"));
+
 		this.btnSave = new JButton(UIManager.getIcon("TextEditor.saveIcon"));
 		this.btnSave.setBorderPainted(false);
 		this.btnSave.setToolTipText(TextHolder.getString("editor.save"));
+
+		this.btnSaveAs = new JButton(
+				UIManager.getIcon("TextEditor.saveAsIcon"));
+		this.btnSaveAs.setBorderPainted(false);
+		this.btnSaveAs.setToolTipText(TextHolder.getString("editor.saveAs"));
 
 		this.btnFind = new JButton(UIManager.getIcon("TextEditor.findIcon"));
 		this.btnFind.setBorderPainted(false);
@@ -208,12 +218,18 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 		this.btnCopy.setBorderPainted(false);
 		this.btnCopy.setToolTipText(TextHolder.getString("editor.copyText"));
 
+		btnFont = new JButton(UIManager.getIcon("TextEditor.fontIcon"));
+		btnFont.setBorderPainted(false);
+		btnFont.setToolTipText(TextHolder.getString("editor.font"));
+
 		toolbar.add(Box.createHorizontalStrut(Utility.toPixel(15)));
 		// toolbar.add(btnNew);
 		// toolbar.add(Box.createHorizontalStrut(Utility.toPixel(5)));
 		// toolbar.add(btnOpen);
 		// toolbar.add(Box.createHorizontalStrut(Utility.toPixel(5)));
+		toolbar.add(btnOpen);
 		toolbar.add(btnSave);
+		toolbar.add(btnSaveAs);
 		toolbar.add(btnFind);
 		toolbar.add(btnReplace);
 		toolbar.add(btnGotoLine);
@@ -221,10 +237,19 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 		toolbar.add(btnCut);
 		toolbar.add(btnCopy);
 		toolbar.add(btnPaste);
+		toolbar.add(btnFont);
 		toolbar.add(Box.createHorizontalStrut(Utility.toPixel(5)));
+
+		btnOpen.addActionListener(e -> {
+			open();
+		});
 
 		btnSave.addActionListener(e -> {
 			save();
+		});
+
+		btnSaveAs.addActionListener(e -> {
+			saveAs();
 		});
 
 		btnFind.addActionListener(e -> {
@@ -253,6 +278,13 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 
 		btnPaste.addActionListener(e -> {
 			textArea.paste();
+		});
+
+		btnFont.addActionListener(e -> {
+			JFontChooser jfc = new JFontChooser();
+			if (jfc.showDialog(this) == JFontChooser.OK_OPTION) {
+				textArea.setFont(jfc.getSelectedFont());
+			}
 		});
 
 		this.setPreferredSize(
@@ -408,6 +440,18 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 				JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		ActionMap actMap = getActionMap();
 
+		KeyStroke ksOpen = KeyStroke.getKeyStroke(KeyEvent.VK_O,
+				InputEvent.CTRL_DOWN_MASK);
+
+		inpMap.put(ksOpen, "openKey");
+		actMap.put("openKey", new AbstractAction() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				open();
+			}
+		});
+
 		KeyStroke ksSave = KeyStroke.getKeyStroke(KeyEvent.VK_S,
 				InputEvent.CTRL_DOWN_MASK);
 
@@ -417,6 +461,18 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				save();
+			}
+		});
+
+		KeyStroke ksSaveAs = KeyStroke.getKeyStroke(KeyEvent.VK_S,
+				InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
+
+		inpMap.put(ksSaveAs, "saveKeyAs");
+		actMap.put("ksSaveAs", new AbstractAction() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				saveAs();
 			}
 		});
 
@@ -472,10 +528,45 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 
 		fs = new SshFileSystemWrapper(info);
 
+		changed = false;
+
 		if (args.length > 0) {
 			retrieveFileContents(args[0]);
 		}
 
+	}
+
+	/**
+	 * 
+	 */
+	private void saveAs() {
+		FileSelectionDialog dlg = new FileSelectionDialog(null, fs, getWindow(),
+				false);
+		if (dlg.showDialog(DialogMode.SAVE) == DialogResult.APPROVE) {
+			this.file = dlg.getSelectedPath();
+			this.fileName = PathUtils.getFileName(file);
+		} else {
+			return;
+		}
+		save();
+	}
+
+	/**
+	 * 
+	 */
+	private void open() {
+		if (changed) {
+			if (JOptionPane.showConfirmDialog(getWindow(),
+					"Changes will be lost. Proceed?") != JOptionPane.YES_OPTION) {
+				return;
+			}
+		}
+		FileSelectionDialog dlg = new FileSelectionDialog(null, fs, getWindow(),
+				false);
+		if (dlg.showDialog(DialogMode.OPEN) == DialogResult.APPROVE) {
+			String filePath = dlg.getSelectedPath();
+			retrieveFileContents(filePath);
+		}
 	}
 
 	/**
@@ -678,6 +769,7 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 						textArea.setText(text);
 						textArea.setCaretPosition(0);
 						setChanged(false);
+						this.txtFilePath.setText(this.file);
 					}
 				});
 			}

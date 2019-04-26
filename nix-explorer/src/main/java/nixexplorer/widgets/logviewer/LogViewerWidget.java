@@ -367,7 +367,7 @@ public class LogViewerWidget extends Widget implements LogNotificationListener {
 		model = new DefaultListModel<>();
 
 		list = new JList<>(model);
-		list.setFixedCellHeight(Utility.toPixel(20));
+		//list.setFixedCellHeight(Utility.toPixel(20));
 		list.setFont(new Font(Font.MONOSPACED, Font.PLAIN,
 				Utility.toPixel((Integer) spFont.getValue())));
 

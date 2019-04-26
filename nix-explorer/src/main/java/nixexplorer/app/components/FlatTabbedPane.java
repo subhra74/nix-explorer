@@ -95,6 +95,9 @@ public class FlatTabbedPane extends JPanel {
 		lblTab.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				if (pan.getClientProperty("tab.selected") != Boolean.TRUE) {
+					return;
+				}
 				if (closable) {
 					int index = getSelectedIndex();
 					int x = e.getX();
@@ -170,8 +173,8 @@ public class FlatTabbedPane extends JPanel {
 			if (c instanceof JComponent) {
 				((JComponent) c).putClientProperty("tab.selected",
 						Boolean.FALSE);
-				((JComponent) c).setBackground(
-						UIManager.getColor("Panel.secondary"));
+				((JComponent) c)
+						.setBackground(UIManager.getColor("Panel.secondary"));
 				if (closable) {
 					setIcon((JComponent) c,
 							UIManager.getIcon("FlatTabbedPane.blankIcon"));
