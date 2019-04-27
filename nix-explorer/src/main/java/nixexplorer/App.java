@@ -618,6 +618,7 @@ public final class App {
 		TextHolder.addString("app.control.search", "Find Files");
 		TextHolder.addString("app.control.utility", "Utilities");
 		TextHolder.addString("app.local.title", "Local Files");
+		TextHolder.addString("app.remote.title", "Remote Files");
 		TextHolder.addString("app.files.title", "Files");
 		TextHolder.addString("app.control.disconnect", "Disconnect");
 		TextHolder.addString("app.control.notification", "Notification");
@@ -1723,11 +1724,10 @@ public final class App {
 						App.class.getResource(
 								"/images/" + black + "_save_as.png"),
 						Utility.toPixel(18), Utility.toPixel(18)));
-		
+
 		UIManager.put("TextEditor.fontIcon",
 				new ScaledIcon(
-						App.class.getResource(
-								"/images/" + black + "_font.png"),
+						App.class.getResource("/images/" + black + "_font.png"),
 						Utility.toPixel(18), Utility.toPixel(18)));
 
 		UIManager.put("TextEditor.openIcon",
