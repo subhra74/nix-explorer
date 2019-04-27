@@ -23,7 +23,6 @@ import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 import nixexplorer.TextHolder;
-import nixexplorer.app.components.FlatTabbedPane;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionEventAware;
 import nixexplorer.app.session.SessionInfo;

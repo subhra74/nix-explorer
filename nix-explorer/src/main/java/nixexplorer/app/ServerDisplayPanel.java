@@ -45,6 +45,7 @@ import nixexplorer.widgets.folderview.local.LocalFolderViewWidget;
 import nixexplorer.widgets.folderview.remote.RemoteFolderViewWidget;
 import nixexplorer.widgets.http.HttpClient;
 import nixexplorer.widgets.logviewer.LogViewerWidget;
+import nixexplorer.widgets.portforwarding.PortForwardingWidget;
 import nixexplorer.widgets.search.FileSearchWidget;
 import nixexplorer.widgets.sysmon.SystemMonitorWidget;
 import nixexplorer.widgets.util.Utility;
@@ -487,8 +488,16 @@ public class ServerDisplayPanel extends JPanel {
 			mChkConnectivity.addActionListener(e -> {
 				new NetworkChecker(window, info).setVisible(true);
 			});
+			JMenuItem mPortForwarding = new JMenuItem("Port forwarding");
+			mPortForwarding.addActionListener(e -> {
+				PortForwardingWidget w = new PortForwardingWidget(info,
+						new String[] {}, appSession, window);
+				appSession.addToSession(w);
+				addTab(w);
+			});
 			utilityPopup.add(mSshItem);
 			utilityPopup.add(mChkConnectivity);
+			utilityPopup.add(mPortForwarding);
 		}
 
 		utilityPopup.setInvoker(c);

@@ -678,6 +678,10 @@ public final class App {
 		TextHolder.addString("config.button.save", "Save");
 		TextHolder.addString("config.button.cancel", "Cancel");
 
+		TextHolder.addString("pfapp.local", "Local port forwarding");
+		TextHolder.addString("pfapp.remote", "Remote port forwarding");
+		TextHolder.addString("pfapp.dynamic", "Dynamic port forwarding");
+
 		TextHolder.addString("snippet.title", "Command snippets");
 		TextHolder.addString("snippet.add", "New");
 		TextHolder.addString("snippet.delete", "Delete");
@@ -1848,6 +1852,18 @@ public final class App {
 						App.class
 								.getResource("/images/" + black + "_close.png"),
 						Utility.toPixel(14), Utility.toPixel(14)));
+
+		UIManager.put("PortForwarding.on",
+				new ScaledIcon(
+						App.class.getResource(
+								"/images/" + black + "_connected.png"),
+						Utility.toPixel(24), Utility.toPixel(24)));
+
+		UIManager.put("PortForwarding.off",
+				new ScaledIcon(
+						App.class.getResource(
+								"/images/" + black + "_disconnected.png"),
+						Utility.toPixel(24), Utility.toPixel(24)));
 
 		UIManager.put("FlatTabbedPane.blankIcon",
 				new EmptyIcon(Utility.toPixel(14), Utility.toPixel(14)));
