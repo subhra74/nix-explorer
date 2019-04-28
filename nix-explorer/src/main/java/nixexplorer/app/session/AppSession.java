@@ -41,4 +41,6 @@ public interface AppSession {
 	public void createFolderView(String path);
 
 	public void close();
+
+	public void unregisterSessionAwareComponent(SessionEventAware c);
 }

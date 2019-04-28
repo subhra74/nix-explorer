@@ -236,4 +236,12 @@ public final class AppSessionImpl implements AppSession {
 	public void createFolderView(String path) {
 		display.createFolderView(path);
 	}
+
+	@Override
+	public void unregisterSessionAwareComponent(SessionEventAware c) {
+		try {
+			eventAwareComponents.remove(c);
+		} catch (Exception e) {
+		}
+	}
 }

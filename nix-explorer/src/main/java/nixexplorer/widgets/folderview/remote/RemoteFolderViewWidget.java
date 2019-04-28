@@ -608,6 +608,7 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 	public void viewClosed() {
 		super.viewClosed();
 		close();
+		appSession.unregisterSessionAwareComponent(this);
 	}
 
 	/*

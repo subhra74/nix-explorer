@@ -427,6 +427,7 @@ public final class TabbedConsoleWidget extends Widget
 	@Override
 	public void close() {
 		stopFlag.set(true);
+		appSession.unregisterSessionAwareComponent(this);
 		new Thread(() -> {
 			try {
 				System.out.println("Terminal connection closing...");

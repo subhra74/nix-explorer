@@ -95,15 +95,16 @@ public class FlatTabbedPane extends JPanel {
 		lblTab.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (pan.getClientProperty("tab.selected") != Boolean.TRUE) {
-					return;
-				}
+				
 				if (closable) {
 					int index = getSelectedIndex();
 					int x = e.getX();
 					int iw = lblTab.getWidth() - lblTab.getIcon().getIconWidth()
 							- Utility.toPixel(5);
 					if (x >= iw) {
+						if (pan.getClientProperty("tab.selected") != Boolean.TRUE) {
+							return;
+						}
 						if (!closeTab(index)) {
 							return;
 						}
