@@ -20,12 +20,13 @@ public class PortForwardingEntry {
 		this.name = name;
 		this.target = target;
 		this.targetPort = targetPort;
-		this.localPort = localPort;
+		this.sourcePort = localPort;
+		this.bindAddress = bindAddress;
 	}
 
 	private String target;
 	private int targetPort;
-	private int localPort;
+	private int sourcePort;
 	private String name;
 	private boolean connected;
 	private String bindAddress;
@@ -61,15 +62,15 @@ public class PortForwardingEntry {
 	/**
 	 * @return the localPort
 	 */
-	public int getLocalPort() {
-		return localPort;
+	public int getSourcePort() {
+		return sourcePort;
 	}
 
 	/**
 	 * @param localPort the localPort to set
 	 */
-	public void setLocalPort(int localPort) {
-		this.localPort = localPort;
+	public void setSourcePort(int localPort) {
+		this.sourcePort = localPort;
 	}
 
 	/**

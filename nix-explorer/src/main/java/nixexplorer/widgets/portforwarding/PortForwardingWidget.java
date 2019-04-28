@@ -8,6 +8,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Window;
+import java.io.IOException;
 
 import javax.swing.Box;
 import javax.swing.Icon;
@@ -46,6 +47,7 @@ public class PortForwardingWidget extends Widget {
 	private JTable localTable, remoteTable;
 	private PortForwardingTableModel localModel, remoteModel;
 	private SshWrapper wrapper;
+	private static final Object LOCK = new Object();
 
 	/**
 	 * @param info
@@ -60,8 +62,8 @@ public class PortForwardingWidget extends Widget {
 		tabs.addCustomTab(TextHolder.getString("pfapp.local"), createLocalPF());
 		tabs.addCustomTab(TextHolder.getString("pfapp.remote"),
 				createRemotePF());
-		tabs.addCustomTab(TextHolder.getString("pfapp.dynamic"),
-				createDynamicPF());
+//		tabs.addCustomTab(TextHolder.getString("pfapp.dynamic"),
+//				createDynamicPF());
 
 		add(tabs);
 	}
@@ -114,6 +116,11 @@ public class PortForwardingWidget extends Widget {
 			int r = localTable.getSelectedRow();
 			if (r != -1) {
 				PortForwardingEntry ent = localModel.get(r);
+				if (ent.isConnected()) {
+					JOptionPane.showMessageDialog(this,
+							"To edit this entry, please disconnect first");
+					return;
+				}
 				if (createOrEditEntry(ent) != null) {
 					localModel.refresh();
 				}
@@ -123,6 +130,12 @@ public class PortForwardingWidget extends Widget {
 		btnDel.addActionListener(e -> {
 			int r = localTable.getSelectedRow();
 			if (r != -1) {
+				PortForwardingEntry ent = localModel.get(r);
+				if (ent.isConnected()) {
+					JOptionPane.showMessageDialog(this,
+							"To delete this entry, please disconnect first");
+					return;
+				}
 				localModel.remove(r);
 			}
 		});
@@ -130,29 +143,38 @@ public class PortForwardingWidget extends Widget {
 		btnConn.addActionListener(e -> {
 			int r = localTable.getSelectedRow();
 			if (r != -1) {
-				PortForwardingEntry ent = localModel.get(r);
-				ent.setConnected(true);
-				if (wrapper == null || !wrapper.isConnected()) {
-					new Thread(() -> {
-						try {
-							this.wrapper = SshUtility.connectWrapper(info,
-									widgetClosed);
-							this.wrapper.getSession().setPortForwardingL(
-									ent.getBindAddress(), ent.getLocalPort(),
-									ent.getTarget(), ent.getTargetPort());
 
-						} catch (Exception e1) {
-							e1.printStackTrace();
-							SwingUtilities.invokeLater(() -> {
-								ent.setConnected(false);
-							});
-						} finally {
-							SwingUtilities.invokeLater(() -> {
-								localModel.refresh();
-							});
-						}
-					}).start();
+				PortForwardingEntry ent = localModel.get(r);
+				if (ent.isConnected()) {
+					return;
 				}
+				ent.setConnected(true);
+
+				new Thread(() -> {
+					try {
+						if (wrapper == null || !wrapper.isConnected()) {
+							synchronized (LOCK) {
+								this.wrapper = SshUtility.connectWrapper(info,
+										widgetClosed);
+							}
+						}
+						this.wrapper.getSession().setPortForwardingL(
+								ent.getBindAddress(), ent.getSourcePort(),
+								ent.getTarget(), ent.getTargetPort());
+
+					} catch (Exception e1) {
+						e1.printStackTrace();
+						JOptionPane.showMessageDialog(this, "Error");
+						SwingUtilities.invokeLater(() -> {
+							ent.setConnected(false);
+						});
+					} finally {
+						SwingUtilities.invokeLater(() -> {
+							localModel.refresh();
+						});
+					}
+				}).start();
+
 			}
 		});
 
@@ -160,14 +182,18 @@ public class PortForwardingWidget extends Widget {
 			int r = localTable.getSelectedRow();
 			if (r != -1) {
 				PortForwardingEntry ent = localModel.get(r);
+				if (!ent.isConnected()) {
+					return;
+				}
 				try {
-					if (wrapper == null || !wrapper.isConnected()) {
+					if (wrapper == null || !wrapper.isConnected()
+							|| !ent.isConnected()) {
 						return;
 					}
 					new Thread(() -> {
 						try {
 							this.wrapper.getSession().delPortForwardingL(
-									ent.getBindAddress(), ent.getLocalPort());
+									ent.getBindAddress(), ent.getSourcePort());
 
 						} catch (Exception e1) {
 							e1.printStackTrace();
@@ -194,8 +220,10 @@ public class PortForwardingWidget extends Widget {
 		JLabel lblTitle = new JLabel("Remote port forwarding rules");
 		remoteModel = new PortForwardingTableModel();
 		remoteTable = new JTable(remoteModel);
-		remoteTable.setDefaultRenderer(Object.class,
-				new PortForwardingRenderer());
+		PortForwardingRenderer rr = new PortForwardingRenderer();
+		remoteTable.setDefaultRenderer(Object.class, rr);
+		remoteTable.setRowHeight(
+				rr.getPreferredSize().height + Utility.toPixel(10));
 		remoteTable.setShowGrid(false);
 		remoteTable.setIntercellSpacing(new Dimension(0, 0));
 		remoteTable.setFillsViewportHeight(true);
@@ -231,9 +259,14 @@ public class PortForwardingWidget extends Widget {
 		});
 
 		btnEdit.addActionListener(e -> {
-			int r = localTable.getSelectedRow();
+			int r = remoteTable.getSelectedRow();
 			if (r != -1) {
-				PortForwardingEntry ent = localModel.get(r);
+				PortForwardingEntry ent = remoteModel.get(r);
+				if (ent.isConnected()) {
+					JOptionPane.showMessageDialog(this,
+							"To edit this entry, please disconnect first");
+					return;
+				}
 				if (createOrEditEntry(ent) != null) {
 					remoteModel.refresh();
 				}
@@ -243,7 +276,89 @@ public class PortForwardingWidget extends Widget {
 		btnDel.addActionListener(e -> {
 			int r = remoteTable.getSelectedRow();
 			if (r != -1) {
+				PortForwardingEntry ent = remoteModel.get(r);
+				if (ent.isConnected()) {
+					JOptionPane.showMessageDialog(this,
+							"To delete this entry, please disconnect first");
+					return;
+				}
 				remoteModel.remove(r);
+			}
+		});
+
+		btnConn.addActionListener(e -> {
+			int r = remoteTable.getSelectedRow();
+			if (r != -1) {
+
+				PortForwardingEntry ent = remoteModel.get(r);
+				if (ent.isConnected()) {
+					return;
+				}
+				ent.setConnected(true);
+
+				new Thread(() -> {
+					try {
+						if (wrapper == null || !wrapper.isConnected()) {
+							synchronized (LOCK) {
+								this.wrapper = SshUtility.connectWrapper(info,
+										widgetClosed);
+							}
+						}
+
+						this.wrapper.getSession().setPortForwardingR(
+								ent.getBindAddress(), ent.getSourcePort(),
+								ent.getTarget(), ent.getTargetPort());
+
+//						this.wrapper.getSession().setPortForwardingL(
+//								ent.getBindAddress(), ent.getSourcePort(),
+//								ent.getTarget(), ent.getTargetPort());
+
+					} catch (Exception e1) {
+						e1.printStackTrace();
+						JOptionPane.showMessageDialog(this, "Error");
+						SwingUtilities.invokeLater(() -> {
+							ent.setConnected(false);
+						});
+					} finally {
+						SwingUtilities.invokeLater(() -> {
+							remoteModel.refresh();
+						});
+					}
+				}).start();
+
+			}
+		});
+
+		btnDisConn.addActionListener(e -> {
+			int r = remoteTable.getSelectedRow();
+			if (r != -1) {
+				PortForwardingEntry ent = remoteModel.get(r);
+				if (!ent.isConnected()) {
+					return;
+				}
+				try {
+					if (wrapper == null || !wrapper.isConnected()
+							|| !ent.isConnected()) {
+						return;
+					}
+					new Thread(() -> {
+						try {
+							this.wrapper.getSession().delPortForwardingR(
+									ent.getBindAddress(), ent.getSourcePort());
+
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						} finally {
+							SwingUtilities.invokeLater(() -> {
+								ent.setConnected(false);
+								remoteModel.refresh();
+							});
+						}
+					}).start();
+
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
 
@@ -261,7 +376,7 @@ public class PortForwardingWidget extends Widget {
 		if (e != null) {
 			txtName.setText(e.getName());
 			txtHost.setText(e.getTarget());
-			sp1.setValue(e.getLocalPort());
+			sp1.setValue(e.getSourcePort());
 			sp2.setValue(e.getTargetPort());
 			txtBindAddr.setText(e.getBindAddress());
 		}
@@ -291,11 +406,11 @@ public class PortForwardingWidget extends Widget {
 				continue;
 			}
 			if (e == null) {
-				e = new PortForwardingEntry(name, host, p1, p2, bindAddress);
+				e = new PortForwardingEntry(name, host, p2, p1, bindAddress);
 			} else {
 				e.setName(name);
 				e.setTarget(host);
-				e.setLocalPort(p1);
+				e.setSourcePort(p1);
 				e.setTargetPort(p2);
 				e.setBindAddress(bindAddress);
 			}
@@ -339,6 +454,9 @@ public class PortForwardingWidget extends Widget {
 				Utility.toPixel(5), Utility.toPixel(5)));
 
 		p.add(b1);
+		
+		
+		
 		return p;
 	}
 
@@ -363,7 +481,15 @@ public class PortForwardingWidget extends Widget {
 	@Override
 	public boolean viewClosing() {
 		new Thread(() -> {
-			close();
+			synchronized (LOCK) {
+				if (wrapper != null) {
+					try {
+						wrapper.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
 		}).start();
 		return true;
 	}

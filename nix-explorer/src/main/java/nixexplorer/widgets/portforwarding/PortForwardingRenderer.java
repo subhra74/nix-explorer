@@ -25,8 +25,8 @@ public class PortForwardingRenderer extends JLabel
 	 */
 	public PortForwardingRenderer() {
 		setText("Dummy text");
-		setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10),
-				Utility.toPixel(10), Utility.toPixel(10)));
+		setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+				Utility.toPixel(5), Utility.toPixel(5)));
 	}
 
 	@Override

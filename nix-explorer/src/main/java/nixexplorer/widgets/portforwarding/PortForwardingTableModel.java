@@ -13,8 +13,8 @@ import javax.swing.table.AbstractTableModel;
  *
  */
 public class PortForwardingTableModel extends AbstractTableModel {
-	private String columns[] = { "Name", "Local port", "Target host",
-			"Target port", "Bind address" };
+	private String columns[] = { "Name", "Source port", "Target host",
+			"Target port", "Bind address", "Connected" };
 	private List<PortForwardingEntry> list = new ArrayList<>();
 
 	@Override
@@ -34,13 +34,15 @@ public class PortForwardingTableModel extends AbstractTableModel {
 		case 0:
 			return lpf;
 		case 1:
-			return lpf.getLocalPort();
+			return lpf.getSourcePort();
 		case 2:
 			return lpf.getTarget();
 		case 3:
 			return lpf.getTargetPort();
 		case 4:
 			return lpf.getBindAddress();
+		case 5:
+			return lpf.isConnected() ? "Yes" : "No";
 		}
 		return "";
 	}
@@ -56,8 +58,9 @@ public class PortForwardingTableModel extends AbstractTableModel {
 	}
 
 	public void add(PortForwardingEntry e) {
+		int r = list.size();
 		list.add(e);
-		fireTableDataChanged();
+		fireTableRowsInserted(r, r);
 	}
 
 	public void remove(int index) {
