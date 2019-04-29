@@ -1,16 +1,6 @@
 CMD_PATH=""
 
-my_whereis(){
-	for cmdpath in /bin/ /sbin/ /usr/bin/ /usr/local/bin/ /usr/local/sbin/
-	do
-		if [ -f "$cmdpath$1" ]
-		then
-			CMD_PATH="$cmdpath$1"
-			return 0
-		fi
-	done
-	return 1
-}
+export PATH=$PATH:/bin:/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin
 
 sysinfo(){
 echo "System information:"
