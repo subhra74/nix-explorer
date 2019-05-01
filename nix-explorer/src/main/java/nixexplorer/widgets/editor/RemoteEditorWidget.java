@@ -765,7 +765,7 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 					enableEditor();
 					if (success.get()) {
 						this.file = path;
-						this.fileName = path;
+						this.fileName = PathUtils.getFileName(path);
 						textArea.setText(text);
 						textArea.setCaretPosition(0);
 						setChanged(false);

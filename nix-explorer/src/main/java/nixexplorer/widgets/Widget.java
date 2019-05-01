@@ -147,7 +147,7 @@ public abstract class Widget extends JPanel implements TabbedChild {
 	protected void updateTabTitle(String title) {
 		if (title != null) {
 			if (lblTitleTab != null) {
-				String fileName = PathUtils.getFileName(getTabTitle(title));
+				String fileName = getTabTitle(title);
 				lblTitleTab.setText(fileName);
 			}
 		}
