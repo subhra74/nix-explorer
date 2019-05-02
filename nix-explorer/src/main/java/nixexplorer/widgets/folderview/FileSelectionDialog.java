@@ -354,11 +354,7 @@ public class FileSelectionDialog extends JDialog {
 		if (txtSelection.getText().length() < 1) {
 			return null;
 		}
-		String text = (String) txtSelection.getClientProperty("text.fullpath");
-		if (text == null) {
-			return PathUtils.combineUnix(folder, txtSelection.getText());
-		}
-		return text;
+		return PathUtils.combineUnix(folder, txtSelection.getText());
 	}
 
 	private void disableView() {
@@ -404,6 +400,7 @@ public class FileSelectionDialog extends JDialog {
 								.collect(Collectors.toList()) : list;
 						folderViewModel.addAll(files);
 						txtAddress.setText(this.folder);
+						txtSelection.setText("");
 					});
 				}
 			} catch (Exception e) {

@@ -194,6 +194,15 @@ public class AppConfig {
 		private boolean confirmBeforeDelete;
 		private String externalEditor;
 		private ViewMode viewMode = ViewMode.Details;
+		private boolean showLocalSidePane;
+
+		public boolean isShowLocalSidePane() {
+			return showLocalSidePane;
+		}
+
+		public void setShowLocalSidePane(boolean showLocalSidePane) {
+			this.showLocalSidePane = showLocalSidePane;
+		}
 
 		private List<String> remoteBookmarks = new ArrayList<>();
 		private List<String> localBookmarks = new ArrayList<>();

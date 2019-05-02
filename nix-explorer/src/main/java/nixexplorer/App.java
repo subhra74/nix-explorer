@@ -1616,7 +1616,7 @@ public final class App {
 		UIManager.put("ServerList.offlineIcon",
 				new ScaledIcon(
 						App.class.getResource(
-								"/images/" + black + "_offline.png"),
+								"/images/" + black + "_connected.png"),
 						Utility.toPixel(32), Utility.toPixel(32)));
 
 		UIManager.put("ServerList.searchIcon",
@@ -1871,6 +1871,10 @@ public final class App {
 		Icon smallFolder = new ScaledIcon(
 				App.class.getResource("/images/folder.png"),
 				Utility.toPixel(20), Utility.toPixel(20));
+		
+		Icon treeFolder = new ScaledIcon(
+				App.class.getResource("/images/long_folder.png"),
+				Utility.toPixel(20), Utility.toPixel(20));
 
 		Icon smallFile = new ScaledIcon(
 				App.class.getResource("/images/fileicon.png"),
@@ -1880,7 +1884,7 @@ public final class App {
 		UIManager.put("ListView.smallFile", smallFile);
 		UIManager.put("ListView.smallFile", smallFile);
 		UIManager.put("Tree.closedIcon", smallFolder);
-		UIManager.put("Tree.openIcon", smallFolder);
+		UIManager.put("Tree.openIcon", treeFolder);
 		UIManager.put("Tree.leafIcon", smallFile);
 
 	}

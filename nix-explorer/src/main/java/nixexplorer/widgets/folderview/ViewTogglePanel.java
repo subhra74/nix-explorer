@@ -39,7 +39,7 @@ public class ViewTogglePanel {
 
 		b1 = Box.createHorizontalBox();
 		b1.add(btnListView);
-		b1.add(Box.createHorizontalStrut(Utility.toPixel(5)));
+		//b1.add(Box.createHorizontalStrut(Utility.toPixel(5)));
 		b1.add(btnDetailsView);
 
 		setViewMode(viewMode);

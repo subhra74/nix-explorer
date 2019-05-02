@@ -260,11 +260,11 @@ public abstract class TabbedFolderViewWidget extends Widget
 		glassPane.addMouseListener(new MouseAdapter() {
 		});
 		glassPane.setOpaque(false);
-		JButton btn = new JButton("Cancel");
-		btn.addActionListener(e -> {
-			cancel();
-		});
-		glassPane.add(btn);
+//		JButton btn = new JButton("Cancel");
+//		btn.addActionListener(e -> {
+//			cancel();
+//		});
+//		glassPane.add(btn);
 		glassPane.setVisible(false);
 		return glassPane;
 	}

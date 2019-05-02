@@ -675,7 +675,6 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 			try {
 				System.out.println("Cancelling...");
 				this.fs.close();
-				;
 			} catch (Exception e) {
 			} finally {
 				enableView();
