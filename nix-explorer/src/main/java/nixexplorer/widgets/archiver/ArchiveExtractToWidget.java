@@ -66,6 +66,7 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 	private JPanel panel1, panel2;
 	private JTextField txtFile;
 	private JButton btnOK, btnCancel;
+	private final static Object LOCK = new Object();
 
 	public ArchiveExtractToWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window) {
@@ -284,12 +285,14 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 	private void stop() {
 		new Thread(() -> {
 			stopFlag.set(true);
-			try {
-				if (wrapper != null) {
-					System.out.println("Disconnecting decompressor");
-					wrapper.disconnect();
+			synchronized (LOCK) {
+				try {
+					if (wrapper != null) {
+						System.out.println("Disconnecting decompressor");
+						wrapper.disconnect();
+					}
+				} catch (Exception e) {
 				}
-			} catch (Exception e) {
 			}
 		}).start();
 	}
@@ -379,7 +382,9 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 				log(TextHolder.getString("archiver.error"));
 			}
 		} finally {
-			wrapper.disconnect();
+			synchronized (LOCK) {
+				wrapper.disconnect();
+			}
 			stopProgress();
 		}
 	}

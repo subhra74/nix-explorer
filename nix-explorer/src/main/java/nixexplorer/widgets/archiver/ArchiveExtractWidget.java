@@ -51,6 +51,7 @@ public class ArchiveExtractWidget extends JDialog implements Runnable {
 	private SessionInfo info;
 	private AppSession appSession;
 	private AtomicBoolean stopFlag = new AtomicBoolean(false);
+	private final static Object LOCK = new Object();
 
 	public ArchiveExtractWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window) {
@@ -188,12 +189,16 @@ public class ArchiveExtractWidget extends JDialog implements Runnable {
 	private void stop() {
 		new Thread(() -> {
 			stopFlag.set(true);
-			try {
-				if (wrapper != null) {
-					System.out.println("Disconnecting decompressor");
-					wrapper.disconnect();
+			synchronized (LOCK) {
+				try {
+					if (wrapper != null) {
+						System.out.println("Disconnecting decompressor");
+
+						wrapper.disconnect();
+
+					}
+				} catch (Exception e) {
 				}
-			} catch (Exception e) {
 			}
 		}).start();
 	}
@@ -227,7 +232,9 @@ public class ArchiveExtractWidget extends JDialog implements Runnable {
 	private void extractAsync(String path) {
 		System.out.println("Extracting.. " + path);
 		try {
-			wrapper = SshUtility.connectWrapper(info, stopFlag);
+			synchronized (LOCK) {
+				wrapper = SshUtility.connectWrapper(info, stopFlag);
+			}
 			// wrapper.connect();
 			String extractCmd = ArchiveExtractWidget
 					.getExtractCmd(path.toLowerCase());
@@ -281,7 +288,9 @@ public class ArchiveExtractWidget extends JDialog implements Runnable {
 				log(TextHolder.getString("archiver.error"));
 			}
 		} finally {
-			wrapper.disconnect();
+			synchronized (LOCK) {
+				wrapper.disconnect();
+			}
 			stopProgress();
 		}
 	}

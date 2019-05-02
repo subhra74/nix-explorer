@@ -63,6 +63,7 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 	private SessionInfo info;
 	private AppSession appSession;
 	private AtomicBoolean stopFlag = new AtomicBoolean(false);
+	private final static Object LOCK = new Object();
 
 	public ArchiveCompressWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window) {
@@ -263,7 +264,11 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 			stopFlag.set(true);
 			try {
 				System.out.println("Disconnecting compressor");
-				wrapper.disconnect();
+				synchronized (LOCK) {
+					if (wrapper != null) {
+						wrapper.disconnect();
+					}
+				}
 			} catch (Exception e) {
 			}
 		}).start();
@@ -280,7 +285,10 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 			setTitle(TextHolder.getString("archiver.compressing"));
 		});
 		try {
-			wrapper = SshUtility.connectWrapper(info, stopFlag);
+			synchronized (LOCK) {
+				wrapper = SshUtility.connectWrapper(info, stopFlag);
+			}
+
 //			wrapper = new SshWrapper(info);
 //			wrapper.connect();
 
@@ -338,7 +346,9 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 				});
 			}
 		} finally {
-			wrapper.disconnect();
+			synchronized (LOCK) {
+				wrapper.disconnect();
+			}
 			stopProgress();
 		}
 	}
