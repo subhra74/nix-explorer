@@ -40,8 +40,12 @@ import com.jcraft.jsch.ChannelExec;
 import nixexplorer.TextHolder;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.ssh.SshFileSystemWrapper;
 import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
+import nixexplorer.widgets.folderview.FileSelectionDialog;
+import nixexplorer.widgets.folderview.FileSelectionDialog.DialogMode;
+import nixexplorer.widgets.folderview.FileSelectionDialog.DialogResult;
 import nixexplorer.widgets.util.Utility;
 
 /**
@@ -57,7 +61,6 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 	private String file;
 	private JProgressBar prg;
 	private String folder;
-	private SshWrapper wrapper;
 	private String files;
 	private SessionInfo info;
 	private AppSession appSession;
@@ -66,10 +69,10 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 	private JPanel panel1, panel2;
 	private JTextField txtFile;
 	private JButton btnOK, btnCancel;
+	private SshFileSystemWrapper fs;
 	private final static Object LOCK = new Object();
 
-	public ArchiveExtractToWidget(SessionInfo info, String[] args,
-			AppSession appSession, Window window) {
+	public ArchiveExtractToWidget(SessionInfo info, String[] args, AppSession appSession, Window window) {
 		super(window);
 		this.info = info;
 		this.appSession = appSession;
@@ -86,12 +89,13 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 		this.file = args[1];
 		this.folder = args[0];
 
-		System.out.println("Extract params: file: " + this.file + " folder: "
-				+ this.folder);
+		System.out.println("Extract params: file: " + this.file + " folder: " + this.folder);
 
 		panel1 = createExtractToPanel();
 		panel2 = createExtractPanel();
 		add(panel1);
+
+		fs = new SshFileSystemWrapper(info);
 
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(new WindowAdapter() {
@@ -110,8 +114,8 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 		panel1 = new JPanel();
 		BoxLayout bl = new BoxLayout(panel1, BoxLayout.Y_AXIS);
 		panel1.setLayout(bl);
-		p2.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10),
-				Utility.toPixel(10), Utility.toPixel(10)));
+		p2.setBorder(
+				new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
 
 		JLabel lblName = new JLabel(TextHolder.getString("archiver.filename"));
 		lblName.setAlignmentX(LEFT_ALIGNMENT);
@@ -121,30 +125,40 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 
 		txtFile = new JTextField(30);
 		txtFile.setAlignmentX(LEFT_ALIGNMENT);
-		txtFile.setMaximumSize(new Dimension(Integer.MAX_VALUE,
-				txtFile.getPreferredSize().height));
+		txtFile.setMaximumSize(new Dimension(Integer.MAX_VALUE, txtFile.getPreferredSize().height));
 		txtFile.setEditable(false);
 		txtFile.setText(this.file);
 		panel1.add(txtFile);
 
 		panel1.add(Box.createRigidArea(new Dimension(0, Utility.toPixel(10))));
 
-		JLabel lblTarget = new JLabel(
-				TextHolder.getString("archiver.extractto"));
+		JLabel lblTarget = new JLabel(TextHolder.getString("archiver.extractto"));
 		lblTarget.setAlignmentX(LEFT_ALIGNMENT);
 		panel1.add(lblTarget);
 
-		txtTargetDir = new JTextField();
+		txtTargetDir = new JTextField(30);
 		txtTargetDir.setText(this.folder);
-		txtTargetDir.setAlignmentX(LEFT_ALIGNMENT);
-		panel1.add(txtTargetDir);
+
+		Box b32 = Box.createHorizontalBox();
+		b32.setAlignmentX(LEFT_ALIGNMENT);
+		b32.add(txtTargetDir);
+
+		JButton btnBrowse = new JButton("...");
+		btnBrowse.addActionListener(e -> {
+			FileSelectionDialog dlg = new FileSelectionDialog(folder, fs, this, true);
+			if (dlg.showDialog(DialogMode.OPEN) == DialogResult.APPROVE) {
+				this.txtTargetDir.setText(dlg.getSelectedPath());
+			}
+		});
+		b32.add(Box.createRigidArea(new Dimension(Utility.toPixel(5), Utility.toPixel(5))));
+		b32.add(btnBrowse);
+		panel1.add(b32);
 
 		panel1.add(Box.createRigidArea(new Dimension(0, Utility.toPixel(5))));
 
-		txtTargetDir.setMaximumSize(new Dimension(Integer.MAX_VALUE,
-				txtTargetDir.getPreferredSize().height));
+		txtTargetDir.setMaximumSize(new Dimension(Integer.MAX_VALUE, txtTargetDir.getPreferredSize().height));
 
-		panel1.add(txtTargetDir);
+		//panel1.add(txtTargetDir);
 
 		panel1.add(Box.createRigidArea(new Dimension(0, Utility.toPixel(10))));
 
@@ -209,20 +223,13 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 				};
 			});
 			extractCommands.put(".tar", "cat \"%s\"|tar -C \"%s\" -xvf -");
-			extractCommands.put(".tar.gz",
-					"gunzip -c <\"%s\"|tar -C \"%s\" -xvf -");
-			extractCommands.put(".tgz",
-					"gunzip -c <\"%s\"|tar -C \"%s\" -xvf -");
-			extractCommands.put(".tar.bz2",
-					"bzip2 -d -c <\"%s\"|tar -C \"%s\" -xvf -");
-			extractCommands.put(".tbz2",
-					"bzip2 -d -c <\"%s\"|tar -C \"%s\" -xvf -");
-			extractCommands.put(".tbz",
-					"bzip2 -d -c <\"%s\"|tar -C \"%s\" -xvf -");
-			extractCommands.put(".tar.xz",
-					"xz -d -c <\"%s\"|tar -C \"%s\" -xvf -");
-			extractCommands.put(".txz",
-					"xz -d -c <\"%s\"|tar -C \"%s\" -xvf -");
+			extractCommands.put(".tar.gz", "gunzip -c <\"%s\"|tar -C \"%s\" -xvf -");
+			extractCommands.put(".tgz", "gunzip -c <\"%s\"|tar -C \"%s\" -xvf -");
+			extractCommands.put(".tar.bz2", "bzip2 -d -c <\"%s\"|tar -C \"%s\" -xvf -");
+			extractCommands.put(".tbz2", "bzip2 -d -c <\"%s\"|tar -C \"%s\" -xvf -");
+			extractCommands.put(".tbz", "bzip2 -d -c <\"%s\"|tar -C \"%s\" -xvf -");
+			extractCommands.put(".tar.xz", "xz -d -c <\"%s\"|tar -C \"%s\" -xvf -");
+			extractCommands.put(".txz", "xz -d -c <\"%s\"|tar -C \"%s\" -xvf -");
 			extractCommands.put(".zip", "unzip -o \"%s\" -d \"%s\" ");
 		}
 		for (String key : extractCommands.keySet()) {
@@ -240,15 +247,13 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 	}
 
 	private JPanel createExtractPanel() {
-		JPanel panel = new JPanel(
-				new BorderLayout(Utility.toPixel(10), Utility.toPixel(10)));
-		panel.setBorder(new EmptyBorder(Utility.toPixel(10),
-				Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
+		JPanel panel = new JPanel(new BorderLayout(Utility.toPixel(10), Utility.toPixel(10)));
+		panel.setBorder(
+				new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
 
 		logListModel = new DefaultListModel<>();
 		logList = new JList<>(logListModel);
-		logList.setFont(
-				new Font(Font.MONOSPACED, Font.PLAIN, Utility.toPixel(12)));
+		logList.setFont(new Font(Font.MONOSPACED, Font.PLAIN, Utility.toPixel(12)));
 		panel.add(new JScrollPane(logList));
 
 		Box b2 = Box.createVerticalBox();
@@ -261,8 +266,7 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 
 		btnStop = new JButton(TextHolder.getString("archiver.stop"));
 		btnStop.setPreferredSize(
-				new Dimension(btnStop.getPreferredSize().width * 2,
-						btnStop.getPreferredSize().height));
+				new Dimension(btnStop.getPreferredSize().width * 2, btnStop.getPreferredSize().height));
 		btnStop.addActionListener(new ActionListener() {
 
 			@Override
@@ -287,10 +291,7 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 			stopFlag.set(true);
 			synchronized (LOCK) {
 				try {
-					if (wrapper != null) {
-						System.out.println("Disconnecting decompressor");
-						wrapper.disconnect();
-					}
+					fs.close();
 				} catch (Exception e) {
 				}
 			}
@@ -304,8 +305,7 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 				if (logListModel != null) {
 					logListModel.addElement(text);
 					if (logListModel.getSize() > 0) {
-						logList.ensureIndexIsVisible(
-								logListModel.getSize() - 1);
+						logList.ensureIndexIsVisible(logListModel.getSize() - 1);
 					}
 				}
 			}
@@ -326,10 +326,9 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 	private void extractAsync() {
 		System.out.println("Extracting.. " + file);
 		try {
-			wrapper = SshUtility.connectWrapper(info, stopFlag);
+
 //			wrapper.connect();
-			String extractCmd = ArchiveExtractToWidget
-					.getExtractCmd(file.toLowerCase());
+			String extractCmd = ArchiveExtractToWidget.getExtractCmd(file.toLowerCase());
 			if (extractCmd == null) {
 				log(TextHolder.getString("archiver.unknownformat"));
 				return;
@@ -344,20 +343,19 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 
 			System.out.println(extractCmd);
 			log(extractCmd);
-			ChannelExec exec = wrapper.getExecChannel();
+			ChannelExec exec = fs.getWrapper().getExecChannel();
 			InputStream in = exec.getInputStream();
 			exec.setCommand(extractCmd);
 			exec.connect();
 
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(in));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 			while (true) {
 				String line = reader.readLine();
 				if (line != null && line.length() > 0) {
 					log(line);
 					System.err.println(line);
 				}
-				if (!wrapper.isConnected() || exec.getExitStatus() != -1) {
+				if (!fs.isConnected() || exec.getExitStatus() != -1) {
 					break;
 				}
 			}
@@ -382,8 +380,10 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 				log(TextHolder.getString("archiver.error"));
 			}
 		} finally {
-			synchronized (LOCK) {
-				wrapper.disconnect();
+			try {
+				fs.close();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			stopProgress();
 		}

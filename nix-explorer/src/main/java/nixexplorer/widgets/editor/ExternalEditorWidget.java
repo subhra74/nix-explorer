@@ -57,8 +57,7 @@ import nixexplorer.worker.editwatcher.ChangeUploader;
  * @author subhro
  *
  */
-public class ExternalEditorWidget extends JDialog
-		implements ChangeUploader, Runnable, IProgress, DisposableView {
+public class ExternalEditorWidget extends JDialog implements ChangeUploader, Runnable, IProgress, DisposableView {
 
 	/**
 	 * @param env
@@ -88,6 +87,7 @@ public class ExternalEditorWidget extends JDialog
 	private AtomicBoolean stopFlag = new AtomicBoolean(false);
 	protected AtomicBoolean widgetClosed = new AtomicBoolean(Boolean.FALSE);
 	private WatchKey watchKey;
+	private static final Object LOCK = new Object();
 
 	enum Mode {
 		OpenWithEditor, OpenWithDefApp
@@ -95,8 +95,7 @@ public class ExternalEditorWidget extends JDialog
 
 	private Mode mode;
 
-	public ExternalEditorWidget(SessionInfo info, String[] args,
-			AppSession appSession, Window window) {
+	public ExternalEditorWidget(SessionInfo info, String[] args, AppSession appSession, Window window) {
 		super(window);
 		System.out.println("External editor");
 		this.info = info;
@@ -164,8 +163,8 @@ public class ExternalEditorWidget extends JDialog
 		box1.add(prg);
 		box1.add(Box.createVerticalGlue());
 		mainPanel = new JPanel(new BorderLayout());
-		mainPanel.setBorder(new EmptyBorder(Utility.toPixel(10),
-				Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
+		mainPanel.setBorder(
+				new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
 		mainPanel.add(box1);
 		// add(box1);
 
@@ -219,8 +218,7 @@ public class ExternalEditorWidget extends JDialog
 			ExternalEditorWidget.this.revalidate();
 			ExternalEditorWidget.this.repaint();
 		});
-		UploadTask task = new UploadTask(wrapper, remoteFile, file, this,
-				stopFlag);
+		UploadTask task = new UploadTask(wrapper, remoteFile, file, this, stopFlag);
 		callback = threadPool.submit(task);
 	}
 
@@ -284,42 +282,42 @@ public class ExternalEditorWidget extends JDialog
 			this.file = dir.resolve(PathUtils.getFileName(remoteFile)) // Paths.get(dir.,
 																		// PathUtils.getFileName(remoteFile))
 					.toAbsolutePath().toString();
-			wrapper = SshUtility.connectWrapper(info, stopFlag);
-			wrapper.getSftpChannel().get(remoteFile, file,
-					new SftpProgressMonitor() {
-						long total = 0L, received = 0L;
-						int progress = 0;
+			synchronized (LOCK) {
+				wrapper = SshUtility.connectWrapper(info, stopFlag);
+			}
 
-						@Override
-						public void init(int op, String src, String dest,
-								long max) {
-							this.total = max;
-							SwingUtilities.invokeLater(() -> {
-								prg.setValue(progress);
-							});
-						}
+			wrapper.getSftpChannel().get(remoteFile, file, new SftpProgressMonitor() {
+				long total = 0L, received = 0L;
+				int progress = 0;
 
-						@Override
-						public void end() {
-
-						}
-
-						@Override
-						public boolean count(long count) {
-							received += count;
-							int progress1 = (int) ((received * 100) / total);
-							if (progress1 > progress) {
-								progress = progress1;
-								SwingUtilities.invokeLater(() -> {
-									prg.setValue(progress);
-								});
-							}
-
-							return true;
-						}
+				@Override
+				public void init(int op, String src, String dest, long max) {
+					this.total = max;
+					SwingUtilities.invokeLater(() -> {
+						prg.setValue(progress);
 					});
-			this.lastModified = Files.getLastModifiedTime(Paths.get(file))
-					.toMillis();
+				}
+
+				@Override
+				public void end() {
+
+				}
+
+				@Override
+				public boolean count(long count) {
+					received += count;
+					int progress1 = (int) ((received * 100) / total);
+					if (progress1 > progress) {
+						progress = progress1;
+						SwingUtilities.invokeLater(() -> {
+							prg.setValue(progress);
+						});
+					}
+
+					return true;
+				}
+			});
+			this.lastModified = Files.getLastModifiedTime(Paths.get(file)).toMillis();
 			this.watchKey = appSession.registerEditWatchers(file, this);
 			openDefaultApp(file);
 			SwingUtilities.invokeLater(() -> {
@@ -331,20 +329,27 @@ public class ExternalEditorWidget extends JDialog
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (!stopFlag.get()) {
-				if (JOptionPane.showConfirmDialog(this,
-						"Operation failed, retry?", "Error",
+				if (JOptionPane.showConfirmDialog(this, "Operation failed, retry?", "Error",
 						JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 					retry();
 				}
 			}
-//			SwingUtilities.invokeLater(() -> {
-//				ExternalEditorWidget.this.getContentPane().removeAll();
-//				ExternalEditorWidget.this.add(panelError);
-//				ExternalEditorWidget.this.revalidate();
-//				ExternalEditorWidget.this.repaint();
-//			});
+		} finally {
+			closeWrapper();
 		}
 
+	}
+
+	private void closeWrapper() {
+		synchronized (LOCK) {
+			if (wrapper != null) {
+				try {
+					wrapper.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	public void openDefaultApp(String file) {
@@ -352,8 +357,7 @@ public class ExternalEditorWidget extends JDialog
 		System.out.println("Operating system: " + os);
 		if (os.contains("linux")) {
 			openDefaultAppLinux(file);
-		} else if (os.contains("mac") || os.contains("darwin")
-				|| os.contains("os x")) {
+		} else if (os.contains("mac") || os.contains("darwin") || os.contains("os x")) {
 			openDefaultAppOSX(file);
 		} else if (os.contains("windows")) {
 			openDefaultAppWin(file);
@@ -379,8 +383,9 @@ public class ExternalEditorWidget extends JDialog
 			lst.add("url.dll,FileProtocolHandler");
 			lst.add(file);
 			builder.command(lst);
-			builder.start();
-		} catch (IOException e) {
+			System.out.println("Exit code: " + builder.start().waitFor());
+
+		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
@@ -413,8 +418,7 @@ public class ExternalEditorWidget extends JDialog
 	@Override
 	public void failed() {
 		if (!stopFlag.get()) {
-			if (JOptionPane.showConfirmDialog(this, "Operation failed, retry?",
-					"Error",
+			if (JOptionPane.showConfirmDialog(this, "Operation failed, retry?", "Error",
 					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				retry();
 			}
@@ -504,8 +508,7 @@ class UploadTask implements Callable<Boolean> {
 	 * @param remote
 	 * @param local
 	 */
-	public UploadTask(SshWrapper wrapper, String remote, String local,
-			IProgress prg, AtomicBoolean stopFlag) {
+	public UploadTask(SshWrapper wrapper, String remote, String local, IProgress prg, AtomicBoolean stopFlag) {
 		super();
 		this.wrapper = wrapper;
 		this.remote = remote;
@@ -526,8 +529,7 @@ class UploadTask implements Callable<Boolean> {
 		ChannelSftp sftp = null;
 		try {
 			if (!wrapper.isConnected()) {
-				wrapper = SshUtility.connectWrapper(wrapper.getInfo(),
-						stopFlag);
+				wrapper = SshUtility.connectWrapper(wrapper.getInfo(), stopFlag);
 			}
 			sftp = wrapper.getSftpChannel();
 			in = new FileInputStream(local);

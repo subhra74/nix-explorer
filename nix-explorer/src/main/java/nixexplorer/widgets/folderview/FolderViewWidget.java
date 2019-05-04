@@ -1241,7 +1241,7 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 		}
 		folderTable.setDropMode(DropMode.USE_SELECTION);
 		folderTable.setShowGrid(false);
-		folderTable.setRowHeight(r.getPreferredHeight() + Utility.toPixel(0));
+		folderTable.setRowHeight( Utility.toPixel(40));
 		folderTable.setFillsViewportHeight(true);
 
 		folderTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);

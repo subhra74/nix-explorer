@@ -18,6 +18,8 @@ import nixexplorer.app.ServerDisplayPanel;
 import nixexplorer.app.components.DisposableView;
 import nixexplorer.app.components.TabbedChild;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.worker.ChangeWatcher;
+import nixexplorer.worker.ChangeWatcherService;
 import nixexplorer.worker.editwatcher.ChangeUploader;
 import nixexplorer.worker.editwatcher.EditWatcher;
 import nixexplorer.worker.editwatcher.FileEntry;
@@ -33,6 +35,7 @@ public final class AppSessionImpl implements AppSession {
 	private File sessionFolder;
 	private WeakHashMap<SessionEventAware, Boolean> eventAwareComponents;
 	private WeakHashMap<DisposableView, Boolean> components;
+	private ChangeWatcherService service;
 
 	public AppSessionImpl(SessionInfo session, boolean running, Window window) {
 		super();
@@ -49,6 +52,7 @@ public final class AppSessionImpl implements AppSession {
 		if (!sessionFolder.exists()) {
 			sessionFolder.mkdirs();
 		}
+		service = new ChangeWatcherService(session, this);
 	}
 
 	public SessionInfo getSession() {
@@ -243,5 +247,17 @@ public final class AppSessionImpl implements AppSession {
 			eventAwareComponents.remove(c);
 		} catch (Exception e) {
 		}
+	}
+
+	/**
+	 * @return the window
+	 */
+	public Window getWindow() {
+		return window;
+	}
+
+	@Override
+	public ChangeWatcher getChangeWatcher() {
+		return this.service;
 	}
 }

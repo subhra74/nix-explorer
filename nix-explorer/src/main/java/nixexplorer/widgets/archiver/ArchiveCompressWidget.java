@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,13 +38,18 @@ import nixexplorer.TextHolder;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.core.FileSystemProvider;
 import nixexplorer.app.session.SessionInfo;
+import nixexplorer.core.ssh.FileSystemWrapper;
+import nixexplorer.core.ssh.SshFileSystemWrapper;
 import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
+import nixexplorer.widgets.folderview.FileSelectionDialog;
+import nixexplorer.widgets.folderview.FileSelectionDialog.DialogMode;
+import nixexplorer.widgets.folderview.FileSelectionDialog.DialogResult;
 import nixexplorer.widgets.util.Utility;
 
 public class ArchiveCompressWidget extends JDialog implements Runnable {
 	private static final long serialVersionUID = -1887498535965638214L;
-	private Map<String, String> compressCommands = new HashMap<>();
+	private Map<String, String> compressCommands = new LinkedHashMap<>();
 	private Thread t;
 	private JList<String> logList;
 	private DefaultListModel<String> logListModel;
@@ -52,21 +58,19 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 	private String file;
 	private JProgressBar prg;
 	private String folder;
-	private SshWrapper wrapper;
 	private JPanel panel1;
 	private JPanel panel2;
 	private JTextField txtFile, txtFolder;
 	private JComboBox<String> cmbFormats;
 	private String compressCmd;
 	private JCheckBox chkExt;
-	private FileSystemProvider fs;
+	private SshFileSystemWrapper fs;
 	private SessionInfo info;
 	private AppSession appSession;
 	private AtomicBoolean stopFlag = new AtomicBoolean(false);
 	private final static Object LOCK = new Object();
 
-	public ArchiveCompressWidget(SessionInfo info, String[] args,
-			AppSession appSession, Window window) {
+	public ArchiveCompressWidget(SessionInfo info, String[] args, AppSession appSession, Window window) {
 		super(window);
 		this.info = info;
 		this.appSession = appSession;
@@ -97,6 +101,10 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 				dispose();
 			}
 		});
+
+		fs = new SshFileSystemWrapper(info);
+		this.file = getArchiveName();
+
 	}
 
 	private JPanel createCompressPanel() {
@@ -104,8 +112,8 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 		panel1 = new JPanel();
 		BoxLayout bl = new BoxLayout(panel1, BoxLayout.Y_AXIS);
 		panel1.setLayout(bl);
-		p2.setBorder(new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10),
-				Utility.toPixel(10), Utility.toPixel(10)));
+		p2.setBorder(
+				new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
 
 		JLabel lblName = new JLabel(TextHolder.getString("archiver.filename"));
 		lblName.setAlignmentX(LEFT_ALIGNMENT);
@@ -117,11 +125,9 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 
 		panel1.add(Box.createRigidArea(new Dimension(0, Utility.toPixel(10))));
 
-		txtFile.setMaximumSize(new Dimension(Integer.MAX_VALUE,
-				txtFile.getPreferredSize().height));
+		txtFile.setMaximumSize(new Dimension(Integer.MAX_VALUE, txtFile.getPreferredSize().height));
 
-		JLabel lblFolderName = new JLabel(
-				TextHolder.getString("archiver.savein"));
+		JLabel lblFolderName = new JLabel(TextHolder.getString("archiver.savein"));
 		lblFolderName.setAlignmentX(LEFT_ALIGNMENT);
 		panel1.add(lblFolderName);
 
@@ -131,22 +137,19 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 		txtFolder.setAlignmentX(LEFT_ALIGNMENT);
 		b2.add(txtFolder);
 
-		txtFolder.setMaximumSize(new Dimension(Integer.MAX_VALUE,
-				txtFolder.getPreferredSize().height));
+		txtFolder.setMaximumSize(new Dimension(Integer.MAX_VALUE, txtFolder.getPreferredSize().height));
 		txtFolder.setText(folder);
 
-//		btnBrowse = new JButton(TextHolder.getString("archiver.browse"));
-//		btnBrowse.setAlignmentX(LEFT_ALIGNMENT);
-//		btnBrowse.addActionListener(e -> {
-////			FolderBrowserDialog dlg = new FolderBrowserDialog(fs, null, Mode.FolderOpen);
-////			dlg.setSelectionCallback(s -> {
-////				if (s != null && s.length() > 0) {
-////					txtFolder.setText(s);
-////				}
-////			});
-////			AppSessionPanel.getsharedInstance().openWidget(dlg);
-//		});
-//		b2.add(btnBrowse);
+		JButton btnBrowse = new JButton("...");
+		btnBrowse.setAlignmentX(LEFT_ALIGNMENT);
+		btnBrowse.addActionListener(e -> {
+			FileSelectionDialog dlg = new FileSelectionDialog(folder, fs, this, true);
+			if (dlg.showDialog(DialogMode.OPEN) == DialogResult.APPROVE) {
+				this.txtFolder.setText(dlg.getSelectedPath());
+			}
+		});
+		b2.add(Box.createRigidArea(new Dimension(Utility.toPixel(5), Utility.toPixel(5))));
+		b2.add(btnBrowse);
 		panel1.add(b2);
 
 		panel1.add(Box.createRigidArea(new Dimension(0, Utility.toPixel(10))));
@@ -163,24 +166,17 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 		lblFmt.setAlignmentX(LEFT_ALIGNMENT);
 		panel1.add(lblFmt);
 		panel1.add(cmbFormats);
-		cmbFormats.setMaximumSize(new Dimension(Integer.MAX_VALUE,
-				cmbFormats.getPreferredSize().height));
+		cmbFormats.setMaximumSize(new Dimension(Integer.MAX_VALUE, cmbFormats.getPreferredSize().height));
 		cmbFormats.addItemListener(e -> {
 			String value = e.getItem().toString();
-			String txt = String.format(TextHolder.getString("archiver.addext"),
-					"." + value);
+			String txt = String.format(TextHolder.getString("archiver.addext"), "." + value);
 			chkExt.setText(txt);
 		});
 
-		String name = files.size() == 1 ? files.get(0)
-				: PathUtils.getFileName(folder);
-
-		txtFile.setText(name);
+		txtFile.setText(getArchiveName());
 		panel1.add(Box.createRigidArea(new Dimension(0, Utility.toPixel(10))));
 
-		chkExt = new JCheckBox(
-				String.format(TextHolder.getString("archiver.addext"),
-						cmbFormats.getSelectedItem()));
+		chkExt = new JCheckBox(String.format(TextHolder.getString("archiver.addext"), cmbFormats.getSelectedItem()));
 		chkExt.setSelected(true);
 		panel1.add(chkExt);
 
@@ -200,8 +196,7 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 			if (this.file.length() < 1) {
 				return;
 			}
-			this.compressCmd = compressCommands
-					.get(cmbFormats.getSelectedItem().toString());
+			this.compressCmd = compressCommands.get(cmbFormats.getSelectedItem().toString());
 			this.remove(panel1);
 			this.add(panel2);
 			revalidate();
@@ -219,13 +214,16 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 		return p2;
 	}
 
+	private String getArchiveName() {
+		String name = files.size() == 1 ? files.get(0) : PathUtils.getFileName(folder);
+		return name;
+	}
+
 	private JPanel createProgressPanel() {
-		panel2 = new JPanel(
-				new BorderLayout(Utility.toPixel(10), Utility.toPixel(10)));
-		panel2.add(new JLabel(TextHolder.getString("archiver.compressing")),
-				BorderLayout.NORTH);
-		panel2.setBorder(new EmptyBorder(Utility.toPixel(10),
-				Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
+		panel2 = new JPanel(new BorderLayout(Utility.toPixel(10), Utility.toPixel(10)));
+		panel2.add(new JLabel(TextHolder.getString("archiver.compressing")), BorderLayout.NORTH);
+		panel2.setBorder(
+				new EmptyBorder(Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10), Utility.toPixel(10)));
 
 		logListModel = new DefaultListModel<>();
 		logList = new JList<>(logListModel);
@@ -238,8 +236,7 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 
 		btnStop = new JButton(TextHolder.getString("archiver.stop"));
 		btnStop.setPreferredSize(
-				new Dimension(btnStop.getPreferredSize().width * 2,
-						btnStop.getPreferredSize().height));
+				new Dimension(btnStop.getPreferredSize().width * 2, btnStop.getPreferredSize().height));
 		btnStop.addActionListener(e -> {
 			stop();
 			dispose();
@@ -264,11 +261,7 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 			stopFlag.set(true);
 			try {
 				System.out.println("Disconnecting compressor");
-				synchronized (LOCK) {
-					if (wrapper != null) {
-						wrapper.disconnect();
-					}
-				}
+				fs.close();
 			} catch (Exception e) {
 			}
 		}).start();
@@ -285,8 +278,8 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 			setTitle(TextHolder.getString("archiver.compressing"));
 		});
 		try {
-			synchronized (LOCK) {
-				wrapper = SshUtility.connectWrapper(info, stopFlag);
+			if (!fs.isConnected()) {
+				fs.connect();
 			}
 
 //			wrapper = new SshWrapper(info);
@@ -297,28 +290,24 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 				sb.append(" \"" + s + "\"");
 			}
 
-			compressCmd = String.format(compressCmd, sb.toString(),
-					PathUtils.combineUnix(txtFolder.getText(),
-							file + (chkExt.isSelected()
-									? "." + cmbFormats.getSelectedItem()
-									: "")));
+			compressCmd = String.format(compressCmd, sb.toString(), PathUtils.combineUnix(txtFolder.getText(),
+					file + (chkExt.isSelected() ? "." + cmbFormats.getSelectedItem() : "")));
 			String cd = String.format("cd \"%s\";", folder);
 			System.out.println(cd + compressCmd);
 			log(cd + compressCmd);
-			ChannelExec exec = wrapper.getExecChannel();
+			ChannelExec exec = fs.getWrapper().getExecChannel();
 			InputStream in = exec.getInputStream();
 			exec.setCommand(cd + compressCmd);
 			exec.connect();
 
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(in), 512);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in), 512);
 			while (true) {
 				String line = reader.readLine();
 				if (line != null && line.length() > 0) {
 					log(line);
 					System.err.println(line);
 				}
-				if (!wrapper.isConnected() || exec.getExitStatus() != -1) {
+				if (!fs.getWrapper().isConnected() || exec.getExitStatus() != -1) {
 					break;
 				}
 			}
@@ -346,8 +335,10 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 				});
 			}
 		} finally {
-			synchronized (LOCK) {
-				wrapper.disconnect();
+			try {
+				fs.close();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			stopProgress();
 		}

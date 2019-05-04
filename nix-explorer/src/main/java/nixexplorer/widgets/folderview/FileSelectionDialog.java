@@ -139,7 +139,7 @@ public class FileSelectionDialog extends JDialog {
 
 		folderTable.setDropMode(DropMode.USE_SELECTION);
 		folderTable.setShowGrid(false);
-		folderTable.setRowHeight(r.getPreferredHeight() + Utility.toPixel(0));
+		//folderTable.setRowHeight(r.getPreferredHeight() + Utility.toPixel(0));
 		folderTable.setFillsViewportHeight(true);
 
 		folderTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

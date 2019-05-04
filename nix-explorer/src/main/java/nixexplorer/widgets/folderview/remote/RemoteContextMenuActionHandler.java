@@ -52,6 +52,7 @@ import nixexplorer.widgets.folderview.ShellActions;
 import nixexplorer.widgets.folderview.copy.CopyWidget;
 import nixexplorer.widgets.logviewer.LogViewerWidget;
 import nixexplorer.widgets.scp.DirectTransferWidget;
+import nixexplorer.worker.DownloadTask;
 
 /**
  * @author subhro
@@ -1108,9 +1109,9 @@ public class RemoteContextMenuActionHandler
 		FileInfo[] selectedFiles = folderView.getSelectedFiles();
 		if (selectedFiles != null && selectedFiles.length == 1) {
 			FileInfo info = selectedFiles[0];
-			remoteFolderView.getAppSession().createWidget(
-					ExternalEditorWidget.class.getName(),
-					new String[] { "-e", info.getPath() });
+			new DownloadTask(info.getPath(), remoteFolderView.getInfo(),
+					remoteFolderView.getSession(),
+					remoteFolderView.getSession().getChangeWatcher());
 		}
 	}
 

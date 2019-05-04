@@ -1,18 +1,17 @@
 package nixexplorer.widgets.folderview;
 
 import java.awt.Component;
-import java.time.format.DateTimeFormatter;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.UIManager;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 import javax.swing.table.TableCellRenderer;
 
-import nixexplorer.app.components.FileIcon;
 import nixexplorer.core.FileInfo;
 import nixexplorer.core.FileType;
-import nixexplorer.drawables.icons.ScaledIcon;
 import nixexplorer.widgets.util.Utility;
 
 public class FolderViewRenderer implements TableCellRenderer {
@@ -23,8 +22,11 @@ public class FolderViewRenderer implements TableCellRenderer {
 		label = new JLabel();
 		label.setOpaque(true);
 		label.setBorder(
-				new EmptyBorder(Utility.toPixel(5), Utility.toPixel(10), Utility.toPixel(5), Utility.toPixel(10)));
+				new EmptyBorder(Utility.toPixel(5), Utility.toPixel(10), Utility.toPixel(0), Utility.toPixel(0)));
 		label.setIconTextGap(Utility.toPixel(10));
+//		label.setBorder(new CompoundBorder(
+//				new MatteBorder(0, Utility.toPixel(0), Utility.toPixel(0), 0, UIManager.getColor("Panel.background")),
+//				new EmptyBorder(0, Utility.toPixel(10), 0, 0)));
 //		folderIcon = new FileIcon(UIManager.getIcon("ListView.smallFolder"),
 //				true);
 //		fileIcon = new FileIcon(UIManager.getIcon("ListView.smallFile"), true);

@@ -474,8 +474,7 @@ public class PortForwardingWidget extends Widget {
 
 	@Override
 	public String getTitle() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Port forwarding";
 	}
 
 	@Override
