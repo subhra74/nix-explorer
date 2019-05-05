@@ -8,6 +8,8 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -30,7 +32,7 @@ public class AddressBar extends JComponent {
 	private String selectedText;
 	private Icon icon;
 	private int iconSize;
-	private JPopupMenu popup;
+	private JPopupMenu popup, popup2;
 	private Rectangle iconRect;
 	private int hotIndex = -1;
 
@@ -40,6 +42,21 @@ public class AddressBar extends JComponent {
 		this.setFont(UIManager.getFont("label.font"));
 		this.icon = UIManager.getIcon("AddressBar.icon");
 		iconSize = this.icon.getIconHeight();
+
+		popup2 = new JPopupMenu();
+		JMenuItem itemCopy = new JMenuItem("Copy path");
+		JMenuItem itemOpenTab = new JMenuItem("Open in new tab");
+		JMenuItem itemOpenTerm = new JMenuItem("Open in Terminal");
+		JMenuItem itemAddToFav = new JMenuItem("Add to favourites");
+		popup2.add(itemCopy);
+		popup2.add(itemOpenTab);
+		popup2.add(itemOpenTerm);
+		popup2.add(itemAddToFav);
+
+		itemCopy.addActionListener(e -> {
+			Toolkit.getDefaultToolkit().getSystemClipboard()
+					.setContents(new StringSelection(selectedText), null);
+		});
 
 		MouseAdapter ma = new MouseAdapter() {
 
@@ -78,6 +95,7 @@ public class AddressBar extends JComponent {
 				}
 				for (int i = 0; i < rlist.size(); i++) {
 					TextRect r = rlist.get(i);
+
 					// System.out.println("r=" + r + " p=" + p);
 
 					if (r.x != -1 && p.getX() > r.x
@@ -89,10 +107,16 @@ public class AddressBar extends JComponent {
 						}
 						// System.out.println("matched: " + sb);
 						selectedText = sb.toString();
-						for (ActionListener l : listeners) {
-							System.out.println("Performing action");
-							l.actionPerformed(new ActionEvent(this, hashCode(),
-									selectedText));
+						if (e.getButton() == MouseEvent.BUTTON3) {
+							System.out.println("matched: " + sb);
+							popup2.setInvoker(AddressBar.this);
+							popup2.show(AddressBar.this, e.getX(), e.getY());
+						} else {
+							for (ActionListener l : listeners) {
+								System.out.println("Performing action");
+								l.actionPerformed(new ActionEvent(this,
+										hashCode(), selectedText));
+							}
 						}
 						break;
 					}
