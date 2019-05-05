@@ -20,9 +20,7 @@ import nixexplorer.app.components.TabbedChild;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.worker.ChangeWatcher;
 import nixexplorer.worker.ChangeWatcherService;
-import nixexplorer.worker.editwatcher.ChangeUploader;
-import nixexplorer.worker.editwatcher.EditWatcher;
-import nixexplorer.worker.editwatcher.FileEntry;
+
 
 public final class AppSessionImpl implements AppSession {
 	private SessionInfo session;
@@ -30,7 +28,6 @@ public final class AppSessionImpl implements AppSession {
 	private ServerDisplayPanel display;
 	// private Map<String, ChangeUploader> editWatchers = new
 	// ConcurrentHashMap<>();
-	private EditWatcher editWatcher;
 	private Window window;
 	private File sessionFolder;
 	private WeakHashMap<SessionEventAware, Boolean> eventAwareComponents;
@@ -45,8 +42,6 @@ public final class AppSessionImpl implements AppSession {
 		this.components = new WeakHashMap<>();
 		this.window = window;
 		System.out.println("AppSessionImpl - window: " + window);
-		editWatcher = new EditWatcher(session, this, new String[] {});
-		new Thread(editWatcher).start();
 		sessionFolder = new File((String) App.getConfig("temp.dir"),
 				session.getId());
 		if (!sessionFolder.exists()) {
@@ -125,23 +120,7 @@ public final class AppSessionImpl implements AppSession {
 //		this.editWatchers = editWatchers;
 //	}
 
-	@Override
-	public WatchKey registerEditWatchers(String file,
-			ChangeUploader editWatcher) {
-		// this.editWatchers.put(file, editWatcher);
-		Path path = Paths.get(file);
-		FileEntry ent = new FileEntry(PathUtils.getFileName(file), path,
-				path.getParent(), editWatcher);
-		System.out.println("Registered for changes: " + file + " path: "
-				+ path.toString());
-		// Path path = Paths.get(file).getParent();
-		return this.editWatcher.register(ent);
-	}
-
-	@Override
-	public void unregisterWatcher(WatchKey key) {
-		this.editWatcher.unregister(key);
-	}
+	
 
 	/*
 	 * (non-Javadoc)

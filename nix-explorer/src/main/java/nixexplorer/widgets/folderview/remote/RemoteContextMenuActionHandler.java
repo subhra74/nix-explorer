@@ -43,7 +43,6 @@ import nixexplorer.registry.contextmenu.ContextMenuEntry;
 import nixexplorer.registry.contextmenu.ContextMenuRegistry;
 import nixexplorer.widgets.dnd.TransferFileInfo;
 import nixexplorer.widgets.dnd.TransferFileInfo.Action;
-import nixexplorer.widgets.editor.ExternalEditorWidget;
 import nixexplorer.widgets.editor.RemoteEditorWidget;
 import nixexplorer.widgets.folderview.ContextMenuActionHandler;
 import nixexplorer.widgets.folderview.FolderViewWidget;

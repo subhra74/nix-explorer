@@ -6,7 +6,6 @@ package nixexplorer.widgets.folderview.common;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.RowFilter;
-import javax.swing.RowFilter.Entry;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.io.FilenameUtils;
@@ -15,7 +14,6 @@ import nixexplorer.core.FileInfo;
 import nixexplorer.core.FileType;
 import nixexplorer.widgets.folderview.FolderViewTableModel;
 import nixexplorer.widgets.folderview.FolderViewWidget;
-import nixexplorer.worker.editwatcher.FileEntry;
 
 /**
  * @author subhro
