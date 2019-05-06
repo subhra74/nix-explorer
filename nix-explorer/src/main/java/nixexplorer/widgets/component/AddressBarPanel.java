@@ -24,11 +24,11 @@ public class AddressBarPanel extends JPanel {
 	private boolean updating = false;
 	private ActionListener a;
 
-	public AddressBarPanel(char separator) {
+	public AddressBarPanel(char separator, ActionListener popupTriggeredListener) {
 		setLayout(new BorderLayout());
 		addrPanel = new JPanel(new BorderLayout());
-		addrPanel.setBorder(new EmptyBorder(Utility.toPixel(3),
-				Utility.toPixel(3), Utility.toPixel(3), Utility.toPixel(3)));
+		addrPanel.setBorder(
+				new EmptyBorder(Utility.toPixel(3), Utility.toPixel(3), Utility.toPixel(3), Utility.toPixel(3)));
 		model = new DefaultComboBoxModel<>();
 		txtAddressBar = new JComboBox<>(model);
 		txtAddressBar.addActionListener(e -> {
@@ -56,7 +56,7 @@ public class AddressBarPanel extends JPanel {
 			}
 		});
 		txtAddressBar.setEditable(true);
-		addressBar = new AddressBar(separator);
+		addressBar = new AddressBar(separator, popupTriggeredListener);
 		addressBar.addActionListener(e -> {
 			if (a != null) {
 				a.actionPerformed(new ActionEvent(this, 0, null));
@@ -99,8 +99,7 @@ public class AddressBarPanel extends JPanel {
 	}
 
 	public String getText() {
-		return isSelected() ? (String) txtAddressBar.getSelectedItem()
-				: addressBar.getSelectedText();
+		return isSelected() ? (String) txtAddressBar.getSelectedItem() : addressBar.getSelectedText();
 	}
 
 	public void addActionListener(ActionListener e) {

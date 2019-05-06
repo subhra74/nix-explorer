@@ -32,31 +32,43 @@ public class AddressBar extends JComponent {
 	private String selectedText;
 	private Icon icon;
 	private int iconSize;
-	private JPopupMenu popup, popup2;
+	private JPopupMenu popup;// , popup2;
 	private Rectangle iconRect;
 	private int hotIndex = -1;
+	// private ActionListener openNewTabListener, openTerminal, addToFav;
 
-	public AddressBar(char separator) {
+	public AddressBar(char separator, ActionListener popupTriggerListener) {
 		text = "";
 		this.separator = separator;
 		this.setFont(UIManager.getFont("label.font"));
 		this.icon = UIManager.getIcon("AddressBar.icon");
 		iconSize = this.icon.getIconHeight();
 
-		popup2 = new JPopupMenu();
-		JMenuItem itemCopy = new JMenuItem("Copy path");
-		JMenuItem itemOpenTab = new JMenuItem("Open in new tab");
-		JMenuItem itemOpenTerm = new JMenuItem("Open in Terminal");
-		JMenuItem itemAddToFav = new JMenuItem("Add to favourites");
-		popup2.add(itemCopy);
-		popup2.add(itemOpenTab);
-		popup2.add(itemOpenTerm);
-		popup2.add(itemAddToFav);
-
-		itemCopy.addActionListener(e -> {
-			Toolkit.getDefaultToolkit().getSystemClipboard()
-					.setContents(new StringSelection(selectedText), null);
-		});
+//		popup2 = new JPopupMenu();
+//		JMenuItem itemCopy = new JMenuItem("Copy path");
+//		JMenuItem itemOpenTab = new JMenuItem("Open in new tab");
+//		JMenuItem itemOpenTerm = new JMenuItem("Open in Terminal");
+//		JMenuItem itemAddToFav = new JMenuItem("Add to favourites");
+//		popup2.add(itemCopy);
+//
+//		itemCopy.addActionListener(e -> {
+//			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(selectedText), null);
+//		});
+//
+//		if (openTerminal != null) {
+//			popup2.add(itemOpenTerm);
+//			itemOpenTerm.addActionListener(openTerminal);
+//		}
+//
+//		if (openNewTabListener != null) {
+//			popup2.add(itemOpenTab);
+//			itemOpenTab.addActionListener(openNewTabListener);
+//		}
+//
+//		if (addToFav != null) {
+//			popup2.add(itemAddToFav);
+//			itemAddToFav.addActionListener(addToFav);
+//		}
 
 		MouseAdapter ma = new MouseAdapter() {
 
@@ -76,8 +88,7 @@ public class AddressBar extends JComponent {
 				for (int i = 0; i < rlist.size(); i++) {
 					TextRect r = rlist.get(i);
 
-					if (r.x != -1 && p.getX() > r.x
-							&& p.getX() < r.x + r.width) {
+					if (r.x != -1 && p.getX() > r.x && p.getX() < r.x + r.width) {
 						hotIndex = i;
 						repaint();
 						break;
@@ -98,24 +109,24 @@ public class AddressBar extends JComponent {
 
 					// System.out.println("r=" + r + " p=" + p);
 
-					if (r.x != -1 && p.getX() > r.x
-							&& p.getX() < r.x + r.width) {
+					if (r.x != -1 && p.getX() > r.x && p.getX() < r.x + r.width) {
 						StringBuilder sb = new StringBuilder();
 						for (int j = 0; j <= i; j++) {
-							sb.append(AddressBar.this.separator
-									+ rlist.get(j).text);
+							sb.append(AddressBar.this.separator + rlist.get(j).text);
 						}
 						// System.out.println("matched: " + sb);
 						selectedText = sb.toString();
 						if (e.getButton() == MouseEvent.BUTTON3) {
 							System.out.println("matched: " + sb);
-							popup2.setInvoker(AddressBar.this);
-							popup2.show(AddressBar.this, e.getX(), e.getY());
+							if (popupTriggerListener != null) {
+								popupTriggerListener.actionPerformed(new ActionEvent(e, hashCode(), selectedText));
+							}
+//							popup2.setInvoker(AddressBar.this);
+//							popup2.show(AddressBar.this, e.getX(), e.getY());
 						} else {
 							for (ActionListener l : listeners) {
 								System.out.println("Performing action");
-								l.actionPerformed(new ActionEvent(this,
-										hashCode(), selectedText));
+								l.actionPerformed(new ActionEvent(this, hashCode(), selectedText));
 							}
 						}
 						break;
@@ -151,8 +162,7 @@ public class AddressBar extends JComponent {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2.setFont(UIManager.getFont("Label.font"));
 
 		int h = g2.getFontMetrics().getHeight();
@@ -173,14 +183,12 @@ public class AddressBar extends JComponent {
 		int paddingY = UIManager.getInt("AddressBar.textPaddingY");
 
 		Rectangle r = getBounds();
-		int width = r.width - 2 * (getInsets().left + getInsets().right) - 1
-				- iconSize;
+		int width = r.width - 2 * (getInsets().left + getInsets().right) - 1 - iconSize;
 
 		int realHeight = r.height - getInsets().top - getInsets().bottom - 1;
 
 		try {
-			this.iconRect = new Rectangle(getInsets().left, getInsets().top,
-					iconSize, realHeight);
+			this.iconRect = new Rectangle(getInsets().left, getInsets().top, iconSize, realHeight);
 			if (borderColor != null) {
 				// g2.setColor(borderColor);
 				// g2.draw(this.iconRect);
@@ -195,8 +203,7 @@ public class AddressBar extends JComponent {
 					if (str.length() > 0) {
 						int w = g2.getFontMetrics().stringWidth(str);
 						int w1 = w + 2 * paddingX;
-						int h1 = r.height - getInsets().top - getInsets().bottom
-								+ 2 * paddingY;
+						int h1 = r.height - getInsets().top - getInsets().bottom + 2 * paddingY;
 						TextRect tr = new TextRect(str, w, w1, h1);
 						rlist.add(tr);
 					}
@@ -233,14 +240,12 @@ public class AddressBar extends JComponent {
 						g2.setColor(activeForeground);
 					}
 
-					char[] carr = rlist.get(rlist.size() - 1).text
-							.toCharArray();
+					char[] carr = rlist.get(rlist.size() - 1).text.toCharArray();
 					int maxIndex = 0;
 					int dotWidth = g2.getFontMetrics().stringWidth("...");
 					int avail = width - 2 * paddingX - dotWidth;
 					if (avail < 1) {
-						g2.drawString("...", x + width / 2 - dotWidth / 2,
-								asc + realHeight / 2 - h / 2);
+						g2.drawString("...", x + width / 2 - dotWidth / 2, asc + realHeight / 2 - h / 2);
 						return;
 					}
 					int cw = 0;
@@ -252,10 +257,8 @@ public class AddressBar extends JComponent {
 						maxIndex = i;
 						cw += cc;
 					}
-					g2.drawChars(carr, 0, maxIndex + 1, x + paddingX,
-							asc + realHeight / 2 - h / 2);
-					g2.drawString("...", x + paddingX + cw,
-							asc + realHeight / 2 - h / 2);
+					g2.drawChars(carr, 0, maxIndex + 1, x + paddingX, asc + realHeight / 2 - h / 2);
+					g2.drawString("...", x + paddingX + cw, asc + realHeight / 2 - h / 2);
 					return;
 				}
 
@@ -305,8 +308,7 @@ public class AddressBar extends JComponent {
 				}
 			}
 		} finally {
-			icon.paintIcon(this, g2, getInsets().left,
-					getInsets().top + (realHeight / 2 - iconSize / 2));
+			icon.paintIcon(this, g2, getInsets().left, getInsets().top + (realHeight / 2 - iconSize / 2));
 			// g2.setColor(borderColor);
 			// g2.drawRect(0, 0, getWidth(), getHeight()-1);
 		}
@@ -328,9 +330,8 @@ public class AddressBar extends JComponent {
 
 		@Override
 		public String toString() {
-			return "TextRect [text=" + text + ", stringWidth=" + stringWidth
-					+ ", width=" + width + ", height=" + height + ", x=" + x
-					+ "]";
+			return "TextRect [text=" + text + ", stringWidth=" + stringWidth + ", width=" + width + ", height=" + height
+					+ ", x=" + x + "]";
 		}
 	}
 
@@ -359,8 +360,7 @@ public class AddressBar extends JComponent {
 			item.addActionListener(e -> {
 				selectedText = (String) item.getClientProperty("item.path");
 				for (ActionListener l : listeners) {
-					l.actionPerformed(
-							new ActionEvent(this, hashCode(), selectedText));
+					l.actionPerformed(new ActionEvent(this, hashCode(), selectedText));
 				}
 			});
 			popup.add(item);
@@ -375,8 +375,7 @@ public class AddressBar extends JComponent {
 				item.addActionListener(e -> {
 					selectedText = (String) item.getClientProperty("item.path");
 					for (ActionListener l : listeners) {
-						l.actionPerformed(new ActionEvent(this, hashCode(),
-								selectedText));
+						l.actionPerformed(new ActionEvent(this, hashCode(), selectedText));
 					}
 				});
 				popup.add(item);
@@ -391,8 +390,7 @@ public class AddressBar extends JComponent {
 				item.addActionListener(e -> {
 					selectedText = (String) item.getClientProperty("item.path");
 					for (ActionListener l : listeners) {
-						l.actionPerformed(new ActionEvent(this, hashCode(),
-								selectedText));
+						l.actionPerformed(new ActionEvent(this, hashCode(), selectedText));
 					}
 				});
 				popup.add(item);

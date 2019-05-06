@@ -2,6 +2,7 @@ package nixexplorer.widgets.folderview.remote;
 
 import java.awt.Component;
 import java.awt.Window;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -78,6 +79,10 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 	@Override
 	public void close() {
 		tabbedFolders.setVisible(false);
+		System.out.println("closing tabbed pane "+this.closeListener);
+//		if (this.closeListener != null) {
+//			this.closeListener.allTabsClosed(this);
+//		}
 		new Thread(() -> {
 			try {
 				if (fs != null) {
@@ -341,115 +346,6 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 		return true;
 	}
 
-	private void addSftpLocal2Remote(TransferFileInfo data,
-			FolderViewWidget widget) {
-		this.applyPreviousAction = false;
-		int resp = -1;
-		List<String> folders = data.getSourceFolders();
-		List<String> files = data.getSourceFiles();
-		String baseRemoteFolder = data.getBaseFolder();
-
-		if (files != null && files.size() > 0) {
-			for (String f : files) {
-				outer: {
-					List<FileInfo> fileList = widget.getCurrentFiles();
-					File localFile = new File(f);
-					String fileName = localFile.getName();
-					for (int i = 0; i < fileList.size(); i++) {
-						FileInfo info = fileList.get(i);
-						String n = info.getName();
-						if (n.equals(fileName)) {
-							System.out.println(
-									"File '" + n + "' already exists...");
-							if (!applyPreviousAction) {
-								resp = FolderViewUtility
-										.promptDuplicate(fileName);
-							}
-							System.out.println("Resp: " + resp);
-							if (resp == 1) {
-								System.out.println("skipped");
-								break outer;
-							} else if (resp == 2) {
-								// do the rename stuff
-								fileName = FolderViewUtility.autoRename(
-										fileName, widget.getCurrentFiles());
-							} else if (resp != 0) {
-								return;
-							}
-						}
-
-					}
-
-					String remoteFile = PathUtils.combineUnix(baseRemoteFolder,
-							fileName);
-					System.out
-							.println("Adding files for upload: " + remoteFile);
-					try {
-//						BasicFileUploader fd = new BasicFileUploader(
-//								data.getInfo().get(0), remoteFile,
-//								localFile.getAbsolutePath(),
-//								getDesktop().getBgTransferQueue());
-
-						// getAppListener().getTransferWatcher().addTransfer(fd);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-
-		if (folders != null && folders.size() > 0) {
-			for (String f : folders) {
-				File localFolder = new File(f);
-				outer: {
-					String folderName = localFolder.getName();
-					List<FileInfo> fileList = widget.getCurrentFiles();
-					for (int i = 0; i < fileList.size(); i++) {
-						FileInfo info = fileList.get(i);
-						String n = info.getName();
-						if (n.equals(folderName)) {
-							System.out.println(
-									"File '" + n + "' already exists...");
-							if (!applyPreviousAction) {
-								resp = FolderViewUtility
-										.promptDuplicate(folderName);
-							}
-							System.out.println("Resp: " + resp);
-							if (resp == 1) {
-								System.out.println("skipped");
-								break outer;
-							} else if (resp == 2) {
-								// do the rename stuff
-								folderName = FolderViewUtility.autoRename(
-										folderName, widget.getCurrentFiles());
-							} else if (resp != 0) {
-								return;
-							}
-						}
-
-					}
-
-					String remoteFolder = PathUtils
-							.combineUnix(baseRemoteFolder, folderName);
-
-					System.out
-							.println("Adding folder for upload: " + folderName);
-
-//					DirectoryUploader dd = new DirectoryUploader(
-//							data.getInfo().get(0),
-//							localFolder.getAbsolutePath(), remoteFolder,
-//							getDesktop().getBgTransferQueue());
-//					getAppListener().getTransferWatcher().addTransfer(dd);
-				}
-			}
-		}
-
-	}
-
-////	private void copyLocal(TransferFileInfo info) {
-////	copy(info, info.getAction() == Action.COPY);
-////}
-//
 	public void moveFiles(String targetFolder, List<String> sourceFiles,
 			List<String> sourceFolders, boolean copy, FolderViewWidget w) {
 		disableView();

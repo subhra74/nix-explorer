@@ -1,9 +1,8 @@
 package nixexplorer.core;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import nixexplorer.widgets.util.Utility;
 
@@ -18,10 +17,12 @@ public class FileInfo {
 	private String protocol;
 	private String permissionString;
 	private String extra;
+	private String user;
 
-	public FileInfo(String name, String path, long size, FileType type,
-			long lastModified, int permission, String protocol,
-			String permissionString, long created, String extra) {
+	private static final Pattern USER_REGEX = Pattern.compile("^[^\\s]+\\s+[^\\s]+\\s+([^\\s]+)\\s+([^\\s]+)");
+
+	public FileInfo(String name, String path, long size, FileType type, long lastModified, int permission,
+			String protocol, String permissionString, long created, String extra) {
 		super();
 		this.name = name;
 		this.path = path;
@@ -33,6 +34,25 @@ public class FileInfo {
 		this.permissionString = permissionString;
 		this.created = Utility.toDateTime(created);
 		this.extra = extra;
+		if (this.extra != null && this.extra.length() > 0) {
+			this.user = getUserName();
+		}
+	}
+
+	private String getUserName() {
+		try {
+			if (this.extra != null && this.extra.length() > 0) {
+				Matcher matcher = USER_REGEX.matcher(this.extra);
+				if (matcher.find()) {
+					String user = matcher.group(1);
+					return user;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return "";
 	}
 
 	public String getPath() {
@@ -74,7 +94,7 @@ public class FileInfo {
 	@Override
 	public String toString() {
 		return name;
-		
+
 //		"FileInfo [name=" + name + ", path=" + path + ", size=" + size
 //				+ ", type=" + type + ", lastModified=" + lastModified + "]";
 	}
@@ -129,5 +149,13 @@ public class FileInfo {
 	 */
 	public void setExtra(String extra) {
 		this.extra = extra;
+	}
+
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
 	}
 }

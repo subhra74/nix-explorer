@@ -40,6 +40,8 @@ public abstract class TabbedFolderViewWidget extends Widget
 	protected Icon icon;
 	private JLayeredPane layer;
 	private JPanel glassPane;
+	protected TabbedFolderViewListener closeListener;
+	private int initialTabCount = 0;
 
 	protected TabbedFolderViewWidget(SessionInfo info, String args[],
 			AppSession appSession, Window window) {
@@ -60,6 +62,7 @@ public abstract class TabbedFolderViewWidget extends Widget
 		defCursor = getCursor();
 		waitCursor = new Cursor(Cursor.WAIT_CURSOR);
 		tabbedFolders = new JTabbedPane();
+
 		tabbedFolders.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		layer.add(tabbedFolders, JLayeredPane.DEFAULT_LAYER);
 		// add(tabbedFolders);
@@ -104,6 +107,10 @@ public abstract class TabbedFolderViewWidget extends Widget
 			}
 
 		});
+
+		System.out
+				.println("tabbedFolders count: " + tabbedFolders.getTabCount());
+		initialTabCount = tabbedFolders.getTabCount();
 	}
 
 	@Override
@@ -160,7 +167,15 @@ public abstract class TabbedFolderViewWidget extends Widget
 			int index = tabbedFolders.getSelectedIndex();
 			if (index != -1) {
 				tabbedFolders.removeTabAt(index);
+				System.out
+						.println("tab closed: " + tabbedFolders.getTabCount());
+				if (tabbedFolders.getTabCount() == initialTabCount) {
+					if (this.closeListener != null) {
+						this.closeListener.allTabsClosed(this);
+					}
+				}
 			}
+
 		});
 //		btnClose.setBorder(new EmptyBorder(Utility.toPixel(3), Utility.toPixel(3), Utility.toPixel(3), Utility.toPixel(3)));
 		JLabel lblTitle = new JLabel(title);
@@ -217,6 +232,9 @@ public abstract class TabbedFolderViewWidget extends Widget
 	@Override
 	public void allTabClosed() {
 		close();
+		if (this.closeListener != null) {
+			this.closeListener.allTabsClosed(this);
+		}
 	}
 
 	public void disableView() {
@@ -248,7 +266,6 @@ public abstract class TabbedFolderViewWidget extends Widget
 //		return title;
 //	}
 
-	
 	@Override
 	public Icon getIcon() {
 		return this.icon;
@@ -270,5 +287,23 @@ public abstract class TabbedFolderViewWidget extends Widget
 	}
 
 	protected abstract void cancel();
+
+	public interface TabbedFolderViewListener {
+		public void allTabsClosed(TabbedFolderViewWidget w);
+	}
+
+	/**
+	 * @return the closeListener
+	 */
+	public TabbedFolderViewListener getCloseListener() {
+		return closeListener;
+	}
+
+	/**
+	 * @param closeListener the closeListener to set
+	 */
+	public void setCloseListener(TabbedFolderViewListener closeListener) {
+		this.closeListener = closeListener;
+	}
 
 }

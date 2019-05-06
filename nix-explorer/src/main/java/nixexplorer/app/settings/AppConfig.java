@@ -195,6 +195,15 @@ public class AppConfig {
 		private String externalEditor;
 		private ViewMode viewMode = ViewMode.Details;
 		private boolean showLocalSidePane;
+		private boolean localVisible = false;
+
+		public boolean isLocalVisible() {
+			return localVisible;
+		}
+
+		public void setLocalVisible(boolean localVisible) {
+			this.localVisible = localVisible;
+		}
 
 		public boolean isShowLocalSidePane() {
 			return showLocalSidePane;

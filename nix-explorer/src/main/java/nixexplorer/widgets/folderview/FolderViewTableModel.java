@@ -15,10 +15,15 @@ public class FolderViewTableModel extends AbstractTableModel {
 	private List<FileInfo> files = new ArrayList<>();
 
 	private String[] columns = { TextHolder.getString("folderview.sortByName"),
-			TextHolder.getString("folderview.sortBySize"),
-			TextHolder.getString("folderview.sortByType"),
-			TextHolder.getString("folderview.sortByModified"),
-			TextHolder.getString("folderview.sortByPerm") };
+			TextHolder.getString("folderview.sortBySize"), TextHolder.getString("folderview.sortByType"),
+			TextHolder.getString("folderview.sortByModified"), TextHolder.getString("folderview.sortByPerm"),
+			TextHolder.getString("folderview.owner") };
+
+	private boolean local = false;
+
+	public FolderViewTableModel(boolean local) {
+		this.local = local;
+	}
 
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
@@ -84,7 +89,7 @@ public class FolderViewTableModel extends AbstractTableModel {
 	}
 
 	public int getColumnCount() {
-		return 5;
+		return local ? 4 : columns.length;
 	}
 
 	public Object getValueAt(int rowIndex, int columnIndex) {
@@ -101,6 +106,8 @@ public class FolderViewTableModel extends AbstractTableModel {
 		case 4:
 			// System.out.println(ent.getPermission() + "");
 			return ent.getPermission() + "";
+		case 5:
+			return ent.getExtra();
 		}
 		return "";
 	}

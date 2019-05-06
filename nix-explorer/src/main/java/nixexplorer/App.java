@@ -301,6 +301,7 @@ public final class App {
 		TextHolder.addString("folderview.sortByType", "Type");
 		TextHolder.addString("folderview.sortByModified", "Modified");
 		TextHolder.addString("folderview.sortByPerm", "Permission");
+		TextHolder.addString("folderview.owner", "Owner");
 		TextHolder.addString("folderview.sortAsc", "Ascending");
 		TextHolder.addString("folderview.sortDesc", "Descending");
 		TextHolder.addString("folderview.sortBy", "Sort by");

@@ -44,6 +44,7 @@ import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.event.AncestorEvent;
@@ -132,6 +133,7 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 	private JList<FileInfo> fileListView;
 	private JScrollPane scrollListView;
 	private ViewTogglePanel toggleView;
+	private Border border;
 	// private NavigationListModel modelNav;
 
 	public FolderViewWidget(String file, TabCallback tabCallback, FolderViewBaseTransferHandler transferHandler,
@@ -146,12 +148,14 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 		this.menuHandler2.install(this);
 		this.menuHandler3.install(this);
 
+		border = new MatteBorder(Utility.toPixel(1), 0, Utility.toPixel(0), 0,
+				UIManager.getColor("DefaultBorder.color"));
+
 		setLayout(new BorderLayout());
 		history = new NavigationHistory();
 
 		splitPane = new JSplitPane();
-		splitPane.setBorder(new MatteBorder(Utility.toPixel(1), 0, Utility.toPixel(1), 0,
-				UIManager.getColor("DefaultBorder.color")));
+		splitPane.setBorder(border);
 		splitPane.setBackground(UIManager.getColor("DefaultBorder.color"));
 		splitPane.setContinuousLayout(true);
 		lblDetails = new JLabel();
@@ -382,7 +386,13 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			this.popup2.show(btnMoreMenu, x, y);
 		});
 
-		txtAddressBar = new AddressBarPanel(tabCallback.getFs().isLocal() ? File.separatorChar : '/');
+		txtAddressBar = new AddressBarPanel(tabCallback.getFs().isLocal() ? File.separatorChar : '/', e -> {
+			String path = e.getActionCommand();
+			menuHandler3.createMenu(popup3, path);
+			popup3.pack();
+			MouseEvent e1 = (MouseEvent) e.getSource();
+			popup3.show(txtAddressBar, e1.getX(), e1.getY());
+		});
 		txtAddressBar.addActionListener(e -> {
 			String text = txtAddressBar.getText();
 			System.out.println("Address changed: " + text + " old: " + FolderViewWidget.this.file);
@@ -1070,6 +1080,7 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			dividerPos = splitPane.getDividerLocation();
 			splitPane.remove(contentHolder);
 			remove(splitPane);
+			contentHolder.setBorder(border);
 			add(contentHolder);
 			noSidePane = true;
 		}
@@ -1078,6 +1089,7 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 	private void showSidePane() {
 		if (noSidePane) {
 			remove(contentHolder);
+			contentHolder.setBorder(null);
 			splitPane.setRightComponent(contentHolder);
 			add(splitPane);
 			splitPane.setDividerLocation(dividerPos);
@@ -1228,7 +1240,7 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 	}
 
 	private void createFolderTable() {
-		folderViewModel = new FolderViewTableModel();
+		folderViewModel = new FolderViewTableModel(isLocal());
 
 		FolderViewRenderer r = new FolderViewRenderer();
 
@@ -1241,7 +1253,7 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 		}
 		folderTable.setDropMode(DropMode.USE_SELECTION);
 		folderTable.setShowGrid(false);
-		folderTable.setRowHeight( Utility.toPixel(40));
+		folderTable.setRowHeight(Utility.toPixel(40));
 		folderTable.setFillsViewportHeight(true);
 
 		folderTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
