@@ -92,8 +92,7 @@ public final class App {
 			appender.setAppend(false);
 			appender.activateOptions();
 			Logger.getRootLogger().addAppender(appender);
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -143,7 +142,7 @@ public final class App {
 
 		new File(config.get("app.dir").toString()).mkdirs();
 		new File(config.get("temp.dir").toString()).mkdirs();
-		
+
 		initLog4J();
 
 		UIManager.put("TabbedPaneUI", FlatTabbedPaneUI.class.getName());
@@ -287,6 +286,7 @@ public final class App {
 		TextHolder.addString("sysmon.refresh", "Refresh");
 		TextHolder.addString("sysmon.sysinfo", "System information");
 		TextHolder.addString("sysmon.socketTitle", "Process and ports");
+		TextHolder.addString("sysmon.serviceTitle", "Services (systemd)");
 		TextHolder.addString("sysmon.loadTitle", "System load");
 		TextHolder.addString("sysmon.diskTitle", "Diskspace usage");
 		TextHolder.addString("sysmon.title", "System Monitor");
@@ -301,6 +301,12 @@ public final class App {
 		TextHolder.addString("sysmon.sigText", "Send signal");
 		TextHolder.addString("sysmon.niceText", "Change priority");
 		TextHolder.addString("sysmon.showAll", "Show processes from all users");
+		TextHolder.addString("sysmon.service.start", "Start");
+		TextHolder.addString("sysmon.service.stop", "Stop");
+		TextHolder.addString("sysmon.service.enable", "Enable");
+		TextHolder.addString("sysmon.service.disable", "Disable");
+		TextHolder.addString("sysmon.service.reload", "Reload");
+		TextHolder.addString("sysmon.service.restart", "Restart");
 
 		TextHolder.addString("folderview.selectFolder", "Select Folder");
 		TextHolder.addString("folderview.selectFile", "Select File");

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
 import javax.swing.Box;
 import javax.swing.Icon;
@@ -94,7 +95,8 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	private AtomicBoolean readSysinfo = new AtomicBoolean(true),
 			readNetworkStatus = new AtomicBoolean(true),
 			readDiskStatus = new AtomicBoolean(true),
-			readPsStatus = new AtomicBoolean(true);
+			readPsStatus = new AtomicBoolean(true),
+			readServiceStatus = new AtomicBoolean(true);
 	private JButton btnSockRefresh, btnDiskRefresh, btnInfoRefresh,
 			btnProcRefresh;
 	private Map<String, String> statMap;
@@ -105,6 +107,8 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	private JCheckBox chkRunAsSuperUserSock, chkRunAsSuperUserPs;
 	private boolean first = true;
 	private final Cursor DEFAULT_CURSOR;
+	private ServicePanel servicePanel;
+	private List<String> services = new ArrayList<>();
 
 	public SystemMonitorWidget(SessionInfo info, String[] args,
 			AppSession appSession, Window window) {
@@ -124,11 +128,13 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		chkRunAsSuperUserSock.addActionListener(e -> {
 			runAsSuperUser.set(chkRunAsSuperUserSock.isSelected());
 			chkRunAsSuperUserPs.setSelected(chkRunAsSuperUserSock.isSelected());
+			servicePanel.setUseSuperUser(chkRunAsSuperUserSock.isSelected());
 		});
 
 		chkRunAsSuperUserPs.addActionListener(e -> {
 			runAsSuperUser.set(chkRunAsSuperUserPs.isSelected());
 			chkRunAsSuperUserSock.setSelected(chkRunAsSuperUserPs.isSelected());
+			servicePanel.setUseSuperUser(chkRunAsSuperUserPs.isSelected());
 		});
 
 		btnDiskRefresh = new JButton(TextHolder.getString("sysmon.refresh"));
@@ -390,8 +396,69 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		createNiceMenu();
 		createSigMenu();
 
+		servicePanel = new ServicePanel();
+		servicePanel.setRefreshActionListener(e -> {
+			readServiceStatus.set(true);
+			t.interrupt();
+		});
+		servicePanel.setElevationActionListener(e -> {
+			runAsSuperUser.set(servicePanel.getUseSuperUser());
+			chkRunAsSuperUserSock.setSelected(servicePanel.getUseSuperUser());
+			chkRunAsSuperUserPs.setSelected(servicePanel.getUseSuperUser());
+		});
+
+		servicePanel.setStartServiceActionListener(e -> {
+			String cmd = servicePanel.getStartServiceCommand();
+			if (cmd != null) {
+				commandToExecute = cmd;
+				t.interrupt();
+			}
+		});
+
+		servicePanel.setStopServiceActionListener(e -> {
+			String cmd = servicePanel.getStopServiceCommand();
+			if (cmd != null) {
+				commandToExecute = cmd;
+				t.interrupt();
+			}
+		});
+
+		servicePanel.setRestartServiceActionListener(e -> {
+			String cmd = servicePanel.getRestartServiceCommand();
+			if (cmd != null) {
+				commandToExecute = cmd;
+				t.interrupt();
+			}
+		});
+
+		servicePanel.setReloadServiceActionListener(e -> {
+			String cmd = servicePanel.getReloadServiceCommand();
+			if (cmd != null) {
+				commandToExecute = cmd;
+				t.interrupt();
+			}
+		});
+
+		servicePanel.setEnableServiceActionListener(e -> {
+			String cmd = servicePanel.getEnableServiceCommand();
+			if (cmd != null) {
+				commandToExecute = cmd;
+				t.interrupt();
+			}
+		});
+
+		servicePanel.setDisableServiceActionListener(e -> {
+			String cmd = servicePanel.getDisableServiceCommand();
+			if (cmd != null) {
+				commandToExecute = cmd;
+				t.interrupt();
+			}
+		});
+
 		tabs.addCustomTab(TextHolder.getString("sysmon.socketTitle"),
 				socketPanel);
+		tabs.addCustomTab(TextHolder.getString("sysmon.serviceTitle"),
+				servicePanel);
 		tabs.addCustomTab(TextHolder.getString("sysmon.diskTitle"),
 				panDiskInfo);
 		tabs.addCustomTab(TextHolder.getString("sysmon.processTitle"), panel1);
@@ -483,6 +550,13 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 					processTableModel.getCommandString());
 			procList = executeCommand(procScript, false);
 			System.out.println("Process count:" + procList.size());
+		}
+
+		if (readServiceStatus.get()) {
+			services = executeCommand(servicePanel.getServiceListCommand(),
+					false);
+			System.out.println("services count:" + services.size());
+			servicePanel.setServiceData(services);
 		}
 
 		// System.out.println("PROC_LIST: " + procList + "\n\n");
@@ -682,6 +756,11 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 			// diskTableModel.updateTable(environment.get("DISK_USAGE_TABLE"));
 			loadPanel.updateValues(statMap, sysInfoText);
 		});
+
+		if (readServiceStatus.get()) {
+			servicePanel.setServiceData(services);
+			readServiceStatus.set(false);
+		}
 
 	}
 
@@ -1066,5 +1145,9 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 		}
 		socketStatus.setText(sb.toString());
 		socketStatus.setCaretPosition(0);
+	}
+
+	private void createServicePanel() {
+
 	}
 }
