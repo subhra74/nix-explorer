@@ -26,6 +26,10 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.plaf.basic.BasicTextUI;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.jcraft.jsch.ChannelExec;
@@ -79,6 +83,21 @@ public final class App {
 
 	}
 
+	private static void initLog4J() {
+		try {
+			FileAppender appender = new FileAppender(
+					new PatternLayout("%d [ %c %C ] %m%n"), PathUtils.combine(
+							getConfig("app.dir"), "log.txt", File.separator));
+			appender.setThreshold(Level.DEBUG);
+			appender.setAppend(false);
+			appender.activateOptions();
+			Logger.getRootLogger().addAppender(appender);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void main(String[] args)
 			throws Exception, URISyntaxException {
 
@@ -124,6 +143,8 @@ public final class App {
 
 		new File(config.get("app.dir").toString()).mkdirs();
 		new File(config.get("temp.dir").toString()).mkdirs();
+		
+		initLog4J();
 
 		UIManager.put("TabbedPaneUI", FlatTabbedPaneUI.class.getName());
 		UIManager.put("ProgressBarUI", FlatProgressBarUI.class.getName());
@@ -1872,7 +1893,7 @@ public final class App {
 		Icon smallFolder = new ScaledIcon(
 				App.class.getResource("/images/folder.png"),
 				Utility.toPixel(20), Utility.toPixel(20));
-		
+
 		Icon treeFolder = new ScaledIcon(
 				App.class.getResource("/images/long_folder.png"),
 				Utility.toPixel(20), Utility.toPixel(20));
