@@ -40,17 +40,36 @@ public class SudoDialog extends JDialog {
 		SudoDialog dlg = new SudoDialog(w);
 
 		new Thread(() -> {
+
 			ChannelExec exec = null;
 			try {
 				String prompt = UUID.randomUUID().toString();
 				exec = wrapper.getExecChannel();
-				exec.setCommand("sudo -p " + prompt + " -S " + command);
+				exec.setCommand("sudo -S -p '' " + command);
+				System.out.println("sudo -S -p '' " + command);
 				InputStream in = exec.getInputStream();
 				OutputStream out = exec.getOutputStream();
 				exec.connect();
 				StringBuilder sb = new StringBuilder();
 				StringBuilder output = new StringBuilder();
+				boolean askPassword = false;
 				while (true) {
+					if (sb.toString().equals(prompt)) {
+						askPassword = true;
+						sb=new StringBuilder();
+					}
+					if (in.available() == 0) {
+						System.out.println("Prompt ready");
+						String password = JOptionPane
+								.showInputDialog("Password");
+						if (password == null) {
+							return;
+						}
+						sb = new StringBuilder();
+						out.write((password + "\n").getBytes());
+						out.flush();
+					}
+
 					int x = in.read();
 					if (x == '\n') {
 						output.append(sb.toString());
@@ -60,17 +79,10 @@ public class SudoDialog extends JDialog {
 					if (x != -1 && x != '\n')
 						sb.append((char) x);
 
-					if (sb.toString().equals(prompt)) {
-						String password = JOptionPane
-								.showInputDialog("Password");
-						if (password == null) {
-							return;
-						}
-						sb = new StringBuilder();
-						out.write(password.getBytes());
-						out.flush();
+					if (exec.isClosed()) {
+						System.out.println("Channel closed");
+						return;
 					}
-
 					if (exec.getExitStatus() != -1 && x == -1) {
 						break;
 					}
@@ -83,6 +95,7 @@ public class SudoDialog extends JDialog {
 				if (exec != null) {
 					exec.disconnect();
 				}
+				System.out.println("done");
 				SwingUtilities.invokeLater(() -> {
 					dlg.setVisible(false);
 				});

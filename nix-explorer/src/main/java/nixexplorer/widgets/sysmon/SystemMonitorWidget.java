@@ -52,6 +52,8 @@ import nixexplorer.core.FileInfo;
 import nixexplorer.core.ssh.SshUtility;
 import nixexplorer.core.ssh.SshWrapper;
 import nixexplorer.widgets.Widget;
+import nixexplorer.widgets.component.SudoDialog;
+import nixexplorer.widgets.component.SudoDialog.SudoResult;
 import nixexplorer.widgets.console.TerminalDialog;
 import nixexplorer.widgets.folderview.remote.AskForPriviledgeDlg;
 import nixexplorer.widgets.util.Utility;
@@ -810,6 +812,23 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	private List<String> runPriviledged(String commandToExecute)
 			throws Exception {
 		List<String> list = new ArrayList<>();
+		
+//		String suCmd = AskForPriviledgeDlg.askForPriviledge();
+//		if (suCmd == null) {
+//			return list;
+//		}
+//		
+//		boolean sudo = suCmd.startsWith("sudo");
+//		if (sudo) {
+//			SudoResult res=SudoDialog.executeCommand(getWindow(), commandToExecute, wrapper);
+//			if(res.getExitCode()!=0) {
+//				return list;
+//			}else {
+//				list.addAll(Arrays.asList(
+//						new String(res.getOutput()).split("\n")));
+//			}
+//		}
+		
 		String suCmd = PriviledgedUtility
 				.generatePriviledgedCommand(commandToExecute);
 		if (suCmd == null) {
