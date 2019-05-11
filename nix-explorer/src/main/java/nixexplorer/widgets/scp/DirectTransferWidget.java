@@ -156,7 +156,9 @@ public class DirectTransferWidget extends JDialog implements DisposableView {
 				case 2:
 					data = createSshFileList();
 				}
-				os.write(data.getBytes());
+				if (data != null) {
+					os.write(data.getBytes());
+				}
 				os.close();
 				sftp.disconnect();
 				wrapper.disconnect();

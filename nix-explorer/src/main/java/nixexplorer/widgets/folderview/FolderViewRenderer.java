@@ -21,7 +21,7 @@ public class FolderViewRenderer implements TableCellRenderer {
 		label = new JLabel();
 		label.setOpaque(true);
 		label.setBorder(
-				new EmptyBorder(Utility.toPixel(5), Utility.toPixel(10), Utility.toPixel(0), Utility.toPixel(0)));
+				new EmptyBorder(Utility.toPixel(0), Utility.toPixel(10), Utility.toPixel(0), Utility.toPixel(0)));
 		label.setIconTextGap(Utility.toPixel(10));
 		plainFont = new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(12));
 		boldFont = new Font(Font.DIALOG, Font.BOLD, Utility.toPixel(12));

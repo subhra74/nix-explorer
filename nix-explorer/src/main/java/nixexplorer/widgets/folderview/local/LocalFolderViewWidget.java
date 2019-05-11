@@ -42,7 +42,7 @@ public class LocalFolderViewWidget extends TabbedFolderViewWidget
 	private static final long serialVersionUID = 1261155106627917513L;
 	private FileSystemProvider fs;
 	private WeakHashMap<FolderViewWidget, Boolean> folderViews = new WeakHashMap<FolderViewWidget, Boolean>();
-	private AppSession appSession;
+	//private AppSession appSession;
 
 	public LocalFolderViewWidget(SessionInfo info, String args[],
 			AppSession appSession, Window window) {

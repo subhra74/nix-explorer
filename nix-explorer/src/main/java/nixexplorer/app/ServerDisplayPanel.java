@@ -35,7 +35,7 @@ import nixexplorer.app.components.net.NetworkChecker;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.app.settings.ui.ConfigDialog;
-import nixexplorer.widgets.BaseSysInfoWidget;
+//import nixexplorer.widgets.BaseSysInfoWidget;
 import nixexplorer.widgets.console.TabbedConsoleWidget;
 import nixexplorer.widgets.du.DiskUsageViewerWidget;
 import nixexplorer.widgets.editor.RemoteEditorWidget;

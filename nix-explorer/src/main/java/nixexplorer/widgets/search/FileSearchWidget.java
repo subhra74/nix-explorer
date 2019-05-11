@@ -876,7 +876,9 @@ public class FileSearchWidget extends Widget {
 //				}
 //			}
 			System.out.println("Command executed");
-			exec.disconnect();
+			if (exec != null && exec.isConnected()) {
+				exec.disconnect();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
