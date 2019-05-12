@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -266,6 +267,9 @@ public final class App {
 		TextHolder.addString("folderview.showHidden", "Show hidden files");
 		TextHolder.addString("folderview.selectAll", "Select All");
 		TextHolder.addString("folderview.clearSelection", "Clear selection");
+		TextHolder.addString("folderview.noeditor",
+				"No external editor has been configured. Would you like to select one?");
+		TextHolder.addString("folderview.noeditortitle", "External editor");
 		TextHolder.addString("folderview.inverseSelection",
 				"Inverse selection");
 		TextHolder.addString("folderview.selectByPattern", "Select by pattern");
@@ -1410,6 +1414,9 @@ public final class App {
 	}
 
 	private static void loadIcons(String black) {
+		UIManager.put("app.icon",
+				new ImageIcon(App.class.getResource("/images/app-logo.png")));
+
 		UIManager.put("global.settings",
 				new ScaledIcon(
 						App.class.getResource("/images/" + "settings.png"),

@@ -4,6 +4,7 @@
 package nixexplorer.app;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -27,6 +28,7 @@ import javax.swing.border.MatteBorder;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
+import nixexplorer.Constants;
 import nixexplorer.TextHolder;
 import nixexplorer.app.components.FlatTabbedPane;
 import nixexplorer.app.components.TabbedChild;
@@ -131,13 +133,30 @@ public class ServerDisplayPanel extends JPanel {
 		tabs.addTab(w.getTitle(), w, true);
 	}
 
+	private Component createDefaultComponent() {
+		Box b1 = Box.createVerticalBox();
+		b1.add(Box.createVerticalGlue());
+		JLabel l1=new JLabel("Welcome to " + info.getName());
+		l1.setForeground(UIManager.getColor("Button.highlight"));
+		l1.setFont(Utility.getFont(Constants.LARGE));
+		l1.setAlignmentX(Box.CENTER_ALIGNMENT);
+		b1.add(l1);
+		JLabel l2=new JLabel("Please select a tool from above to start");
+		l2.setForeground(UIManager.getColor("Button.highlight"));
+		l2.setFont(Utility.getFont(Constants.NORMAL));
+		l2.setAlignmentX(Box.CENTER_ALIGNMENT);
+		b1.add(l2);
+		b1.add(Box.createVerticalGlue());
+		return b1;
+	}
+
 	private JPanel createContentPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setOpaque(false);
 //		int gap = Utility.toPixel(8);
 //		panel.setBorder(new EmptyBorder(gap, 0, gap, gap));
 
-		tabs = new FlatTabbedPane(true, true, null);
+		tabs = new FlatTabbedPane(true, true, createDefaultComponent());
 		tabs.setClosable(true);
 //		tabs.setBorder(new MatteBorder(Utility.toPixel(0), Utility.toPixel(1),
 //				Utility.toPixel(1), Utility.toPixel(1),

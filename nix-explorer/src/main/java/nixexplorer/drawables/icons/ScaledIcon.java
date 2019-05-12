@@ -18,7 +18,7 @@ public class ScaledIcon implements Icon {
 
 	private int width, height;
 	private Image img;
-
+	
 	public ScaledIcon(URL imgFile, int width, int height) {
 		try {
 			this.width = width;

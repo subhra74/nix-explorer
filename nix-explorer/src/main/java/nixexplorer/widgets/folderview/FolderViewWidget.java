@@ -83,7 +83,8 @@ import nixexplorer.widgets.util.Utility;
  * %d - current directory
  */
 
-public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEventListener, TreeSelectionListener {
+public class FolderViewWidget extends JPanel
+		implements TableCellRenderer, AppEventListener, TreeSelectionListener {
 	private static final long serialVersionUID = 4145936478620976613L;
 	// private JTextField txtAddressBar;
 	private AddressBarPanel txtAddressBar;
@@ -93,8 +94,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 	private FolderViewTableModel folderViewModel;
 	private JTable folderTable;
 	private JLabel label = new JLabel();
-	private JMenuItem mOpen, mRename, mDelete, mNewFile, mNewFolder, mCopy, mPaste, mCut, mAddToFav, mEditExtern,
-			mOpenExtern, mChangePerm;
+	private JMenuItem mOpen, mRename, mDelete, mNewFile, mNewFolder, mCopy,
+			mPaste, mCut, mAddToFav, mEditExtern, mOpenExtern, mChangePerm;
 
 	private String file;
 
@@ -136,9 +137,12 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 	private Border border;
 	// private NavigationListModel modelNav;
 
-	public FolderViewWidget(String file, TabCallback tabCallback, FolderViewBaseTransferHandler transferHandler,
-			TreeBaseTransferHandler treeHandler, ContextMenuActionHandler menuHandler,
-			OverflowMenuActionHandler menuHandler2, TreeContextMenuHandler menuHandler3) {
+	public FolderViewWidget(String file, TabCallback tabCallback,
+			FolderViewBaseTransferHandler transferHandler,
+			TreeBaseTransferHandler treeHandler,
+			ContextMenuActionHandler menuHandler,
+			OverflowMenuActionHandler menuHandler2,
+			TreeContextMenuHandler menuHandler3) {
 		this.file = file;
 		this.tabCallback = tabCallback;
 		this.menuHandler = menuHandler;
@@ -167,7 +171,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 		treeModel = new DefaultTreeModel(root, true);
 		tree = new JTree(treeModel);
 		tree.setCellRenderer(new TreeViewCellRenderer());
-		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		tree.getSelectionModel()
+				.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		tree.addTreeExpansionListener(new TreeExpansionListener() {
 			@Override
 			public void treeExpanded(TreeExpansionEvent event) {
@@ -193,9 +198,11 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON3) {
-					TreePath treePath = tree.getPathForLocation(e.getX(), e.getY());
+					TreePath treePath = tree.getPathForLocation(e.getX(),
+							e.getY());
 					if (treePath != null) {
-						String path = FolderViewUtility.getFilePath(tree, treePath, isLocal());
+						String path = FolderViewUtility.getFilePath(tree,
+								treePath, isLocal());
 						menuHandler3.createMenu(popup3, path);
 						popup3.pack();
 						popup3.show(tree, e.getX(), e.getY());
@@ -242,16 +249,19 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 
 		createViewComboBox();
 
-		navigationPanel = new JPanel(new BorderLayout(Utility.toPixel(5), Utility.toPixel(5)));
+		navigationPanel = new JPanel(
+				new BorderLayout(Utility.toPixel(5), Utility.toPixel(5)));
 		navigationPanel.add(treeScroll);
 		navigationPanel.add(cmbView1, BorderLayout.NORTH);
 
-		navigationPanel.setBorder(new MatteBorder(0, 0, 0, 1, UIManager.getColor("DefaultBorder.color")));
+		navigationPanel.setBorder(new MatteBorder(0, 0, 0, 1,
+				UIManager.getColor("DefaultBorder.color")));
 
 		// splitPane.setLeftComponent(navigationPanel);
 
 		Box b1 = Box.createHorizontalBox();
-		b1.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5), Utility.toPixel(5)));
+		b1.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+				Utility.toPixel(5), Utility.toPixel(5)));
 //		btnSplit = new JToggleButton(UIManager.getIcon("AddressBar.split1"));
 //		// btnSplit.setMargin(new Insets(0, 0, 0, 0));
 //		btnSplit.setBorderPainted(false);
@@ -308,8 +318,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 		add(b1, BorderLayout.SOUTH);
 
 		Box addressBox = Box.createHorizontalBox();
-		addressBox.setBorder(
-				new EmptyBorder(Utility.toPixel(3), Utility.toPixel(3), Utility.toPixel(3), Utility.toPixel(3)));
+		addressBox.setBorder(new EmptyBorder(Utility.toPixel(3),
+				Utility.toPixel(3), Utility.toPixel(3), Utility.toPixel(3)));
 
 		// Dimension d2 = new Dimension(Utility.toPixel(30),
 		// Utility.toPixel(30));
@@ -386,16 +396,18 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			this.popup2.show(btnMoreMenu, x, y);
 		});
 
-		txtAddressBar = new AddressBarPanel(tabCallback.getFs().isLocal() ? File.separatorChar : '/', e -> {
-			String path = e.getActionCommand();
-			menuHandler3.createMenu(popup3, path);
-			popup3.pack();
-			MouseEvent e1 = (MouseEvent) e.getSource();
-			popup3.show(txtAddressBar, e1.getX(), e1.getY());
-		});
+		txtAddressBar = new AddressBarPanel(
+				tabCallback.getFs().isLocal() ? File.separatorChar : '/', e -> {
+					String path = e.getActionCommand();
+					menuHandler3.createMenu(popup3, path);
+					popup3.pack();
+					MouseEvent e1 = (MouseEvent) e.getSource();
+					popup3.show(txtAddressBar, e1.getX(), e1.getY());
+				});
 		txtAddressBar.addActionListener(e -> {
 			String text = txtAddressBar.getText();
-			System.out.println("Address changed: " + text + " old: " + FolderViewWidget.this.file);
+			System.out.println("Address changed: " + text + " old: "
+					+ FolderViewWidget.this.file);
 			if (PathUtils.isSamePath(FolderViewWidget.this.file, text)) {
 				System.out.println("Same text");
 				return;
@@ -426,7 +438,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			}
 		};
 		this.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-				.put(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK), "reload");
+				.put(KeyStroke.getKeyStroke(KeyEvent.VK_R,
+						InputEvent.CTRL_DOWN_MASK), "reload");
 		this.getActionMap().put("reload", reloadAction);
 		btnReload.addActionListener(reloadAction);
 
@@ -449,7 +462,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 						render(tabCallback.getFs().getHome());
 					} catch (Exception e1) {
 						e1.printStackTrace();
-						JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
+						JOptionPane.showMessageDialog(null, TextHolder
+								.getString("folderview.genericError"));
 					}
 				}).start();
 			}
@@ -458,14 +472,16 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 		resizeColumnWidth(folderTable);
 
 		scrollTable = new JScrollPane(folderTable);
-		scrollTable.getVerticalScrollBar().setBackground(folderTable.getBackground());
+		scrollTable.getVerticalScrollBar()
+				.setBackground(folderTable.getBackground());
 		scrollTable.setViewportBorder(new EmptyBorder(0, 0, 0, 0));
 		scrollTable.setBorder(new EmptyBorder(0, 0, 0, 0));
 		scrollTable.addMouseListener(new MouseAdapter() {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event. MouseEvent)
+			 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.
+			 * MouseEvent)
 			 */
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -483,7 +499,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 
 		scrollListView = new JScrollPane(fileListView);
 
-		toggleView = new ViewTogglePanel(AppContext.INSTANCE.getConfig().getFileBrowser().getViewMode());
+		toggleView = new ViewTogglePanel(
+				AppContext.INSTANCE.getConfig().getFileBrowser().getViewMode());
 		toggleView.setViewListener(e -> {
 			updateContentView();
 			revalidate();
@@ -519,9 +536,11 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 		createPopupMenu();
 		createMoreMenu();
 
-		this.selectionHelper = new FolderViewSelectionHelper(this, folderTable, folderViewModel, sorter);
+		this.selectionHelper = new FolderViewSelectionHelper(this, folderTable,
+				folderViewModel, sorter);
 
-		cmbView1.setSelectedIndex(getConfig().getFileBrowser().getSidePanelViewMode());
+		cmbView1.setSelectedIndex(
+				getConfig().getFileBrowser().getSidePanelViewMode());
 
 		resizeColumnWidth(folderTable);
 
@@ -560,8 +579,9 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			fileListView.setTransferHandler(transferHandler);
 		}
 
-		chkSideNav.setSelected(isLocal() ? getConfig().getFileBrowser().isShowLocalSidePane()
-				: getConfig().getFileBrowser().isSidePanelVisible());
+		chkSideNav.setSelected(
+				isLocal() ? getConfig().getFileBrowser().isShowLocalSidePane()
+						: getConfig().getFileBrowser().isSidePanelVisible());
 		showHideSidebar();
 
 		reconnect();
@@ -621,7 +641,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 					render(file);
 				} catch (Exception e) {
 					e.printStackTrace();
-					JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
+					JOptionPane.showMessageDialog(null,
+							TextHolder.getString("folderview.genericError"));
 				}
 			}
 		});
@@ -649,7 +670,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			@Override
 			public void run() {
 				try {
-					List<FileInfo> childs = enableCache ? cachedFolders.get(f) : null;
+					List<FileInfo> childs = enableCache ? cachedFolders.get(f)
+							: null;
 					if (childs == null) {
 
 						System.out.println("Listing file: " + f);
@@ -682,10 +704,13 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 
 							folderTable.setEnabled(true);
 							// System.out.println("Rendered");
-							String title = "/".equals(FolderViewWidget.this.file) ? "ROOT"
-									: PathUtils.getFileName(FolderViewWidget.this.file);
+							String title = "/"
+									.equals(FolderViewWidget.this.file) ? "ROOT"
+											: PathUtils.getFileName(
+													FolderViewWidget.this.file);
 
-							tabCallback.updateTitle(title, FolderViewWidget.this);
+							tabCallback.updateTitle(title,
+									FolderViewWidget.this);
 
 							fileListModel.refresh();
 
@@ -693,7 +718,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 
 							// history.add(file);
 							updateNavButtons();
-							lblDetails.setText(String.format("Total %d items", folderTable.getRowCount()));
+							lblDetails.setText(String.format("Total %d items",
+									folderTable.getRowCount()));
 
 							loadFavourites(tabCallback.listFavourites());
 							focus();
@@ -701,7 +727,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 					});
 				} catch (Exception e) {
 					e.printStackTrace();
-					JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
+					JOptionPane.showMessageDialog(null,
+							TextHolder.getString("folderview.genericError"));
 				} finally {
 					enableView();
 				}
@@ -712,14 +739,15 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 
 	}
 
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-			int row, int column) {
+	public Component getTableCellRendererComponent(JTable table, Object value,
+			boolean isSelected, boolean hasFocus, int row, int column) {
 		FileInfo ent = folderViewModel.getItemAt(row);
 		switch (column) {
 		case 0:
-			label.setIcon((ent.getType() == FileType.Directory || ent.getType() == FileType.DirLink)
-					? UIManager.getIcon("FileView.directoryIcon")
-					: UIManager.getIcon("FileView.fileIcon"));
+			label.setIcon((ent.getType() == FileType.Directory
+					|| ent.getType() == FileType.DirLink)
+							? UIManager.getIcon("FileView.directoryIcon")
+							: UIManager.getIcon("FileView.fileIcon"));
 			label.setText(ent.getName());
 			break;
 		case 1:
@@ -738,7 +766,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			break;
 		}
 
-		label.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+		label.setBackground(isSelected ? table.getSelectionBackground()
+				: table.getBackground());
 		return label;
 	}
 
@@ -752,7 +781,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			}
 			return fs;
 		} else {
-			FileInfo fs[] = new FileInfo[fileListView.getSelectedIndices().length];
+			FileInfo fs[] = new FileInfo[fileListView
+					.getSelectedIndices().length];
 			int rows[] = fileListView.getSelectedIndices();
 			for (int i = 0; i < rows.length; i++) {
 				fs[i] = fileListModel.getElementAt(rows[i]);// folderViewModel.getItemAt(getRow(rows[i]));
@@ -914,7 +944,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 	private void renderTree() {
 		treeLoading = true;
 		try {
-			DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getModel().getRoot();
+			DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree
+					.getModel().getRoot();
 			DefaultMutableTreeNode node = root;
 			String[] arr = file.split("[\\/\\\\]");
 			for (int i = 0; i < arr.length; i++) {
@@ -937,10 +968,12 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 
 			for (int i = 0; i < folderViewModel.getRowCount(); i++) {
 				FileInfo info = folderViewModel.getItemAt(i);
-				if (info.getType() == FileType.Directory || info.getType() == FileType.DirLink) {
+				if (info.getType() == FileType.Directory
+						|| info.getType() == FileType.DirLink) {
 					boolean exists = false;
 					for (int j = 0; j < node.getChildCount(); j++) {
-						DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(j);
+						DefaultMutableTreeNode child = (DefaultMutableTreeNode) node
+								.getChildAt(j);
 						if (info.getName().equals(child.getUserObject())) {
 //							System.out.println("Node already exists: "
 //									+ info.getName() + " under: "
@@ -951,7 +984,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 					}
 					if (!exists) {
 						int index = node.getChildCount();
-						DefaultMutableTreeNode c = new DefaultMutableTreeNode(info.getName());
+						DefaultMutableTreeNode c = new DefaultMutableTreeNode(
+								info.getName());
 						c.setAllowsChildren(true);
 						treeModel.insertNodeInto(c, node, index);
 
@@ -968,10 +1002,12 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 		treeLoading = false;
 	}
 
-	private DefaultMutableTreeNode getChild(DefaultMutableTreeNode node, String text) {
+	private DefaultMutableTreeNode getChild(DefaultMutableTreeNode node,
+			String text) {
 
 		for (int i = 0; i < node.getChildCount(); i++) {
-			DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
+			DefaultMutableTreeNode child = (DefaultMutableTreeNode) node
+					.getChildAt(i);
 			// System.out.println(child.getUserObject() + " -> " + text);
 			if (text.equals(child.getUserObject())) {
 				return child;
@@ -998,7 +1034,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 		if (path == null) {
 			return null;
 		}
-		String selectedPath = FolderViewUtility.getFilePath(tree, path, isLocal());
+		String selectedPath = FolderViewUtility.getFilePath(tree, path,
+				isLocal());
 		if (selectedPath == null) {
 			return null;
 		}
@@ -1071,7 +1108,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 	public void loadFavourites(List<String> favourites) {
 		modelPlaces.removeAllElements();
 		for (String f : favourites) {
-			modelPlaces.addElement(new FavouritePlaceEntry(f, PathUtils.getFileName(f)));
+			modelPlaces.addElement(
+					new FavouritePlaceEntry(f, PathUtils.getFileName(f)));
 		}
 	}
 
@@ -1120,9 +1158,11 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 		cmbView1 = new JComboBox<>(new String[] { "Tree view", "Favourites" });
 //		cmbView1.setBorder(new MatteBorder(0, 0, 0,
 //				Utility.toPixel(1), UIManager.getColor("DefaultBorder.color")));
-		cmbView1.setPreferredSize(new Dimension(Utility.toPixel(150), Utility.toPixel(25)));
+		cmbView1.setPreferredSize(
+				new Dimension(Utility.toPixel(150), Utility.toPixel(25)));
 		cmbView1.setBorder(null);
-		cmbView1.setBorder(new MatteBorder(0, 0, Utility.toPixel(1), 0, UIManager.getColor("DefaultBorder.color")));
+		cmbView1.setBorder(new MatteBorder(0, 0, Utility.toPixel(1), 0,
+				UIManager.getColor("DefaultBorder.color")));
 		cmbView1.addActionListener(e -> {
 			// int loc = splitPane.getDividerLocation();
 			if (cmbView1.getSelectedIndex() == 0) {
@@ -1143,7 +1183,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 //			else {
 //				hideSidePane();
 //			}
-			getConfig().getFileBrowser().setSidePanelViewMode(cmbView1.getSelectedIndex());
+			getConfig().getFileBrowser()
+					.setSidePanelViewMode(cmbView1.getSelectedIndex());
 			getConfig().save();
 			repaint();
 			revalidate();
@@ -1178,9 +1219,11 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 		}
 
 		if (isLocal()) {
-			getConfig().getFileBrowser().setShowLocalSidePane(chkSideNav.isSelected());
+			getConfig().getFileBrowser()
+					.setShowLocalSidePane(chkSideNav.isSelected());
 		} else {
-			getConfig().getFileBrowser().setSidePanelVisible(chkSideNav.isSelected());
+			getConfig().getFileBrowser()
+					.setSidePanelVisible(chkSideNav.isSelected());
 		}
 
 		getConfig().save();
@@ -1253,10 +1296,11 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 		}
 		folderTable.setDropMode(DropMode.USE_SELECTION);
 		folderTable.setShowGrid(false);
-		folderTable.setRowHeight(Utility.toPixel(40));
+		folderTable.setRowHeight(r.getPreferredHeight());
 		folderTable.setFillsViewportHeight(true);
 
-		folderTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		folderTable.setSelectionMode(
+				ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		label.setOpaque(true);
 		folderTable.setDefaultRenderer(Object.class, r);
 		folderTable.setDefaultRenderer(Long.class, r);
@@ -1268,17 +1312,22 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			public int compare(Object s1, Object s2) {
 				FileInfo info1 = (FileInfo) s1;
 				FileInfo info2 = (FileInfo) s2;
-				if (info1.getType() == FileType.Directory || info1.getType() == FileType.DirLink) {
-					if (info2.getType() == FileType.Directory || info2.getType() == FileType.DirLink) {
-						return info1.getName().compareToIgnoreCase(info2.getName());
+				if (info1.getType() == FileType.Directory
+						|| info1.getType() == FileType.DirLink) {
+					if (info2.getType() == FileType.Directory
+							|| info2.getType() == FileType.DirLink) {
+						return info1.getName()
+								.compareToIgnoreCase(info2.getName());
 					} else {
 						return 1;
 					}
 				} else {
-					if (info2.getType() == FileType.Directory || info2.getType() == FileType.DirLink) {
+					if (info2.getType() == FileType.Directory
+							|| info2.getType() == FileType.DirLink) {
 						return -1;
 					} else {
-						return info1.getName().compareToIgnoreCase(info2.getName());
+						return info1.getName()
+								.compareToIgnoreCase(info2.getName());
 					}
 				}
 			}
@@ -1295,17 +1344,22 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 
 			@Override
 			public int compare(FileInfo info1, FileInfo info2) {
-				if (info1.getType() == FileType.Directory || info1.getType() == FileType.DirLink) {
-					if (info2.getType() == FileType.Directory || info2.getType() == FileType.DirLink) {
-						return info1.getLastModified().compareTo(info2.getLastModified());
+				if (info1.getType() == FileType.Directory
+						|| info1.getType() == FileType.DirLink) {
+					if (info2.getType() == FileType.Directory
+							|| info2.getType() == FileType.DirLink) {
+						return info1.getLastModified()
+								.compareTo(info2.getLastModified());
 					} else {
 						return 1;
 					}
 				} else {
-					if (info2.getType() == FileType.Directory || info2.getType() == FileType.DirLink) {
+					if (info2.getType() == FileType.Directory
+							|| info2.getType() == FileType.DirLink) {
 						return -1;
 					} else {
-						return info1.getLastModified().compareTo(info2.getLastModified());
+						return info1.getLastModified()
+								.compareTo(info2.getLastModified());
 					}
 				}
 			}
@@ -1327,7 +1381,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			public void actionPerformed(ActionEvent ae) {
 				FileInfo[] files = getSelectedFiles();
 				if (files.length > 0) {
-					if (files[0].getType() == FileType.Directory || files[0].getType() == FileType.DirLink) {
+					if (files[0].getType() == FileType.Directory
+							|| files[0].getType() == FileType.DirLink) {
 						String str = files[0].getPath();
 						render(str);
 					}
@@ -1335,7 +1390,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			}
 		});
 
-		folderTable.addKeyListener(new FolderViewKeyHandler(folderTable, folderViewModel));
+		folderTable.addKeyListener(
+				new FolderViewKeyHandler(folderTable, folderViewModel));
 
 		folderTable.addMouseListener(new MouseAdapter() {
 			@Override
@@ -1354,15 +1410,19 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 						return;
 					}
 					if (r == folderTable.getSelectedRow()) {
-						FileInfo fileInfo = folderViewModel.getItemAt(getRow(r));
-						if (fileInfo.getType() == FileType.Directory || fileInfo.getType() == FileType.DirLink) {
-							System.out.println("Current file: " + FolderViewWidget.this.file);
+						FileInfo fileInfo = folderViewModel
+								.getItemAt(getRow(r));
+						if (fileInfo.getType() == FileType.Directory
+								|| fileInfo.getType() == FileType.DirLink) {
+							System.out.println("Current file: "
+									+ FolderViewWidget.this.file);
 							history.addBack(FolderViewWidget.this.file);
 							render(fileInfo.getPath());
 							updateNavButtons();
 						}
 					}
-				} else if (e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON3) {
+				} else if (e.isPopupTrigger()
+						|| e.getButton() == MouseEvent.BUTTON3) {
 					selectRow(e);
 					if (embedded)
 						return;
@@ -1399,7 +1459,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 
 	public void sortView(int index, boolean asc) {
 		ArrayList<RowSorter.SortKey> list = new ArrayList<>();
-		list.add(new RowSorter.SortKey(index, asc ? SortOrder.ASCENDING : SortOrder.DESCENDING));
+		list.add(new RowSorter.SortKey(index,
+				asc ? SortOrder.ASCENDING : SortOrder.DESCENDING));
 		sorter.setSortKeys(list);
 		sorter.sort();
 		fileListModel.refresh();
@@ -1430,7 +1491,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see java.awt.event.MouseAdapter#mousePressed(java.awt.event. MouseEvent)
+			 * @see java.awt.event.MouseAdapter#mousePressed(java.awt.event.
+			 * MouseEvent)
 			 */
 //			@Override
 //			public void mousePressed(MouseEvent e) {
@@ -1463,14 +1525,17 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 					if (r == fileListView.getSelectedIndex()) {
 						FileInfo fileInfo = fileListModel.getElementAt(r);
 						// .getItemAt(getRow(r));
-						if (fileInfo.getType() == FileType.Directory || fileInfo.getType() == FileType.DirLink) {
-							System.out.println("Current file: " + FolderViewWidget.this.file);
+						if (fileInfo.getType() == FileType.Directory
+								|| fileInfo.getType() == FileType.DirLink) {
+							System.out.println("Current file: "
+									+ FolderViewWidget.this.file);
 							history.addBack(FolderViewWidget.this.file);
 							render(fileInfo.getPath());
 							updateNavButtons();
 						}
 					}
-				} else if (e.isPopupTrigger() || e.getButton() == MouseEvent.BUTTON3) {
+				} else if (e.isPopupTrigger()
+						|| e.getButton() == MouseEvent.BUTTON3) {
 					// selectListRow(e);
 					menuHandler.createMenu(popup, getSelectedFiles());
 					popup.pack();
@@ -1501,7 +1566,8 @@ public class FolderViewWidget extends JPanel implements TableCellRenderer, AppEv
 			public void actionPerformed(ActionEvent ae) {
 				FileInfo[] files = getSelectedFiles();
 				if (files.length > 0) {
-					if (files[0].getType() == FileType.Directory || files[0].getType() == FileType.DirLink) {
+					if (files[0].getType() == FileType.Directory
+							|| files[0].getType() == FileType.DirLink) {
 						String str = files[0].getPath();
 						System.out.println("Rendering: " + str);
 						render(str);

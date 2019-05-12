@@ -13,6 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Properties;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
@@ -46,6 +47,7 @@ public class MainAppFrame extends JFrame {
 	}
 
 	private void initUI() {
+		setIconImage(((ImageIcon) UIManager.getIcon("app.icon")).getImage());
 		defCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 		resizeCursor = new Cursor(Cursor.W_RESIZE_CURSOR);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);

@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
+import nixexplorer.App;
 import nixexplorer.Constants;
 import nixexplorer.app.AppSidePanel;
 import nixexplorer.app.settings.AppConfig;
@@ -33,9 +34,9 @@ public class WelcomeScreen extends JPanel {
 	 */
 	public WelcomeScreen(Window window, AppConfig config, AppSidePanel panel) {
 		setLayout(new WelcomePageLayout());// new BorderLayout());
-		//setBackground(UIManager.getColor("Panel.secondary"));
+		// setBackground(UIManager.getColor("Panel.secondary"));
 		JLabel lblMainIcon = new JLabel(
-				new ScaledIcon(getClass().getResource("/images/app-logo.png"),
+				new ScaledIcon(App.class.getResource("/images/app-logo.png"),
 						Utility.toPixel(256), Utility.toPixel(256)));
 		lblMainIcon.setHorizontalAlignment(JLabel.CENTER);
 		lblMainIcon.setVerticalAlignment(JLabel.CENTER);
@@ -52,7 +53,7 @@ public class WelcomeScreen extends JPanel {
 //		btn1.setHorizontalAlignment(JButton.LEFT);
 //		btn2.setHorizontalAlignment(JButton.LEFT);
 //		btn3.setHorizontalAlignment(JButton.LEFT);
-		
+
 		btn1.setHorizontalAlignment(JButton.LEFT);
 		btn2.setHorizontalAlignment(JButton.LEFT);
 		btn3.setHorizontalAlignment(JButton.LEFT);

@@ -36,6 +36,7 @@ import nixexplorer.TextHolder;
 import nixexplorer.app.AppContext;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionStore;
+import nixexplorer.app.settings.AppConfig;
 import nixexplorer.core.FileInfo;
 import nixexplorer.core.FileType;
 import nixexplorer.core.ssh.SshFileSystemWrapper;
@@ -52,6 +53,7 @@ import nixexplorer.widgets.folderview.copy.CopyWidget;
 import nixexplorer.widgets.logviewer.LogViewerWidget;
 import nixexplorer.widgets.scp.DirectTransferWidget;
 import nixexplorer.worker.DownloadTask;
+import nixexplorer.worker.DownloadTask.OpenMode;
 
 /**
  * @author subhro
@@ -134,7 +136,7 @@ public class RemoteContextMenuActionHandler
 		mOpenWithDefApp.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				openDefApp();
+				openApp(OpenMode.Default);
 			}
 		});
 
@@ -152,7 +154,26 @@ public class RemoteContextMenuActionHandler
 		mOpenWithCustom.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
+				AppConfig config = AppContext.INSTANCE.getConfig();
+				String str = config.getFileBrowser().getExternalEditor();
+				if (str != null && str.length() > 0) {
+					openApp(OpenMode.External);
+				} else {
+					if (JOptionPane.showConfirmDialog(remoteFolderView,
+							TextHolder.getString("folderview.noeditor"),
+							TextHolder.getString("noeditortitle"),
+							JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+						JFileChooser jfc = new JFileChooser();
+						if (jfc.showOpenDialog(
+								remoteFolderView) == JFileChooser.APPROVE_OPTION) {
+							AppContext.INSTANCE.getConfig().getFileBrowser()
+									.setExternalEditor(jfc.getSelectedFile()
+											.getAbsolutePath());
+							AppContext.INSTANCE.getConfig().save();
+							openApp(OpenMode.External);
+						}
+					}
+				}
 			}
 		});
 
@@ -1104,13 +1125,13 @@ public class RemoteContextMenuActionHandler
 	/**
 	 * 
 	 */
-	protected void openDefApp() {
+	protected void openApp(OpenMode mode) {
 		FileInfo[] selectedFiles = folderView.getSelectedFiles();
 		if (selectedFiles != null && selectedFiles.length == 1) {
 			FileInfo info = selectedFiles[0];
 			new DownloadTask(info.getPath(), remoteFolderView.getInfo(),
 					remoteFolderView.getSession(),
-					remoteFolderView.getSession().getChangeWatcher());
+					remoteFolderView.getSession().getChangeWatcher(), mode);
 		}
 	}
 
@@ -1133,10 +1154,10 @@ public class RemoteContextMenuActionHandler
 			openTextEditor();
 			break;
 		case 1:
-
+			openApp(OpenMode.External);
 			break;
 		case 2:
-			openDefApp();
+			openApp(OpenMode.Default);
 			break;
 		}
 	}

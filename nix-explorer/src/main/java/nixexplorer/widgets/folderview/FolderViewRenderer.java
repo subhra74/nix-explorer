@@ -8,6 +8,7 @@ import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 
+import nixexplorer.IconCache;
 import nixexplorer.core.FileInfo;
 import nixexplorer.core.FileType;
 import nixexplorer.widgets.util.Utility;
@@ -20,11 +21,12 @@ public class FolderViewRenderer implements TableCellRenderer {
 	public FolderViewRenderer() {
 		label = new JLabel();
 		label.setOpaque(true);
-		label.setBorder(
-				new EmptyBorder(Utility.toPixel(0), Utility.toPixel(10), Utility.toPixel(0), Utility.toPixel(0)));
+		label.setBorder(new EmptyBorder(Utility.toPixel(3), Utility.toPixel(10),
+				Utility.toPixel(3), Utility.toPixel(0)));
 		label.setIconTextGap(Utility.toPixel(10));
 		plainFont = new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(12));
 		boldFont = new Font(Font.DIALOG, Font.BOLD, Utility.toPixel(12));
+
 //		label.setBorder(new CompoundBorder(
 //				new MatteBorder(0, Utility.toPixel(0), Utility.toPixel(0), 0, UIManager.getColor("Panel.background")),
 //				new EmptyBorder(0, Utility.toPixel(10), 0, 0)));
@@ -33,9 +35,18 @@ public class FolderViewRenderer implements TableCellRenderer {
 //		fileIcon = new FileIcon(UIManager.getIcon("ListView.smallFile"), true);
 	}
 
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-			int row, int column) {
-		FolderViewTableModel folderViewModel = (FolderViewTableModel) table.getModel();
+	public int getPreferredHeight() {
+		label.setIcon(IconCache.getIconExt("fileicon", false));
+		int h1 = getPrefHeight();
+		label.setText("ABC");
+		int h2 = getPrefHeight();
+		return Math.max(h1, h2);
+	}
+
+	public Component getTableCellRendererComponent(JTable table, Object value,
+			boolean isSelected, boolean hasFocus, int row, int column) {
+		FolderViewTableModel folderViewModel = (FolderViewTableModel) table
+				.getModel();
 		int r = table.convertRowIndexToModel(row);
 		int c = table.convertColumnIndexToModel(column);
 		FileInfo ent = folderViewModel.getItemAt(r);
@@ -47,10 +58,12 @@ public class FolderViewRenderer implements TableCellRenderer {
 			break;
 		case 1:
 			label.setIcon(null);
-			if (ent.getType() == FileType.Directory || ent.getType() == FileType.DirLink) {
+			if (ent.getType() == FileType.Directory
+					|| ent.getType() == FileType.DirLink) {
 				label.setText("");
 			} else {
-				label.setText(Utility.humanReadableByteCount(ent.getSize(), true));
+				label.setText(
+						Utility.humanReadableByteCount(ent.getSize(), true));
 			}
 			break;
 		case 2:
@@ -73,13 +86,14 @@ public class FolderViewRenderer implements TableCellRenderer {
 			break;
 		}
 
-		label.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
-		label.setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
+		label.setBackground(isSelected ? table.getSelectionBackground()
+				: table.getBackground());
+		label.setForeground(isSelected ? table.getSelectionForeground()
+				: table.getForeground());
 		return label;
 	}
 
-	public int getPreferredHeight() {
-		label.setText("The quick brown fox jumps over the lazy dog");
+	public int getPrefHeight() {
 		return label.getPreferredSize().height;
 	}
 

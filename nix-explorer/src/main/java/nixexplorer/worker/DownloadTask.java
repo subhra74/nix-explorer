@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,6 +27,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpProgressMonitor;
 
 import nixexplorer.PathUtils;
+import nixexplorer.app.AppContext;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
 import nixexplorer.core.ssh.SshFileSystemWrapper;
@@ -42,12 +44,17 @@ public class DownloadTask implements Runnable {
 	private JProgressBar prg;
 	private JLabel lblText;
 
-	/**
-	 * 
-	 */
+	public enum OpenMode {
+		External, Default
+	}
+
+	private OpenMode openMode;
+
 	public DownloadTask(String remoteFile, SessionInfo info,
-			AppSession appSession, ChangeWatcher changeWatcher) {
+			AppSession appSession, ChangeWatcher changeWatcher,
+			OpenMode openMode) {
 		this.fs = new SshFileSystemWrapper(info);
+		this.openMode = openMode;
 		this.remoteFile = remoteFile;
 		this.appSession = appSession;
 		this.changeWatcher = changeWatcher;
@@ -91,7 +98,12 @@ public class DownloadTask implements Runnable {
 		}
 		while (!stopFlag.get()) {
 			if (downloadFile()) {
-				openDefaultApp(localTempFile);
+				if (this.openMode == OpenMode.Default) {
+					openDefaultApp(localTempFile);
+				} else {
+					openExternalApp(localTempFile);
+				}
+
 				changeWatcher.watchForChanges(createWatcherEntry());
 				break;
 			}
@@ -102,7 +114,6 @@ public class DownloadTask implements Runnable {
 					"Retry") == JOptionPane.CANCEL_OPTION) {
 				break;
 			}
-
 		}
 
 		SwingUtilities.invokeLater(() -> {
@@ -173,6 +184,18 @@ public class DownloadTask implements Runnable {
 	private WatcherEntry createWatcherEntry() {
 		return new WatcherEntry(remoteFile, localTempFile, localTempFolder, 0,
 				PathUtils.getFileName(remoteFile));
+	}
+
+	public void openExternalApp(String file) {
+		String os = System.getProperty("os.name").toLowerCase();
+		System.out.println("Operating system: " + os);
+		ProcessBuilder pb = new ProcessBuilder(AppContext.INSTANCE.getConfig()
+				.getFileBrowser().getExternalEditor(), file);
+		try {
+			pb.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void openDefaultApp(String file) {
