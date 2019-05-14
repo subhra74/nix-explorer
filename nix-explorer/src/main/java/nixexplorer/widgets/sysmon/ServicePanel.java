@@ -4,10 +4,12 @@
 package nixexplorer.widgets.sysmon;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -17,9 +19,15 @@ import java.util.stream.Collectors;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.RowFilter;
+import javax.swing.RowFilter.Entry;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.TableRowSorter;
 
 import nixexplorer.TextHolder;
 import nixexplorer.widgets.util.Utility;
@@ -37,10 +45,13 @@ public class ServicePanel extends JPanel {
 			.compile("(\\S+)\\s+([\\S]+.*)");
 	private JButton btnStart, btnStop, btnRestart, btnReload, btnEnable,
 			btnDisable, btnRefresh;
+	private JTextField txtFilter;
 
 	private JCheckBox chkRunAsSuperUser;
 
 	private static final String SEP = UUID.randomUUID().toString();
+
+	private JButton btnFilter;
 
 	private static final String SYSTEMD_COMMAND = "systemctl list-unit-files -t service -a --plain --no-pager --no-legend --full; echo "
 			+ SEP
@@ -51,9 +62,54 @@ public class ServicePanel extends JPanel {
 	 */
 	public ServicePanel() {
 		super(new BorderLayout(Utility.toPixel(5), Utility.toPixel(5)));
+		setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+				Utility.toPixel(5), Utility.toPixel(5)));
 		table = new JTable(model);
+		table.setShowGrid(false);
+		table.setIntercellSpacing(new Dimension(0, 0));
 		table.setFillsViewportHeight(true);
-		table.setAutoCreateRowSorter(true);
+
+		JLabel lbl1 = new JLabel(TextHolder.getString("sysmon.service.search"));
+		txtFilter = new JTextField(30);
+		btnFilter = new JButton(TextHolder.getString("sysmon.service.search"));
+
+		Box b1 = Box.createHorizontalBox();
+		b1.add(lbl1);
+		b1.add(Box.createHorizontalStrut(Utility.toPixel(5)));
+		b1.add(txtFilter);
+		b1.add(Box.createHorizontalStrut(Utility.toPixel(5)));
+		b1.add(btnFilter);
+
+		add(b1, BorderLayout.NORTH);
+
+		btnFilter.addActionListener(e -> {
+			String text = txtFilter.getText();
+
+			TableRowSorter<ServiceTableModel> sorter = new TableRowSorter<>(
+					model);
+			sorter.setRowFilter(new RowFilter<ServiceTableModel, Integer>() {
+				@Override
+				public boolean include(
+						Entry<? extends ServiceTableModel, ? extends Integer> entry) {
+					if (text.length() < 1) {
+						return true;
+					}
+					Integer index = entry.getIdentifier();
+					int c = entry.getModel().getColumnCount();
+					for (int i = 0; i < c; i++) {
+						if ((entry.getModel().getValueAt(index, i)).toString()
+								.toLowerCase(Locale.ENGLISH)
+								.contains(text.toLowerCase(Locale.ENGLISH))) {
+							return true;
+						}
+					}
+					return false;
+				}
+
+			});
+			table.setRowSorter(sorter);
+		});
+
 		add(new JScrollPane(table));
 
 		Box box = Box.createHorizontalBox();

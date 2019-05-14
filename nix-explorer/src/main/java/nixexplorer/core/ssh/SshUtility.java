@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPInputStream;
 
+import javax.swing.Icon;
 import javax.swing.JOptionPane;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelShell;
 
+import nixexplorer.app.components.ConnectionErrorDialog;
 import nixexplorer.app.session.SessionInfo;
 
 public class SshUtility {
@@ -117,8 +119,9 @@ public class SshUtility {
 				if (stopFlag.get()) {
 					break;
 				}
-				if (JOptionPane.showConfirmDialog(null,
-						"Unable to connect to server. Retry?") != JOptionPane.YES_OPTION) {
+
+				if (!ConnectionErrorDialog.INSTANCE
+						.shouldRetry(info != null ? info.getName() : "")) {
 					break;
 				}
 			}

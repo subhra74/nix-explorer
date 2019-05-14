@@ -188,9 +188,12 @@ public final class App {
 	 */
 	private static void loadStrings() {
 		TextHolder.addString("common.ok", "OK");
+		TextHolder.addString("common.yes", "Yes");
+		TextHolder.addString("common.no", "No");
 		TextHolder.addString("common.save", "Save");
 		TextHolder.addString("common.open", "Open");
 		TextHolder.addString("common.cancel", "Cancel");
+		TextHolder.addString("common.faied", "Connection failed, would you like to retry?");
 
 		TextHolder.addString("messagebox.ok", "OK");
 
@@ -311,6 +314,7 @@ public final class App {
 		TextHolder.addString("sysmon.service.disable", "Disable");
 		TextHolder.addString("sysmon.service.reload", "Reload");
 		TextHolder.addString("sysmon.service.restart", "Restart");
+		TextHolder.addString("sysmon.service.search", "Search");
 
 		TextHolder.addString("folderview.selectFolder", "Select Folder");
 		TextHolder.addString("folderview.selectFile", "Select File");

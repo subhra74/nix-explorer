@@ -3,6 +3,7 @@
  */
 package nixexplorer.app;
 
+import java.awt.Window;
 import java.util.WeakHashMap;
 
 import nixexplorer.app.session.AppSession;
@@ -15,6 +16,7 @@ import nixexplorer.app.settings.AppConfig;
 public class AppContext {
 	private WeakHashMap<AppSession, Boolean> sessionRefs = new WeakHashMap<>();
 	private AppConfig config;
+	private Window window;
 
 	public static final AppContext INSTANCE = new AppContext();
 
@@ -43,5 +45,19 @@ public class AppContext {
 		for (AppSession session : sessionRefs.keySet()) {
 			session.configChanged();
 		}
+	}
+
+	/**
+	 * @return the window
+	 */
+	public Window getWindow() {
+		return window;
+	}
+
+	/**
+	 * @param window the window to set
+	 */
+	public void setWindow(Window window) {
+		this.window = window;
 	}
 }

@@ -44,6 +44,7 @@ public class MainAppFrame extends JFrame {
 
 	private MainAppFrame() {
 		initUI();
+		AppContext.INSTANCE.setWindow(this);
 	}
 
 	private void initUI() {

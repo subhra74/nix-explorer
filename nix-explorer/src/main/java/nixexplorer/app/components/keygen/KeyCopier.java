@@ -15,7 +15,8 @@ public class KeyCopier {
 	private String host, user, password, key;
 	private AtomicBoolean stopFlag = new AtomicBoolean(false);
 
-	public KeyCopier(String host, String user, String password, String key, AtomicBoolean stopFlag) {
+	public KeyCopier(String host, String user, String password, String key,
+			AtomicBoolean stopFlag) {
 		super();
 		this.host = host;
 		this.user = user;
@@ -36,7 +37,9 @@ public class KeyCopier {
 				throw new Exception("Operation cancelled");
 			}
 			InputStream in = new ByteArrayInputStream(key.getBytes("utf-8"));
-			ctx.getSftp().put(in, ctx.getSftp().getHome() + "/.ssh/authorized_keys", null, ChannelSftp.APPEND);
+			ctx.getSftp().put(in,
+					ctx.getSftp().getHome() + "/.ssh/authorized_keys", null,
+					ChannelSftp.APPEND);
 			if (stopFlag.get()) {
 				throw new Exception("Operation cancelled");
 			}
