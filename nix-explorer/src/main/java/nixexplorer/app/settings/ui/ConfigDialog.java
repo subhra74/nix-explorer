@@ -59,8 +59,7 @@ public class ConfigDialog extends JDialog {
 	private LogHighlightConfigPanel logViewerPanel;
 
 	// folderview ui elements
-	private JCheckBox chkFolderCachingEnabled, chkReloadFolderAfterOperation, chkSidePanelVisible,
-			chkPreferShellOverSftp, chkConfirmBeforeDelete;
+	private JCheckBox chkSidePanelVisible, chkConfirmBeforeDelete, chkConfirmBeforeExit;
 	private JComboBox<String> cmbDblClickAction;
 	private JComboBox<String> cmbMainViewMode;
 	private JComboBox<String> cmbSidePanelViewMode;
@@ -76,6 +75,7 @@ public class ConfigDialog extends JDialog {
 
 	// general panel
 	private JCheckBox chkUseDarkThemes;
+	private JSpinner spTimeout;
 
 	/**
 	 * 
@@ -113,14 +113,15 @@ public class ConfigDialog extends JDialog {
 
 	private void setGeneralConfig(AppConfig config) {
 		chkUseDarkThemes.setSelected(config.isUseDarkTheme());
+		chkConfirmBeforeExit.setSelected(config.isConfirmBeforeExit());
 	}
 
 	private void setFolderViewConfig(AppConfig config) {
 		FolderBrowser fb = config.getFileBrowser();
-		chkFolderCachingEnabled.setSelected(fb.isFolderCachingEnabled());
-		chkReloadFolderAfterOperation.setSelected(fb.isReloadFolderAfterOperation());
+		// chkFolderCachingEnabled.setSelected(fb.isFolderCachingEnabled());
+		// chkReloadFolderAfterOperation.setSelected(fb.isReloadFolderAfterOperation());
 		chkSidePanelVisible.setSelected(fb.isSidePanelVisible());
-		chkPreferShellOverSftp.setSelected(fb.isPreferShellOverSftp());
+		// chkPreferShellOverSftp.setSelected(fb.isPreferShellOverSftp());
 		chkConfirmBeforeDelete.setSelected(fb.isConfirmBeforeDelete());
 		cmbDblClickAction.setSelectedIndex(fb.getDblClickAction());
 		cmbSidePanelViewMode.setSelectedIndex(fb.getSidePanelViewMode());
@@ -130,10 +131,10 @@ public class ConfigDialog extends JDialog {
 
 	private void updateFolderViewConfig(AppConfig config) {
 		FolderBrowser fb = config.getFileBrowser();
-		fb.setFolderCachingEnabled(chkFolderCachingEnabled.isSelected());
-		fb.setReloadFolderAfterOperation(chkReloadFolderAfterOperation.isSelected());
+		// fb.setFolderCachingEnabled(chkFolderCachingEnabled.isSelected());
+		// fb.setReloadFolderAfterOperation(chkReloadFolderAfterOperation.isSelected());
 		fb.setSidePanelVisible(chkSidePanelVisible.isSelected());
-		fb.setPreferShellOverSftp(chkPreferShellOverSftp.isSelected());
+		// fb.setPreferShellOverSftp(chkPreferShellOverSftp.isSelected());
 		fb.setConfirmBeforeDelete(chkConfirmBeforeDelete.isSelected());
 
 		fb.setDblClickAction(cmbDblClickAction.getSelectedIndex());
@@ -160,6 +161,7 @@ public class ConfigDialog extends JDialog {
 
 	private void updateGeneralConfig(AppConfig config) {
 		config.setUseDarkTheme(chkUseDarkThemes.isSelected());
+		config.setConfirmBeforeExit(chkConfirmBeforeExit.isSelected());
 	}
 
 	private void updateTerminalConfig(AppConfig config) {
@@ -328,17 +330,17 @@ public class ConfigDialog extends JDialog {
 
 	private JComponent createFolderViewPanel() {
 		Box box = Box.createVerticalBox();
-		chkFolderCachingEnabled = new JCheckBox(TextHolder.getString("config.folderview.caching"));
-		chkFolderCachingEnabled.setAlignmentX(Box.LEFT_ALIGNMENT);
+//		chkFolderCachingEnabled = new JCheckBox(TextHolder.getString("config.folderview.caching"));
+//		chkFolderCachingEnabled.setAlignmentX(Box.LEFT_ALIGNMENT);
 
-		chkReloadFolderAfterOperation = new JCheckBox(TextHolder.getString("config.folderview.autoReload"));
-		chkReloadFolderAfterOperation.setAlignmentX(Box.LEFT_ALIGNMENT);
+//		chkReloadFolderAfterOperation = new JCheckBox(TextHolder.getString("config.folderview.autoReload"));
+//		chkReloadFolderAfterOperation.setAlignmentX(Box.LEFT_ALIGNMENT);
 
 		chkSidePanelVisible = new JCheckBox(TextHolder.getString("config.folderview.sidePane"));
 		chkSidePanelVisible.setAlignmentX(Box.LEFT_ALIGNMENT);
 
-		chkPreferShellOverSftp = new JCheckBox(TextHolder.getString("config.folderview.preferShell"));
-		chkPreferShellOverSftp.setAlignmentX(Box.LEFT_ALIGNMENT);
+//		chkPreferShellOverSftp = new JCheckBox(TextHolder.getString("config.folderview.preferShell"));
+//		chkPreferShellOverSftp.setAlignmentX(Box.LEFT_ALIGNMENT);
 
 		chkConfirmBeforeDelete = new JCheckBox(TextHolder.getString("config.folderview.delete"));
 		chkConfirmBeforeDelete.setAlignmentX(Box.LEFT_ALIGNMENT);
@@ -392,14 +394,14 @@ public class ConfigDialog extends JDialog {
 		bx.add(btnBrowseEditor);
 		bx.setAlignmentX(Box.LEFT_ALIGNMENT);
 
-		box.add(chkReloadFolderAfterOperation);
-		box.add(Box.createVerticalStrut(Utility.toPixel(10)));
+		// box.add(chkReloadFolderAfterOperation);
+		// box.add(Box.createVerticalStrut(Utility.toPixel(10)));
 
 		box.add(chkSidePanelVisible);
 		box.add(Box.createVerticalStrut(Utility.toPixel(10)));
 
-		box.add(chkPreferShellOverSftp);
-		box.add(Box.createVerticalStrut(Utility.toPixel(10)));
+		// box.add(chkPreferShellOverSftp);
+		// box.add(Box.createVerticalStrut(Utility.toPixel(10)));
 
 		box.add(chkConfirmBeforeDelete);
 		box.add(Box.createVerticalStrut(Utility.toPixel(10)));
@@ -433,7 +435,20 @@ public class ConfigDialog extends JDialog {
 		Box b1 = Box.createVerticalBox();
 		chkUseDarkThemes = new JCheckBox(TextHolder.getString("config.general.useDarkTheme"));
 		chkUseDarkThemes.setAlignmentX(Box.LEFT_ALIGNMENT);
+		chkConfirmBeforeExit = new JCheckBox(TextHolder.getString("config.general.confirmBeforeExit"));
+		chkConfirmBeforeExit.setAlignmentX(Box.LEFT_ALIGNMENT);
+		spTimeout = new JSpinner(new SpinnerNumberModel(60, 5, Integer.MAX_VALUE, 1));
+		spTimeout.setPreferredSize(
+				new Dimension(spTimeout.getPreferredSize().width, spTimeout.getPreferredSize().height));
+		spTimeout.setMaximumSize(spTimeout.getPreferredSize());
+		Box b11 = Box.createHorizontalBox();
+		b11.add(new JLabel(TextHolder.getString("config.general.timeout")));
+		b11.add(Box.createHorizontalGlue());
+		b11.add(spTimeout);
+		b11.setAlignmentX(Box.LEFT_ALIGNMENT);
 		b1.add(chkUseDarkThemes);
+		b1.add(chkConfirmBeforeExit);
+		b1.add(b11);
 		return b1;
 	}
 }

@@ -40,7 +40,7 @@ public class IndexCellRenderer extends JLabel
 			String value, int index, boolean isSelected, boolean cellHasFocus) {
 		setText(value);
 		setOpaque(isSelected);
-		setBackground(UIManager.getColor("DefaultBorder.color"));
+		setBackground(UIManager.getColor("Button.highlight"));
 		return this;
 	}
 }

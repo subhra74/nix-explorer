@@ -21,7 +21,6 @@ import nixexplorer.app.session.SessionInfo;
 import nixexplorer.worker.ChangeWatcher;
 import nixexplorer.worker.ChangeWatcherService;
 
-
 public final class AppSessionImpl implements AppSession {
 	private SessionInfo session;
 	private boolean running;
@@ -42,8 +41,7 @@ public final class AppSessionImpl implements AppSession {
 		this.components = new WeakHashMap<>();
 		this.window = window;
 		System.out.println("AppSessionImpl - window: " + window);
-		sessionFolder = new File((String) App.getConfig("temp.dir"),
-				session.getId());
+		sessionFolder = new File((String) App.getConfig("temp.dir"), session.getId());
 		if (!sessionFolder.exists()) {
 			sessionFolder.mkdirs();
 		}
@@ -85,13 +83,12 @@ public final class AppSessionImpl implements AppSession {
 	public synchronized void createWidget(String className, String[] args) {
 		try {
 			Class<?> clazz = Class.forName(className);
-			Constructor<?> ctor = clazz.getConstructor(SessionInfo.class,
-					String[].class, AppSession.class, Window.class);
+			Constructor<?> ctor = clazz.getConstructor(SessionInfo.class, String[].class, AppSession.class,
+					Window.class);
 //			if (window == null) {
 //				window = SwingUtilities.getWindowAncestor(getDisplay());
 //			}
-			Object obj = ctor
-					.newInstance(new Object[] { session, args, this, window });
+			Object obj = ctor.newInstance(new Object[] { session, args, this, window });
 
 			if (obj instanceof TabbedChild) {
 				display.addTab((TabbedChild) obj);
@@ -120,8 +117,6 @@ public final class AppSessionImpl implements AppSession {
 //		this.editWatchers = editWatchers;
 //	}
 
-	
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -135,8 +130,7 @@ public final class AppSessionImpl implements AppSession {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * nixexplorer.app.session.AppSession#closeTab(nixexplorer.app.components.
+	 * @see nixexplorer.app.session.AppSession#closeTab(nixexplorer.app.components.
 	 * TabbedChild)
 	 */
 	@Override
@@ -177,15 +171,13 @@ public final class AppSessionImpl implements AppSession {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * nixexplorer.app.session.AppSession#remoteFileSystemWasChanged(java.lang.
+	 * @see nixexplorer.app.session.AppSession#remoteFileSystemWasChanged(java.lang.
 	 * String)
 	 */
 	@Override
 	public void remoteFileSystemWasChanged(String path) {
 		System.out.println("remote file system was changed " + path);
-		System.out.println(
-				"Event aware components: " + eventAwareComponents.keySet());
+		System.out.println("Event aware components: " + eventAwareComponents.keySet());
 		for (SessionEventAware c : eventAwareComponents.keySet()) {
 			c.fileSystemUpdated(path);
 		}
@@ -197,7 +189,7 @@ public final class AppSessionImpl implements AppSession {
 	 * @see nixexplorer.app.session.AppSession#close()
 	 */
 	@Override
-	public void close() {
+	public boolean close() {
 		try {
 			Iterator<DisposableView> iterator = components.keySet().iterator();
 			while (iterator.hasNext()) {
@@ -205,7 +197,7 @@ public final class AppSessionImpl implements AppSession {
 				System.out.println("Closing: " + view);
 				if (!view.closeView()) {
 					System.out.println(view + " -closeview return false, stop");
-					return;
+					return false;
 				}
 			}
 			display.removeSelf();
@@ -213,7 +205,7 @@ public final class AppSessionImpl implements AppSession {
 			window.revalidate();
 			window.repaint();
 		}
-
+		return true;
 	}
 
 	public void createFolderView(String path) {

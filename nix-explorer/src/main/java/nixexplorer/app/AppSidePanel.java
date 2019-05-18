@@ -211,6 +211,16 @@ public class AppSidePanel extends JPanel implements SessionListCallback {
 		this.serverList.addListSelectionListener(listener);
 	}
 
+	public boolean closeAllSessions() {
+		for (int i = 0; i < serverListModel.getSize(); i++) {
+			AppSession session = serverListModel.get(i);
+			if (!session.close()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	@Override
 	public void close(AppSession session) {
 		System.out.println("Removing");

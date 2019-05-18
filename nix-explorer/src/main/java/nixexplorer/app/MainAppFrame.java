@@ -11,6 +11,8 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Properties;
 
 import javax.swing.ImageIcon;
@@ -48,13 +50,21 @@ public class MainAppFrame extends JFrame {
 	}
 
 	private void initUI() {
+		AppSidePanel sidePanel = new AppSidePanel(this);
 		setIconImage(((ImageIcon) UIManager.getIcon("app.icon")).getImage());
 		defCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 		resizeCursor = new Cursor(Cursor.W_RESIZE_CURSOR);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				if (sidePanel.closeAllSessions()) {
+					System.exit(0);
+				}
+			}
+		});
 		adjustWindowSize();
 
-		AppSidePanel sidePanel = new AppSidePanel(this);
 		// JPanel serverDisplayPanel = new ServerDisplayPanel();
 		// serverDisplayPanel.setCursor(defCursor);
 
@@ -71,12 +81,10 @@ public class MainAppFrame extends JFrame {
 		};
 
 		JPanel mainPanel = new JPanel(new BorderLayout());
-		mainPanel.setBorder(new LineBorder(
-				UIManager.getColor("DefaultBorder.color"), Utility.toPixel(1)));
+		mainPanel.setBorder(new LineBorder(UIManager.getColor("DefaultBorder.color"), Utility.toPixel(1)));
 
 		content = new JPanel(new BorderLayout());
-		content.add(new WelcomeScreen(this, AppContext.INSTANCE.getConfig(),
-				sidePanel));
+		content.add(new WelcomeScreen(this, AppContext.INSTANCE.getConfig(), sidePanel));
 		sidePanel.setListSelectionListener(e -> {
 			try {
 				content.removeAll();
@@ -108,10 +116,8 @@ public class MainAppFrame extends JFrame {
 	private void adjustWindowSize() {
 		AppConfig config = AppContext.INSTANCE.getConfig();
 		if (config.getWindowWidth() < 1 || config.getWindowHeight() < 1) {
-			Insets inset = Toolkit.getDefaultToolkit().getScreenInsets(
-					GraphicsEnvironment.getLocalGraphicsEnvironment()
-							.getDefaultScreenDevice()
-							.getDefaultConfiguration());
+			Insets inset = Toolkit.getDefaultToolkit().getScreenInsets(GraphicsEnvironment.getLocalGraphicsEnvironment()
+					.getDefaultScreenDevice().getDefaultConfiguration());
 
 			Dimension screenD = Toolkit.getDefaultToolkit().getScreenSize();
 

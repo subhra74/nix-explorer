@@ -77,6 +77,8 @@ public class SessionManagerPanel extends JDialog
 				dispose();
 			}
 		});
+		
+		setTitle("Session manager");
 
 //		List<SessionFolder> folders = SessionStore.getSharedInstance()
 //				.getFolders();

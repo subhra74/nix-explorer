@@ -16,6 +16,7 @@ import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
 import nixexplorer.App;
+import nixexplorer.app.AppContext;
 import nixexplorer.app.MainAppFrame;
 import nixexplorer.app.components.UserInfoUI;
 import nixexplorer.app.session.SessionInfo;
@@ -88,8 +89,7 @@ public class SshWrapper implements Closeable {
 		// ResourceManager.register(info.getContainterId(), this);
 		jsch = new JSch();
 		try {
-			jsch.setKnownHosts(new File(App.getConfig("app.dir"), "known_hosts")
-					.getAbsolutePath());
+			jsch.setKnownHosts(new File(App.getConfig("app.dir"), "known_hosts").getAbsolutePath());
 		} catch (Exception e) {
 
 		}
@@ -99,8 +99,7 @@ public class SshWrapper implements Closeable {
 //				"password,keyboard-interactive");
 		JSch.setConfig("MaxAuthTries", "5");
 
-		if (info.getPrivateKeyFile() != null
-				&& info.getPrivateKeyFile().length() > 0) {
+		if (info.getPrivateKeyFile() != null && info.getPrivateKeyFile().length() > 0) {
 			jsch.addIdentity(info.getPrivateKeyFile());
 		}
 
@@ -115,25 +114,21 @@ public class SshWrapper implements Closeable {
 			}
 		}
 
-		session = jsch.getSession(info.getUser(), info.getHost(),
-				info.getPort());
+		session = jsch.getSession(info.getUser(), info.getHost(), info.getPort());
 
-		session.setUserInfo(
-				new UserInfoUI(info, MainAppFrame.getSharedInstance()));
+		session.setUserInfo(new UserInfoUI(info, MainAppFrame.getSharedInstance()));
 
 		session.setPassword(info.getPassword());
 		// session.setConfig("StrictHostKeyChecking", "no");
-		session.setConfig("PreferredAuthentications",
-				"publickey,keyboard-interactive,password");
+		session.setConfig("PreferredAuthentications", "publickey,keyboard-interactive,password");
 
-		session.setTimeout(60000);
+		session.setTimeout(AppContext.INSTANCE.getConfig().getConnectionTimeout() * 1000);
 		session.connect();
 
 		System.out.println("Client version: " + session.getClientVersion());
 		System.out.println("Server host: " + session.getHost());
 		System.out.println("Server version: " + session.getServerVersion());
-		System.out.println(
-				"Hostkey: " + session.getHostKey().getFingerPrint(jsch));
+		System.out.println("Hostkey: " + session.getHostKey().getFingerPrint(jsch));
 	}
 
 	public void disconnect() {
@@ -172,8 +167,7 @@ public class SshWrapper implements Closeable {
 	class MyUserInfo implements UserInfo, UIKeyboardInteractive {
 
 		@Override
-		public String[] promptKeyboardInteractive(String destination,
-				String name, String instruction, String[] prompt,
+		public String[] promptKeyboardInteractive(String destination, String name, String instruction, String[] prompt,
 				boolean[] echo) {
 			for (String s : Arrays.asList(prompt)) {
 				System.out.println(s);

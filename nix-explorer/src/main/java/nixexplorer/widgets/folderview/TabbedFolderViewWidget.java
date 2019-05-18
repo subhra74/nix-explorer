@@ -160,6 +160,20 @@ public abstract class TabbedFolderViewWidget extends Widget
 
 	protected void addTab(String title, Component c) {
 		JPanel tabComponent = new JPanel(new BorderLayout());
+//		tabComponent.addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mouseEntered(MouseEvent e) {
+//				setBackground(UIManager.getColor("button.highlight"));
+//				System.out.println("background set");
+//			}
+//			
+//			@Override
+//			public void mouseExited(MouseEvent e) {
+//				setBackground(UIManager.getColor("panel.background"));
+//				System.out.println("background reset");
+//			}
+//		});
+		
 		JButton btnClose = new JButton(UIManager.getIcon("Tab.roundCloseIcon"));
 		btnClose.setBorderPainted(false);
 		btnClose.setVisible(false);

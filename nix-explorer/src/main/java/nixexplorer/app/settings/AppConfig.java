@@ -36,6 +36,24 @@ public class AppConfig {
 	private ProcessMonitor monitor;
 	private boolean showBanner = true;
 	private boolean useDarkTheme = true;
+	private boolean confirmBeforeExit = true;
+	private int connectionTimeout = 60;
+
+	public int getConnectionTimeout() {
+		return connectionTimeout;
+	}
+
+	public void setConnectionTimeout(int connectionTimeout) {
+		this.connectionTimeout = connectionTimeout;
+	}
+
+	public boolean isConfirmBeforeExit() {
+		return confirmBeforeExit;
+	}
+
+	public void setConfirmBeforeExit(boolean confirmBeforeExit) {
+		this.confirmBeforeExit = confirmBeforeExit;
+	}
 
 	/**
 	 * 

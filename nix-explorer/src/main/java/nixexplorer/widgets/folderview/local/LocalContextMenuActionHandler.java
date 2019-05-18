@@ -12,6 +12,7 @@ import javax.swing.JPopupMenu;
 
 import nixexplorer.AppClipboard;
 import nixexplorer.PathUtils;
+import nixexplorer.ProcessUtils;
 import nixexplorer.TextHolder;
 import nixexplorer.app.AppContext;
 import nixexplorer.core.FileInfo;
@@ -20,17 +21,16 @@ import nixexplorer.widgets.dnd.TransferFileInfo;
 import nixexplorer.widgets.dnd.TransferFileInfo.Action;
 import nixexplorer.widgets.folderview.ContextMenuActionHandler;
 import nixexplorer.widgets.folderview.FolderViewWidget;
+import nixexplorer.worker.DownloadTask.OpenMode;
 
 public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 
-	private JMenuItem mOpen, mRename, mDelete, mNewFile, mNewFolder, mCopy,
-			mPaste, mCut, mAddToFav;
+	private JMenuItem mOpen, mRename, mDelete, mNewFile, mNewFolder, mCopy, mPaste, mCut, mAddToFav;
 
 	private FolderViewWidget folderView;
 	private LocalFolderViewWidget localFolderView;
 
-	public LocalContextMenuActionHandler(
-			LocalFolderViewWidget localFolderView) {
+	public LocalContextMenuActionHandler(LocalFolderViewWidget localFolderView) {
 		super();
 		this.localFolderView = localFolderView;
 	}
@@ -41,7 +41,12 @@ public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 	}
 
 	private void createBuitinItems1(int selectionCount, JPopupMenu popup) {
-		popup.add(mOpen);
+
+		if (folderView.getSelectedFiles()[0].getType() == FileType.Directory
+				|| folderView.getSelectedFiles()[0].getType() == FileType.DirLink) {
+			popup.add(mOpen);
+		}
+
 		if (selectionCount == 1) {
 			popup.add(mRename);
 		}
@@ -109,8 +114,7 @@ public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 			}
 		});
 
-		mNewFolder = new JMenuItem(
-				TextHolder.getString("folderview.newFolder"));
+		mNewFolder = new JMenuItem(TextHolder.getString("folderview.newFolder"));
 		mNewFolder.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -131,8 +135,7 @@ public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (AppClipboard.getContent() instanceof TransferFileInfo) {
-					TransferFileInfo info = (TransferFileInfo) AppClipboard
-							.getContent();
+					TransferFileInfo info = (TransferFileInfo) AppClipboard.getContent();
 					localFolderView.pasteItem(info, folderView);
 					if (info.getAction() == Action.CUT) {
 						AppClipboard.setContent(null);
@@ -165,8 +168,7 @@ public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 		FileInfo[] selectedFiles = folderView.getSelectedFiles();
 		if (selectedFiles != null && selectedFiles.length > 0) {
 			FileInfo info = selectedFiles[0];
-			if (info.getType() == FileType.DirLink
-					|| info.getType() == FileType.Directory) {
+			if (info.getType() == FileType.DirLink || info.getType() == FileType.Directory) {
 				path = info.getPath();
 				name = info.getName();
 			}
@@ -186,8 +188,7 @@ public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 				localFolderView.getFs().rename(oldName, newName);
 			} catch (Exception e) {
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(null,
-						TextHolder.getString("folderview.genericError"));
+				JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
 			} finally {
 				localFolderView.enableView();
 			}
@@ -196,11 +197,9 @@ public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 
 	private void rename(FileInfo info) {
 		String text = JOptionPane
-				.showInputDialog(TextHolder.getString("folderview.renameTitle")
-						+ "\n" + info.getName());
+				.showInputDialog(TextHolder.getString("folderview.renameTitle") + "\n" + info.getName());
 		if (text != null && text.length() > 0) {
-			renameAsync(info.getPath(), PathUtils.combine(
-					PathUtils.getParent(info.getPath()), text, File.separator));
+			renameAsync(info.getPath(), PathUtils.combine(PathUtils.getParent(info.getPath()), text, File.separator));
 		}
 	}
 
@@ -213,8 +212,7 @@ public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(null,
-						TextHolder.getString("folderview.genericError"));
+				JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
 			} finally {
 				localFolderView.enableView();
 			}
@@ -223,19 +221,16 @@ public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 	}
 
 	protected void newFolder(String folder) {
-		String text = JOptionPane.showInputDialog(
-				TextHolder.getString("folderview.renameTitle"));
+		String text = JOptionPane.showInputDialog(TextHolder.getString("folderview.renameTitle"));
 		if (text != null && text.length() > 0) {
 			localFolderView.disableView();
 			new Thread(() -> {
 				try {
-					localFolderView.getFs().mkdir(
-							PathUtils.combine(folder, text, File.separator));
+					localFolderView.getFs().mkdir(PathUtils.combine(folder, text, File.separator));
 					folderView.render(folder);
 				} catch (Exception e1) {
 					e1.printStackTrace();
-					JOptionPane.showMessageDialog(null,
-							TextHolder.getString("folderview.genericError"));
+					JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
 				}
 			}).start();
 		}
@@ -244,8 +239,7 @@ public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 	protected void copyToClipboard(boolean cut) {
 		TransferFileInfo info = createTransferInfo();
 		if (info != null) {
-			info.setAction(cut ? TransferFileInfo.Action.CUT
-					: TransferFileInfo.Action.COPY);
+			info.setAction(cut ? TransferFileInfo.Action.CUT : TransferFileInfo.Action.COPY);
 			AppClipboard.setContent(info);
 		}
 	}
@@ -273,8 +267,7 @@ public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 			addBookmark(folderView.getCurrentPath());
 		} else {
 			for (FileInfo f : files) {
-				if (f.getType() == FileType.Directory
-						|| f.getType() == FileType.DirLink) {
+				if (f.getType() == FileType.Directory || f.getType() == FileType.DirLink) {
 					addBookmark(f.getPath());
 				}
 			}
@@ -283,13 +276,21 @@ public class LocalContextMenuActionHandler implements ContextMenuActionHandler {
 	}
 
 	private void addBookmark(String str) {
-		AppContext.INSTANCE.getConfig().getFileBrowser().getLocalBookmarks()
-				.add(str);
+		AppContext.INSTANCE.getConfig().getFileBrowser().getLocalBookmarks().add(str);
 		AppContext.INSTANCE.getConfig().save();
 	}
 
 	private void loadFavourites() {
 		folderView.loadFavourites(localFolderView.listFavourites());
+	}
+
+	@Override
+	public void openApp(OpenMode mode) {
+		FileInfo[] selectedFiles = folderView.getSelectedFiles();
+		if (selectedFiles != null && selectedFiles.length == 1) {
+			FileInfo info = selectedFiles[0];
+			ProcessUtils.openDefaultApp(info.getPath());
+		}
 	}
 
 }

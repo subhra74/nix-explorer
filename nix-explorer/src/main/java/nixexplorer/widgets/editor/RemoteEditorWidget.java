@@ -376,9 +376,10 @@ public class RemoteEditorWidget extends Widget implements SearchListener {
 		// this.textArea.set
 		this.sp = new RTextScrollPane(textArea);
 		Gutter gutter = this.sp.getGutter();
-		gutter.setLineNumberColor(UIManager.getColor("Gutter.foreground"));
-		gutter.setBorderColor(UIManager.getColor("DefaultBorder.color"));
-		gutter.setLineNumberFont(this.textArea.getFont());
+		gutter.setBorder(new Gutter.GutterBorder(0, 0, 0, 0));
+//		gutter.setLineNumberColor(UIManager.getColor("Gutter.foreground"));
+//		gutter.setBorderColor(UIManager.getColor("Panel.background"));
+//		gutter.setLineNumberFont(this.textArea.getFont());
 		// gutter.setBackground(Color.BLACK);
 
 		add(sp);

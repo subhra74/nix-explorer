@@ -43,6 +43,7 @@ public class ConnectionErrorDialog extends JDialog {
 	private ConnectionErrorDialog() {
 		setModal(true);
 		model = new DefaultListModel<>();
+		setTitle(TextHolder.getString("common.confirm"));
 		list = new JList<>(model);
 		setSize(Utility.toPixel(400), Utility.toPixel(400));
 		JScrollPane jsp = new JScrollPane(list);

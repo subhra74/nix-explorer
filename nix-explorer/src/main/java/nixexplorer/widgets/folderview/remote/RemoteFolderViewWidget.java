@@ -48,8 +48,8 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 	private WeakHashMap<FolderViewWidget, Boolean> folderViews = new WeakHashMap<FolderViewWidget, Boolean>();
 	private TabbedChild parentTab;
 
-	public RemoteFolderViewWidget(SessionInfo info, String args[],
-			AppSession appSession, Window window, TabbedChild parentTab) {
+	public RemoteFolderViewWidget(SessionInfo info, String args[], AppSession appSession, Window window,
+			TabbedChild parentTab) {
 		super(info, args, appSession, window);
 		System.out.println("Window-: " + window);
 		this.parentTab = parentTab;
@@ -79,7 +79,7 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 	@Override
 	public void close() {
 		tabbedFolders.setVisible(false);
-		System.out.println("closing tabbed pane "+this.closeListener);
+		System.out.println("closing tabbed pane " + this.closeListener);
 //		if (this.closeListener != null) {
 //			this.closeListener.allTabsClosed(this);
 //		}
@@ -97,9 +97,7 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 
 	@Override
 	public void openTerminal(String command) {
-		appSession.createWidget(
-				"nixexplorer.widgets.console.TabbedConsoleWidget",
-				new String[] { "-c", command });
+		appSession.createWidget("nixexplorer.widgets.console.TabbedConsoleWidget", new String[] { "-c", command });
 
 		// RemoteFolderViewUtils.openTerminalDialog(command, this);
 //		String[] args = new String[2];
@@ -115,10 +113,8 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 			String folder = null;
 
 			folder = args == null || args.length < 1
-					? (info.getRemoteFolder() == null
-							|| info.getRemoteFolder().length() < 1
-									? fs.getHome()
-									: info.getRemoteFolder())
+					? (info.getRemoteFolder() == null || info.getRemoteFolder().length() < 1 ? fs.getHome()
+							: info.getRemoteFolder())
 					: args[0];
 			final String initFolder = folder;
 			SwingUtilities.invokeLater(new Runnable() {
@@ -138,16 +134,11 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 		try {
 			RemoteFolderViewTransferHandler transferHandler = new RemoteFolderViewTransferHandler(
 					RemoteFolderViewWidget.this);
-			TreeViewTransferHandler treeHandler = new TreeViewTransferHandler(
-					RemoteFolderViewWidget.this);
+			TreeViewTransferHandler treeHandler = new TreeViewTransferHandler(RemoteFolderViewWidget.this);
 
-			FolderViewWidget singleFolderView = new FolderViewWidget(initFolder,
-					RemoteFolderViewWidget.this, transferHandler, treeHandler,
-					new RemoteContextMenuActionHandler(
-							RemoteFolderViewWidget.this),
-					new OverflowMenuActionHandlerImpl(),
-					new RemoteTreeContextMenuHandler(
-							RemoteFolderViewWidget.this));
+			FolderViewWidget singleFolderView = new FolderViewWidget(initFolder, RemoteFolderViewWidget.this,
+					transferHandler, treeHandler, new RemoteContextMenuActionHandler(RemoteFolderViewWidget.this),
+					new OverflowMenuActionHandlerImpl(), new RemoteTreeContextMenuHandler(RemoteFolderViewWidget.this));
 			folderViews.put(singleFolderView, Boolean.TRUE);
 			String title = info.getHost();
 			addTab(title, singleFolderView);
@@ -158,14 +149,10 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 
 	public void openNewTab(String path) {
 		String title = "Sftp";
-		RemoteFolderViewTransferHandler t = new RemoteFolderViewTransferHandler(
-				this);
-		TreeViewTransferHandler treeHandler = new TreeViewTransferHandler(
-				RemoteFolderViewWidget.this);
-		FolderViewWidget folderView = new FolderViewWidget(path, this, t,
-				treeHandler,
-				new RemoteContextMenuActionHandler(RemoteFolderViewWidget.this),
-				new OverflowMenuActionHandlerImpl(),
+		RemoteFolderViewTransferHandler t = new RemoteFolderViewTransferHandler(this);
+		TreeViewTransferHandler treeHandler = new TreeViewTransferHandler(RemoteFolderViewWidget.this);
+		FolderViewWidget folderView = new FolderViewWidget(path, this, t, treeHandler,
+				new RemoteContextMenuActionHandler(RemoteFolderViewWidget.this), new OverflowMenuActionHandlerImpl(),
 				new RemoteTreeContextMenuHandler(RemoteFolderViewWidget.this));
 		folderViews.put(folderView, Boolean.TRUE);
 
@@ -176,14 +163,10 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 	public void openNewTab(String title, String path) {
 		System.out.println("called2");
 
-		RemoteFolderViewTransferHandler t = new RemoteFolderViewTransferHandler(
-				this);
-		TreeViewTransferHandler treeHandler = new TreeViewTransferHandler(
-				RemoteFolderViewWidget.this);
-		FolderViewWidget folderView = new FolderViewWidget(path, this, t,
-				treeHandler,
-				new RemoteContextMenuActionHandler(RemoteFolderViewWidget.this),
-				new OverflowMenuActionHandlerImpl(),
+		RemoteFolderViewTransferHandler t = new RemoteFolderViewTransferHandler(this);
+		TreeViewTransferHandler treeHandler = new TreeViewTransferHandler(RemoteFolderViewWidget.this);
+		FolderViewWidget folderView = new FolderViewWidget(path, this, t, treeHandler,
+				new RemoteContextMenuActionHandler(RemoteFolderViewWidget.this), new OverflowMenuActionHandlerImpl(),
 				new RemoteTreeContextMenuHandler(RemoteFolderViewWidget.this));
 		folderViews.put(folderView, Boolean.TRUE);
 		addTab(title, folderView);
@@ -193,8 +176,7 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 	@Override
 	public void editFile(String fileName) {
 
-		File tempFolder = new File(System.getProperty("java.io.tmpdir"),
-				UUID.randomUUID() + "");
+		File tempFolder = new File(System.getProperty("java.io.tmpdir"), UUID.randomUUID() + "");
 		tempFolder.mkdirs();
 		File f = new File(tempFolder, PathUtils.getFileName(fileName));
 		disableUI();
@@ -328,10 +310,8 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 		List<String> args = new ArrayList<>();
 		args.add("u");
 		args.add(widget.getCurrentPath());
-		args.add(finfo.getSourceFiles() == null ? "0"
-				: finfo.getSourceFiles().size() + "");
-		args.add(finfo.getSourceFolders() == null ? "0"
-				: finfo.getSourceFolders().size() + "");
+		args.add(finfo.getSourceFiles() == null ? "0" : finfo.getSourceFiles().size() + "");
+		args.add(finfo.getSourceFolders() == null ? "0" : finfo.getSourceFolders().size() + "");
 		args.addAll(finfo.getSourceFiles());
 		args.addAll(finfo.getSourceFolders());
 
@@ -346,8 +326,8 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 		return true;
 	}
 
-	public void moveFiles(String targetFolder, List<String> sourceFiles,
-			List<String> sourceFolders, boolean copy, FolderViewWidget w) {
+	public void moveFiles(String targetFolder, List<String> sourceFiles, List<String> sourceFolders, boolean copy,
+			FolderViewWidget w) {
 		disableView();
 		Map<String, String> mvMap = new HashMap<>();
 		new Thread(() -> {
@@ -356,27 +336,22 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 				applyPreviousAction = false;
 				List<FileInfo> list = getFs().list(targetFolder);
 
-				if (!FolderViewUtility.prepareFileList(targetFolder,
-						sourceFiles, mvMap, false, list)) {
+				if (!FolderViewUtility.prepareFileList(targetFolder, sourceFiles, mvMap, false, list)) {
 					System.out.println("Returing...");
 					return;
 				}
 
-				if (!FolderViewUtility.prepareFileList(targetFolder,
-						sourceFolders, mvMap, false, list)) {
+				if (!FolderViewUtility.prepareFileList(targetFolder, sourceFolders, mvMap, false, list)) {
 					System.out.println("Returing...");
 					return;
 				}
 
 				for (String key : mvMap.keySet()) {
-					System.out.println(
-							"Moving file: " + key + " -> " + mvMap.get(key));
+					System.out.println("Moving file: " + key + " -> " + mvMap.get(key));
 					if (copy) {
-						ShellActions.copy(key, mvMap.get(key),
-								((SshFileSystemWrapper) fs).getWrapper());
+						ShellActions.copy(key, mvMap.get(key), ((SshFileSystemWrapper) fs).getWrapper());
 					} else {
-						System.out.println("Renaming file " + key + " -> "
-								+ mvMap.get(key));
+						System.out.println("Renaming file " + key + " -> " + mvMap.get(key));
 						getFs().rename(key, mvMap.get(key));
 					}
 				}
@@ -412,8 +387,7 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 					args[0] = "-c";
 					args[1] = command.toString();
 
-					RemoteFolderViewUtils.openTerminalDialog(command.toString(),
-							this, true, true);
+					RemoteFolderViewUtils.openTerminalDialog(command.toString(), this, true, true);
 
 //					getDesktop().createWidget(
 //							TabbedConsoleWidget.class.getName(), env, args,
@@ -424,11 +398,13 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 			} catch (Exception e) {
 				e.printStackTrace();
 				SwingUtilities.invokeLater(() -> {
-					JOptionPane.showMessageDialog(null,
-							TextHolder.getString("folderview.genericError"));
+					JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
 				});
 
 			} finally {
+				SwingUtilities.invokeLater(() -> {
+					appSession.remoteFileSystemWasChanged(targetFolder);
+				});
 				enableView();
 			}
 		}).start();
@@ -438,9 +414,8 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 		info.setBaseFolder(w.getCurrentPath());
 		List<String> droppedFiles = info.getSourceFiles();
 		List<String> droppedFolders = info.getSourceFolders();
-		System.out.println(
-				"copying files to: " + w.getCurrentPath() + " dropped files: "
-						+ droppedFiles + " dropped folders: " + droppedFolders);
+		System.out.println("copying files to: " + w.getCurrentPath() + " dropped files: " + droppedFiles
+				+ " dropped folders: " + droppedFolders);
 		moveFiles(w.getCurrentPath(), droppedFiles, droppedFolders, copy, w);
 	}
 
@@ -453,8 +428,8 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 		info.setBaseFolder(path);
 		List<String> droppedFiles = info.getSourceFiles();
 		List<String> droppedFolders = info.getSourceFolders();
-		System.out.println("copying files to: " + path + " dropped files: "
-				+ droppedFiles + " dropped folders: " + droppedFolders);
+		System.out.println("copying files to: " + path + " dropped files: " + droppedFiles + " dropped folders: "
+				+ droppedFolders);
 		moveFiles(path, droppedFiles, droppedFolders, false, null);
 	}
 
@@ -465,8 +440,7 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 			info.addInfo(this.info);
 			handleFileDrop(info, w);
 		} else {
-			if (FolderViewUtility.sameSession(this.info,
-					info.getInfo().get(0))) {
+			if (FolderViewUtility.sameSession(this.info, info.getInfo().get(0))) {
 				copy(info, info.getAction() == Action.COPY, w);
 			} else {
 				System.out.println("Paste but not same session");
@@ -585,8 +559,7 @@ public class RemoteFolderViewWidget extends TabbedFolderViewWidget
 				System.out.println("Creating link...");
 				fs.createLink(src, dst, hardLink);
 			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null,
-						TextHolder.getString("folderview.genericError"));
+				JOptionPane.showMessageDialog(null, TextHolder.getString("folderview.genericError"));
 			} finally {
 				enableView();
 			}
