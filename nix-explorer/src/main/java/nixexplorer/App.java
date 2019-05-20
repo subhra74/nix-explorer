@@ -77,7 +77,7 @@ public final class App {
 
 	private static Properties config = new Properties();
 
-	private static Image appIcon;
+	//private static Image appIcon;
 
 	public static String getConfig(String key) {
 		return config.getProperty(key);
@@ -1432,8 +1432,8 @@ public final class App {
 	private static void loadIcons(String black) {
 		ImageIcon icon = new ImageIcon(
 				App.class.getResource("/images/app-logo.png"));
-		appIcon = new ScaledIcon(icon, Utility.toPixel(24), Utility.toPixel(24))
-				.getImg();
+//		appIcon = new ScaledIcon(icon, Utility.toPixel(24), Utility.toPixel(24))
+//				.getImg();
 
 		UIManager.put("app.icon", icon);
 
@@ -2918,7 +2918,7 @@ public final class App {
 	 * @return the appIcon
 	 */
 	public static Image getAppIcon() {
-		return appIcon;
+		return ((ImageIcon) UIManager.getIcon("app.icon")).getImage();
 	}
 
 }

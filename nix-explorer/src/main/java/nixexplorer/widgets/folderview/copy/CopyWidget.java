@@ -88,6 +88,8 @@ public class CopyWidget extends JDialog implements DisposableView {
 		this.info = info;
 		this.appSession = appSession;
 		setIconImage(App.getAppIcon());
+		
+		setTitle(info.getName());
 
 		this.setSize(Utility.toPixel(300), Utility.toPixel(130));
 

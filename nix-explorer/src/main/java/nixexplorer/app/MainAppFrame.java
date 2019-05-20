@@ -22,6 +22,7 @@ import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 
+import nixexplorer.App;
 import nixexplorer.TextHolder;
 import nixexplorer.app.components.WelcomeScreen;
 import nixexplorer.app.session.AppSessionImpl;
@@ -51,7 +52,7 @@ public class MainAppFrame extends JFrame {
 
 	private void initUI() {
 		AppSidePanel sidePanel = new AppSidePanel(this);
-		setIconImage(((ImageIcon) UIManager.getIcon("app.icon")).getImage());
+		setIconImage(App.getAppIcon());
 		defCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 		resizeCursor = new Cursor(Cursor.W_RESIZE_CURSOR);
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
