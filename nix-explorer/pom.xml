@@ -106,7 +106,7 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.6</version>
 		</dependency>
-		
+
 
 	</dependencies>
 
@@ -142,12 +142,16 @@
 						<manifest>
 							<mainClass>nixexplorer.App</mainClass>
 						</manifest>
+						<compress>false</compress>
 					</archive>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
 					<appendAssemblyId>false</appendAssemblyId>
 					<finalName>nix-explorer</finalName>
+					<archiverConfig>
+						<compress>false</compress>
+					</archiverConfig>
 				</configuration>
 				<executions>
 					<execution>
@@ -156,6 +160,11 @@
 						<goals>
 							<goal>single</goal>
 						</goals>
+						<configuration>
+							<archive>
+								<compress>false</compress>
+							</archive>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
