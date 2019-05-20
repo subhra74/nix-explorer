@@ -42,6 +42,13 @@ public class WelcomeScreen extends JPanel {
 		lblMainIcon.setVerticalAlignment(JLabel.CENTER);
 		add(lblMainIcon);
 
+		JLabel title = new JLabel("Nix Explorer 1.0.1");
+		title.setFont(Utility.getFont(Constants.LARGE));
+		title.setHorizontalAlignment(JLabel.CENTER);
+		title.setBorder(new EmptyBorder(Utility.toPixel(20), Utility.toPixel(0),
+				Utility.toPixel(30), Utility.toPixel(0)));
+		add(title);
+
 //		JPanel p = new JPanel();
 //
 //		Box b1 = Box.createVerticalBox();
@@ -57,6 +64,13 @@ public class WelcomeScreen extends JPanel {
 		btn1.setHorizontalAlignment(JButton.LEFT);
 		btn2.setHorizontalAlignment(JButton.LEFT);
 		btn3.setHorizontalAlignment(JButton.LEFT);
+
+		btn1.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(50),
+				Utility.toPixel(5), Utility.toPixel(5)));
+		btn2.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(50),
+				Utility.toPixel(5), Utility.toPixel(5)));
+		btn3.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(50),
+				Utility.toPixel(5), Utility.toPixel(5)));
 
 //		btn1.setBackground(UIManager.getColor("Panel.secondary"));
 //		btn2.setBackground(UIManager.getColor("Panel.secondary"));
@@ -76,12 +90,12 @@ public class WelcomeScreen extends JPanel {
 		btn2.setFont(font);
 		btn3.setFont(font);
 
-		btn1.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-				Utility.toPixel(5), Utility.toPixel(5)));
-		btn2.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-				Utility.toPixel(5), Utility.toPixel(5)));
-		btn3.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
-				Utility.toPixel(5), Utility.toPixel(5)));
+//		btn1.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+//				Utility.toPixel(5), Utility.toPixel(5)));
+//		btn2.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+//				Utility.toPixel(5), Utility.toPixel(5)));
+//		btn3.setBorder(new EmptyBorder(Utility.toPixel(5), Utility.toPixel(5),
+//				Utility.toPixel(5), Utility.toPixel(5)));
 
 		btn1.addActionListener(e -> {
 			panel.makeNewSession();

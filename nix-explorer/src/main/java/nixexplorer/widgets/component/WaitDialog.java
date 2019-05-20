@@ -13,6 +13,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.border.EmptyBorder;
 
+import nixexplorer.App;
 import nixexplorer.TextHolder;
 import nixexplorer.widgets.util.Utility;
 
@@ -27,6 +28,7 @@ public class WaitDialog extends JDialog {
 	 */
 	public WaitDialog(Window window, ActionListener a) {
 		super(window);
+		setIconImage(App.getAppIcon());
 		setModal(true);
 		setTitle(TextHolder.getString("waiting.title"));
 		JLabel lblText = new JLabel(TextHolder.getString("waiting.message"));

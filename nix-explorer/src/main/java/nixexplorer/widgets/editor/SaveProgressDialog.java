@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.border.EmptyBorder;
 
+import nixexplorer.App;
 import nixexplorer.widgets.util.Utility;
 
 /**
@@ -33,6 +34,7 @@ public class SaveProgressDialog extends JDialog {
 
 	public SaveProgressDialog(Window parent, ActionListener a) {
 		lbl = new JLabel("Saving file, please wait...");
+		setIconImage(App.getAppIcon());
 		prg = new JProgressBar();
 		btnSave = new JButton("Cancel");
 		setModal(true);

@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
+import nixexplorer.App;
 import nixexplorer.TextHolder;
 import nixexplorer.core.FileInfo;
 import nixexplorer.core.FileType;
@@ -38,6 +39,7 @@ public class PermissionsDialog extends JDialog {
 	public PermissionsDialog(Window window, boolean multimode) {
 		super(window);
 		setResizable(true);
+		setIconImage(App.getAppIcon());
 		setModal(true);
 		setTitle("Properties");
 		// setSize(new Dimension(Utility.toPixel(350), Utility.toPixel(350)));

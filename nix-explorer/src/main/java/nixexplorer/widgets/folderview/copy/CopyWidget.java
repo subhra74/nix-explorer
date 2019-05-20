@@ -30,6 +30,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.jcraft.jsch.ChannelSftp;
 
+import nixexplorer.App;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
 import nixexplorer.app.components.CredentialsDialog;
@@ -86,6 +87,7 @@ public class CopyWidget extends JDialog implements DisposableView {
 		super(window);
 		this.info = info;
 		this.appSession = appSession;
+		setIconImage(App.getAppIcon());
 
 		this.setSize(Utility.toPixel(300), Utility.toPixel(130));
 

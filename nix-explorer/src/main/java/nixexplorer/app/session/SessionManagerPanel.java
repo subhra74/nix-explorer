@@ -33,6 +33,7 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import nixexplorer.App;
 import nixexplorer.Constants;
 import nixexplorer.TextHolder;
 import nixexplorer.widgets.util.Utility;
@@ -63,6 +64,7 @@ public class SessionManagerPanel extends JDialog
 	}
 
 	private void createUI() {
+		setIconImage(App.getAppIcon());
 		setLayout(new BorderLayout());
 
 		setSize(Utility.toPixel(640), Utility.toPixel(480));

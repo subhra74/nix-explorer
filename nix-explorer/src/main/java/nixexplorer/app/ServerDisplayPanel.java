@@ -320,7 +320,7 @@ public class ServerDisplayPanel extends JPanel {
 				}
 			}
 		}, TextHolder.getString("logviewer.title"),
-				UIManager.getIcon("ServerTools.taskmgrIcon"));
+				UIManager.getIcon("ServerTools.logIcon"));
 
 		toolbar.addButton("app.control.search", new ActionListener() {
 			@Override
@@ -350,7 +350,7 @@ public class ServerDisplayPanel extends JPanel {
 				}
 			}
 		}, TextHolder.getString("diskUsageViewer.title"),
-				UIManager.getIcon("ServerTools.taskmgrIcon"));
+				UIManager.getIcon("ServerTools.duIcon"));
 
 		utilityButton = toolbar.addButton("app.control.utility",
 				new ActionListener() {

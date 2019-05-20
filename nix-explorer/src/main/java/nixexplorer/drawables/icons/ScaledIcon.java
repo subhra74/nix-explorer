@@ -13,12 +13,13 @@ import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 public class ScaledIcon implements Icon {
 
 	private int width, height;
 	private Image img;
-	
+
 	public ScaledIcon(URL imgFile, int width, int height) {
 		try {
 			this.width = width;
@@ -29,7 +30,19 @@ public class ScaledIcon implements Icon {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
+	}
+
+	public ScaledIcon(ImageIcon icon, int width, int height) {
+		try {
+			this.width = width;
+			this.height = height;
+			Image img1 = icon.getImage();
+			img = img1.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	@Override

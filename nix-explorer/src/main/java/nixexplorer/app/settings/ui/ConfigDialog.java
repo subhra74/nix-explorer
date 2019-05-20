@@ -35,8 +35,10 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
+import nixexplorer.App;
 import nixexplorer.Constants;
 import nixexplorer.TextHolder;
+import nixexplorer.app.AppContext;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.settings.AppConfig;
 import nixexplorer.app.settings.AppConfig.FolderBrowser;
@@ -105,6 +107,7 @@ public class ConfigDialog extends JDialog {
 		updateTerminalConfig(config);
 		updateLogViewerConfig(config);
 		updateGeneralConfig(config);
+		config.save();
 	}
 
 	private void setLogViewerConfig(AppConfig config) {
@@ -175,6 +178,7 @@ public class ConfigDialog extends JDialog {
 	private void createUI() {
 		setSize(Utility.toPixel(640), Utility.toPixel(480));
 		setModal(true);
+		setIconImage(App.getAppIcon());
 		logViewerPanel = new LogHighlightConfigPanel();
 		cardLayout = new CardLayout();
 		cardPanel = new JPanel(cardLayout);

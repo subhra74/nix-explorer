@@ -33,6 +33,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.jcraft.jsch.ChannelExec;
 
+import nixexplorer.App;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
 import nixexplorer.app.session.AppSession;
@@ -72,6 +73,7 @@ public class ArchiveCompressWidget extends JDialog implements Runnable {
 
 	public ArchiveCompressWidget(SessionInfo info, String[] args, AppSession appSession, Window window) {
 		super(window);
+		setIconImage(App.getAppIcon());
 		this.info = info;
 		this.appSession = appSession;
 		setLayout(new BorderLayout());

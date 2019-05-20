@@ -22,6 +22,7 @@ import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import nixexplorer.TextHolder;
@@ -153,7 +154,7 @@ public class DiskUsageViewerWidget extends Widget implements Runnable {
 
 	@Override
 	public Icon getIcon() {
-		return null;
+		return UIManager.getIcon("ServerTools.duIcon16");
 	}
 
 	@Override
@@ -192,8 +193,8 @@ public class DiskUsageViewerWidget extends Widget implements Runnable {
 			List<String> output = new LinkedList<>();
 
 			if (SshUtility.executeCommand(wrapper,
-					"export BLOCKSIZE=512; du \"" + text + "\"|gzip|cat",
-					true, output) != 0) {
+					"export BLOCKSIZE=512; du \"" + text + "\"|gzip|cat", true,
+					output) != 0) {
 				throw new Exception();
 			}
 			if (stopRequested.get()) {

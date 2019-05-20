@@ -21,11 +21,13 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpProgressMonitor;
 
+import nixexplorer.App;
 import nixexplorer.PathUtils;
 import nixexplorer.ProcessUtils;
 import nixexplorer.app.AppContext;
@@ -148,6 +150,7 @@ public class DownloadTask implements Runnable {
 
 	private JDialog createAndShowDialog() {
 		JDialog dlg = new JDialog(this.appSession.getWindow());
+		dlg.setIconImage(App.getAppIcon());
 		dlg.setTitle("Downloading");
 		dlg.setSize(Utility.toPixel(200), Utility.toPixel(100));
 		dlg.setLocationRelativeTo(this.appSession.getWindow());
@@ -186,8 +189,6 @@ public class DownloadTask implements Runnable {
 		return new WatcherEntry(remoteFile, localTempFile, localTempFolder, 0,
 				PathUtils.getFileName(remoteFile));
 	}
-
-	
 
 	private void download(ChannelSftp sftp, String source, String dest)
 			throws Exception {

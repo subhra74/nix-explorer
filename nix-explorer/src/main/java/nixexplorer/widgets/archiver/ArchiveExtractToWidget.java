@@ -37,6 +37,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.jcraft.jsch.ChannelExec;
 
+import nixexplorer.App;
 import nixexplorer.TextHolder;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
@@ -75,6 +76,7 @@ public class ArchiveExtractToWidget extends JDialog implements Runnable {
 	public ArchiveExtractToWidget(SessionInfo info, String[] args, AppSession appSession, Window window) {
 		super(window);
 		this.info = info;
+		setIconImage(App.getAppIcon());
 		this.appSession = appSession;
 		setLayout(new BorderLayout());
 		setModal(true);

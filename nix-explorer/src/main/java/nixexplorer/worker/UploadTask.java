@@ -25,6 +25,7 @@ import javax.swing.border.EmptyBorder;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpATTRS;
 
+import nixexplorer.App;
 import nixexplorer.PathUtils;
 import nixexplorer.app.session.AppSession;
 import nixexplorer.app.session.SessionInfo;
@@ -163,6 +164,7 @@ public class UploadTask implements Runnable {
 
 	private JDialog createAndShowDialog() {
 		JDialog dlg = new JDialog(this.appSession.getWindow());
+		dlg.setIconImage(App.getAppIcon());
 		dlg.setTitle("Uploading");
 		dlg.setSize(Utility.toPixel(200), Utility.toPixel(100));
 		dlg.setLocationRelativeTo(this.appSession.getWindow());

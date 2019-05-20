@@ -34,7 +34,7 @@ public class SnippetManagerPanel extends JPanel {
 	private SnippetTableModel model;
 	private JTable table;
 	private JComboBox<String> cmbChars;
-	private JCheckBox chkAlt, chkShift, chkCtrl;
+	private JCheckBox chkShift, chkCtrl;
 
 	private JTextField txtName, txtCommand;
 
@@ -77,7 +77,7 @@ public class SnippetManagerPanel extends JPanel {
 			txtName.setText("");
 			txtCommand.setText("");
 			cmbChars.setSelectedItem("");
-			chkAlt.setSelected(false);
+			// chkAlt.setSelected(false);
 			chkCtrl.setSelected(false);
 			chkShift.setSelected(false);
 			showNewSnippetDialog();
@@ -97,7 +97,7 @@ public class SnippetManagerPanel extends JPanel {
 				txtName.setText(item.getName());
 				txtCommand.setText(item.getCommand());
 				cmbChars.setSelectedItem(item.getKeyChar() + "");
-				chkAlt.setSelected(item.isAltDown());
+				// chkAlt.setSelected(item.isAltDown());
 				chkCtrl.setSelected(item.isCtrlDown());
 				chkShift.setSelected(item.isShiftDown());
 				showNewSnippetDialog();
@@ -123,7 +123,7 @@ public class SnippetManagerPanel extends JPanel {
 
 		cmbChars = new JComboBox<>(arr);
 
-		chkAlt = new JCheckBox(TextHolder.getString("snippet.alt"));
+		// chkAlt = new JCheckBox(TextHolder.getString("snippet.alt"));
 		chkShift = new JCheckBox(TextHolder.getString("snippet.shift"));
 		chkCtrl = new JCheckBox(TextHolder.getString("snippet.ctrl"));
 	}
@@ -132,8 +132,8 @@ public class SnippetManagerPanel extends JPanel {
 		Object arr[] = { TextHolder.getString("snippet.new"),
 				TextHolder.getString("snippet.name"), txtName,
 				TextHolder.getString("snippet.command"), txtCommand,
-				TextHolder.getString("snippet.chars"), cmbChars, chkAlt,
-				chkShift, chkCtrl };
+				TextHolder.getString("snippet.chars"), cmbChars, chkShift,
+				chkCtrl };
 		while (JOptionPane.showOptionDialog(null, arr,
 				TextHolder.getString("snippet.new"),
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
@@ -159,16 +159,14 @@ public class SnippetManagerPanel extends JPanel {
 
 			char ch = cmbChars.getSelectedItem().toString().charAt(0);
 
-			if (!(chkAlt.isSelected() || chkCtrl.isSelected()
-					|| chkShift.isSelected())) {
+			if (!(chkCtrl.isSelected() || chkShift.isSelected())) {
 				JOptionPane.showMessageDialog(null,
 						TextHolder.getString("snippet.noCharSelected"));
 				continue;
 			}
 
-			SnippetItem item = new SnippetItem(name, command, ch,
-					chkAlt.isSelected(), chkCtrl.isSelected(),
-					chkShift.isSelected());
+			SnippetItem item = new SnippetItem(name, command, ch, false,
+					chkCtrl.isSelected(), chkShift.isSelected());
 
 			model.addSnippet(item);
 			break;

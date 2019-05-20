@@ -37,6 +37,7 @@ import javax.swing.border.LineBorder;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpException;
 
+import nixexplorer.App;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
 import nixexplorer.app.components.DisposableView;
@@ -81,6 +82,7 @@ public class DirectTransferWidget extends JDialog implements DisposableView {
 			List<String> folders, String sourceDirectory, AppSession appSession,
 			Window window) {
 		super(window);
+		setIconImage(App.getAppIcon());
 		this.info = info;
 		this.window = window;
 		this.appSession = appSession;

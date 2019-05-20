@@ -36,6 +36,7 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableRowSorter;
 
+import nixexplorer.App;
 import nixexplorer.PathUtils;
 import nixexplorer.TextHolder;
 import nixexplorer.core.FileInfo;
@@ -75,6 +76,7 @@ public class FileSelectionDialog extends JDialog {
 	public FileSelectionDialog(String path, FileSystemProvider fs,
 			Window window, boolean folderOnly) {
 		super(window);
+		setIconImage(App.getAppIcon());
 		this.fs = fs;
 		setSize(Utility.toPixel(640), Utility.toPixel(480));
 		setLocationRelativeTo(window);

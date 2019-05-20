@@ -16,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
+import nixexplorer.App;
 import nixexplorer.Constants;
 import nixexplorer.app.components.DisposableView;
 import nixexplorer.app.session.AppSession;
@@ -47,6 +48,7 @@ public class TerminalDialog extends JDialog implements DisposableView {
 			AppSession appSession, Window window, String title,
 			boolean autoClose, boolean modal, SshWrapper wrapper) {
 		super(window);
+		setIconImage(App.getAppIcon());
 		setTitle(title);
 		setModal(modal);
 		lblResult = new JLabel();

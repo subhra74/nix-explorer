@@ -129,12 +129,18 @@ public final class TabbedConsoleWidget extends Widget
 		btnManageSnippets.addActionListener(e -> {
 			ConfigDialog dlg = new ConfigDialog(getWindow(),
 					AppContext.INSTANCE.getConfig());
-			dlg.selectPage(1);
+			dlg.selectPage(2);
 			dlg.setLocationRelativeTo(getWindow());
 			dlg.setVisible(true);
 			if (term != null) {
 				term.requestFocusInWindow();
 			}
+			snippetProvider.setList(AppContext.INSTANCE.getConfig()
+					.getTerminal().getSnippets());
+
+			model.removeAllElements();
+			model.addAll(AppContext.INSTANCE.getConfig().getTerminal()
+					.getSnippets());
 		});
 		hb.add(btnManageSnippets);
 		hb.add(Box.createHorizontalStrut(Utility.toPixel(10)));
