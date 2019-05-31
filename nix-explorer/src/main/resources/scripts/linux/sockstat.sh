@@ -1,3 +1,4 @@
+echo '#----------SCRIPT START----------#'
 export PATH=$PATH:/usr/sbin:/bin:/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
 
 lsof -b -n -i tcp 2>/dev/null

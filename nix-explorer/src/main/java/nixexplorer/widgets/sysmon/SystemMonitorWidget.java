@@ -74,7 +74,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 	private JTable diskTable;
 	private GenericTableModel diskTableModel;
 	private SystemLoadPanel loadPanel;
-	private String unameCmd = "uname";
+	private String unameCmd = "echo '#----------SCRIPT START----------#'\nuname";
 	private String[] knownOS = new String[] { "Linux", "HP-UX", "OpenBSD",
 			"FreeBSD" };
 	private List<String> listLines = new ArrayList<>(50);
@@ -503,7 +503,7 @@ public class SystemMonitorWidget extends Widget implements Runnable {
 				System.out.println("Unable to detect OS");
 				return;
 			}
-			os = list.get(0);
+			os = list.get(list.size()-1);
 
 			final String strOs = os;
 

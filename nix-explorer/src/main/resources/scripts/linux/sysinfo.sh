@@ -1,3 +1,5 @@
+echo '#----------SCRIPT START----------#'
+
 CMD_PATH=""
 
 export PATH=$PATH:/bin:/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin

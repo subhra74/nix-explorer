@@ -179,7 +179,8 @@ public class SshTtyConnector implements DisposableTtyConnector {
 
 	private void setPtySize(ChannelShell channel, int col, int row, int wp,
 			int hp) {
-		System.out.println("Exec pty resized");
+		System.out.println("Exec pty resized:- col: " + col + " row: " + row
+				+ " wp: " + wp + " hp: " + hp);
 		channel.setPtySize(col, row, wp, hp);
 	}
 

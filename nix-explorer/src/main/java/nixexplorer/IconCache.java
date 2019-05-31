@@ -30,8 +30,8 @@ public class IconCache {
 						new ScaledIcon(
 								IconCache.class
 										.getResource("/images/" + ext + ".png"),
-								Utility.toPixel(largeIcon ? 48 : 32),
-								Utility.toPixel(largeIcon ? 48 : 32)),
+								Utility.toPixel(largeIcon ? 32 : 28),
+								Utility.toPixel(largeIcon ? 32 : 28)),
 						!largeIcon);
 				iconMap.put(ext, icon);
 			} else {

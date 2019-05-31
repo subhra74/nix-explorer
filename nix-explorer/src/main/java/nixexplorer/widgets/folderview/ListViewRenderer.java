@@ -59,7 +59,7 @@ public class ListViewRenderer extends JPanel implements ListCellRenderer<FileInf
 		hBox.add(lblDescBottomRight);
 
 		lblTitle = new JLabel();
-		lblTitle.setFont(new Font(Font.DIALOG, Font.BOLD, Utility.toPixel(14)));
+		lblTitle.setFont(new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(14)));
 		lblTitle.setAlignmentX(Box.LEFT_ALIGNMENT);
 		hBox.setAlignmentX(Box.LEFT_ALIGNMENT);
 //		lblTitle.setHorizontalAlignment(JLabel.CENTER);

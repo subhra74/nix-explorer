@@ -1,5 +1,7 @@
 #awk_process_table
 
+echo '#----------SCRIPT START----------#'
+
 get_memory_usage(){
 	cat /proc/meminfo|awk '{
 		if($1=="MemTotal:"){

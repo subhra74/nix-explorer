@@ -24,8 +24,8 @@ public class FolderViewRenderer implements TableCellRenderer {
 		label.setBorder(new EmptyBorder(Utility.toPixel(3), Utility.toPixel(10),
 				Utility.toPixel(3), Utility.toPixel(0)));
 		label.setIconTextGap(Utility.toPixel(10));
-		plainFont = new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(12));
-		boldFont = new Font(Font.DIALOG, Font.BOLD, Utility.toPixel(12));
+		plainFont = new Font(Font.DIALOG, Font.PLAIN, Utility.toPixel(14));
+		boldFont = new Font(Font.DIALOG, Font.BOLD, Utility.toPixel(14));
 
 //		label.setBorder(new CompoundBorder(
 //				new MatteBorder(0, Utility.toPixel(0), Utility.toPixel(0), 0, UIManager.getColor("Panel.background")),
@@ -50,7 +50,7 @@ public class FolderViewRenderer implements TableCellRenderer {
 		int r = table.convertRowIndexToModel(row);
 		int c = table.convertColumnIndexToModel(column);
 		FileInfo ent = folderViewModel.getItemAt(r);
-		label.setFont(c == 0 ? boldFont : plainFont);
+		label.setFont(plainFont);
 		switch (c) {
 		case 0:
 			label.setIcon(FolderViewUtility.getIconForFile(ent, false));

@@ -1,6 +1,7 @@
 package nixexplorer.core.ssh;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPInputStream;
@@ -17,10 +18,13 @@ import nixexplorer.app.session.SessionInfo;
 
 public class SshUtility {
 
+	public static final String SCRIPT_START_TAG = "#----------SCRIPT START----------#";
+
 	public static final int executeCommand(SshWrapper wrapper, String command,
 			boolean compressed, List<String> output) {
 		System.out.println("Executing: " + command);
 		ChannelExec exec = null;
+		List<String> buffer = new ArrayList<>();
 		try {
 			exec = wrapper.getExecChannel();
 			InputStream in = exec.getInputStream();
@@ -33,7 +37,7 @@ public class SshUtility {
 				int x = inStream.read();
 
 				if (x == '\n') {
-					output.add(sb.toString());
+					buffer.add(sb.toString());
 					sb = new StringBuilder();
 				}
 				if (x != -1 && x != '\n')
@@ -52,6 +56,15 @@ public class SshUtility {
 			e.printStackTrace();
 			return -1;
 		} finally {
+			boolean scriptStart = false;
+			for (String str : buffer) {
+				if (scriptStart) {
+					output.add(str);
+				}
+				if (!scriptStart && str.equals(SCRIPT_START_TAG)) {
+					scriptStart = true;
+				}
+			}
 			if (exec != null) {
 				exec.disconnect();
 			}
