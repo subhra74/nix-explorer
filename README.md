@@ -1,3 +1,5 @@
+
+[ this project has been moved to https://github.com/subhra74/snowflake ]
 # nix-explorer
 Powerful and easy to use SSH client for managing Linux/BSD servers and perform day to day activities easily 
 
